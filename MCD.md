@@ -13,7 +13,7 @@
 
 **Core Features**:
 
-1. **Cross-browser compatibility** - Works on Chrome and Firefox with Manifest V3
+1. **Cross-browser compatibility** - Works on Chrome, Edge, and Firefox with Manifest V3
 2. **Persistent settings storage** - Uses browser.storage.local with sync capabilities
 3. **JSON-based defaults** - Configurable default settings loaded from JSON file
 4. **Settings manager UI** - Accessible via browser action with real-time updates
@@ -26,12 +26,12 @@
 
 - Settings save/load operations complete in <100ms
 - Settings UI loads in <500ms after clicking browser action
-- Cross-browser compatibility achieved with single codebase
+- Cross-browser compatibility achieved with single codebase (Chrome, Edge, Firefox)
 - Support for settings files up to 1MB in size
 - Zero data loss during export/import operations
 - Content scripts can access settings in <50ms
 
-**Business Context**: This extension serves as a foundation for other extensions requiring robust settings management, solving the common problem of inconsistent, unreliable settings systems in browser extensions.
+**Business Context**: This internal extension serves as a foundation for other company extensions requiring robust settings management, solving the common problem of inconsistent, unreliable settings systems in browser extensions. Designed for internal deployment to 250-300 company users across Chrome, Edge, and Firefox browsers.
 
 ## 🏗️ Technical Architecture
 
@@ -40,7 +40,7 @@
 - Vanilla JavaScript with ES6+ modules for maximum compatibility
 - HTML5 for settings UI with CSS3 for styling
 - No external frameworks to minimize bundle size
-- WebExtension Polyfill for cross-browser compatibility
+- Native browser APIs with feature detection for Chrome, Edge, and Firefox compatibility
 
 **Backend**:
 
@@ -51,24 +51,33 @@
 
 **APIs**:
 
-- browser.storage.local for persistent local settings
-- browser.storage.sync for cross-device synchronization
-- browser.runtime messaging for inter-component communication
-- browser.action API for browser action integration
+- chrome.storage.local for persistent local settings (with fallback detection)
+- chrome.storage.sync for cross-device synchronization (with fallback detection)
+- chrome.runtime messaging for inter-component communication (with fallback detection)
+- chrome.action API for browser action integration (with fallback detection)
+
+**Browser Compatibility**:
+
+- Uses native chrome.* APIs with feature detection for cross-browser support
+- Chrome: Full native API support
+- Edge: Full chrome.* API compatibility (Chromium-based)
+- Firefox: chrome.* APIs mapped to browser.* APIs automatically
+- Unminified browser-compat.js provides compatibility shims where needed
 
 **Infrastructure**:
 
-- Chrome Web Store for Chrome distribution
-- Firefox Add-ons for Firefox distribution
-- GitHub Actions for automated testing and packaging
+- Local development environment
 - ESLint and Prettier for code quality
+- Slack channel for distribution and support
+- Simple ZIP file packaging for distribution
 
 **Technology Justification**:
 
 - Vanilla JS for maximum browser compatibility and minimal overhead
-- WebExtension Polyfill for unified API access across browsers
+- Native browser APIs with feature detection for Chrome, Edge, and Firefox compatibility
 - Storage API for reliable, persistent data management
 - Service worker architecture for Manifest V3 compliance
+- No minified code to ensure fast Firefox security review for internal deployment
 
 ## 📋 Detailed Implementation Specs
 
@@ -134,7 +143,7 @@ class SettingsManager {
 
   // Initialize settings with defaults
   async initialize() {
-    const stored = await browser.storage.local.get();
+    const stored = await chrome.storage.local.get();
     const defaults = await this.loadDefaults();
     
     this.settings = new Map(Object.entries({
@@ -187,7 +196,7 @@ class SettingsManager {
     setting.value = value;
     this.settings.set(key, setting);
     
-    await browser.storage.local.set({ [key]: setting });
+    await chrome.storage.local.set({ [key]: setting });
     this.notifyListeners('updated', { key, value });
   }
 
@@ -206,7 +215,7 @@ class SettingsManager {
       storageUpdates[key] = setting;
     }
     
-    await browser.storage.local.set(storageUpdates);
+    await chrome.storage.local.set(storageUpdates);
     this.notifyListeners('updated', updates);
   }
 
@@ -240,7 +249,7 @@ class SettingsManager {
       }
     }
     
-    await browser.storage.local.set(validSettings);
+    await chrome.storage.local.set(validSettings);
     await this.initialize(); // Reload settings
     
     this.notifyListeners('imported', validSettings);
@@ -248,7 +257,7 @@ class SettingsManager {
 
   // Reset to defaults
   async resetToDefaults() {
-    await browser.storage.local.clear();
+    await chrome.storage.local.clear();
     await this.initialize();
     this.notifyListeners('reset');
   }
@@ -329,7 +338,7 @@ class ContentScriptSettings {
   // Request single setting
   async getSetting(key) {
     return new Promise((resolve, reject) => {
-      browser.runtime.sendMessage({
+      chrome.runtime.sendMessage({
         type: 'GET_SETTING',
         key: key
       }, (response) => {
@@ -345,7 +354,7 @@ class ContentScriptSettings {
   // Request multiple settings
   async getSettings(keys) {
     return new Promise((resolve, reject) => {
-      browser.runtime.sendMessage({
+      chrome.runtime.sendMessage({
         type: 'GET_SETTINGS',
         keys: keys
       }, (response) => {
@@ -361,7 +370,7 @@ class ContentScriptSettings {
   // Request all settings
   async getAllSettings() {
     return new Promise((resolve, reject) => {
-      browser.runtime.sendMessage({
+      chrome.runtime.sendMessage({
         type: 'GET_ALL_SETTINGS'
       }, (response) => {
         if (response.error) {
@@ -376,7 +385,7 @@ class ContentScriptSettings {
   // Update single setting
   async updateSetting(key, value) {
     return new Promise((resolve, reject) => {
-      browser.runtime.sendMessage({
+      chrome.runtime.sendMessage({
         type: 'UPDATE_SETTING',
         key: key,
         value: value
@@ -393,7 +402,7 @@ class ContentScriptSettings {
   // Update multiple settings
   async updateSettings(updates) {
     return new Promise((resolve, reject) => {
-      browser.runtime.sendMessage({
+      chrome.runtime.sendMessage({
         type: 'UPDATE_SETTINGS',
         updates: updates
       }, (response) => {
@@ -418,7 +427,7 @@ class ContentScriptSettings {
 
   // Setup message listener for settings changes
   setupMessageListener() {
-    browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       if (message.type === 'SETTINGS_CHANGED') {
         for (const callback of this.listeners) {
           callback(message.changes);
@@ -665,7 +674,7 @@ settings-extension/
 ├── lib/                         # Core library files
 │   ├── settings-manager.js      # Settings management core
 │   ├── content-settings.js      # Content script settings API
-│   └── webext-polyfill.js       # Cross-browser compatibility
+│   └── browser-compat.js        # Cross-browser compatibility (unminified)
 ├── config/                      # Configuration files
 │   └── defaults.json           # Default settings
 ├── icons/                      # Extension icons
@@ -704,7 +713,7 @@ settings-extension/
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": ["lib/webext-polyfill.js", "lib/content-settings.js", "content-script.js"]
+      "js": ["lib/browser-compat.js", "lib/content-settings.js", "content-script.js"]
     }
   ],
   
@@ -741,7 +750,7 @@ settings-extension/
 
 ```javascript
 // Service worker for settings management
-importScripts('lib/webext-polyfill.js', 'lib/settings-manager.js');
+importScripts('lib/browser-compat.js', 'lib/settings-manager.js');
 
 let settingsManager;
 
@@ -752,7 +761,7 @@ async function initializeSettings() {
 }
 
 // Handle messages from content scripts and popup
-browser.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
+chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
   if (!settingsManager) {
     await initializeSettings();
   }
@@ -779,9 +788,9 @@ browser.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
         sendResponse({ success: true });
         
         // Notify all content scripts of change
-        browser.tabs.query({}, (tabs) => {
+        chrome.tabs.query({}, (tabs) => {
           tabs.forEach(tab => {
-            browser.tabs.sendMessage(tab.id, {
+            chrome.tabs.sendMessage(tab.id, {
               type: 'SETTINGS_CHANGED',
               changes: { [message.key]: message.value }
             });
@@ -794,9 +803,9 @@ browser.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
         sendResponse({ success: true });
         
         // Notify all content scripts of changes
-        browser.tabs.query({}, (tabs) => {
+        chrome.tabs.query({}, (tabs) => {
           tabs.forEach(tab => {
-            browser.tabs.sendMessage(tab.id, {
+            chrome.tabs.sendMessage(tab.id, {
               type: 'SETTINGS_CHANGED',
               changes: message.updates
             });
@@ -872,13 +881,11 @@ initializeSettings();
 
 ```bash
 # Install dependencies
-npm install --save-dev eslint prettier web-ext
+npm install --save-dev eslint prettier
 
 # Development commands
 npm run lint          # Run ESLint
 npm run format        # Format with Prettier
-npm run build         # Build extension
-npm run test          # Run tests
 ```
 
 **Package.json**
@@ -889,17 +896,11 @@ npm run test          # Run tests
   "version": "1.0.0",
   "scripts": {
     "lint": "eslint .",
-    "format": "prettier --write .",
-    "build": "web-ext build",
-    "test": "jest",
-    "dev:chrome": "web-ext run --target=chromium",
-    "dev:firefox": "web-ext run --target=firefox-desktop"
+    "format": "prettier --write ."
   },
   "devDependencies": {
     "eslint": "^8.0.0",
-    "prettier": "^2.0.0",
-    "web-ext": "^7.0.0",
-    "jest": "^29.0.0"
+    "prettier": "^2.0.0"
   }
 }
 ```
@@ -1009,12 +1010,12 @@ npm run test          # Run tests
 
 **4.2 Cross-Browser Testing**
 
-- Test all functionality in Chrome and Firefox
-- Verify performance across different versions
+- Test all functionality in Chrome, Edge, and Firefox
+- Verify performance across different versions used internally
 - Test storage limits and error conditions
 - **Dependencies**: 4.1
-- **Deliverable**: Cross-browser compatibility report
-- **Acceptance**: All features work identically across browsers
+- **Deliverable**: Cross-browser compatibility report for internal browsers
+- **Acceptance**: All features work identically across Chrome, Edge, and Firefox
 
 **4.3 Performance Optimization**
 
@@ -1029,30 +1030,30 @@ npm run test          # Run tests
 
 **5.1 API Documentation**
 
-- Create comprehensive API reference
+- Create comprehensive API reference for internal developers
 - Add code examples for all functions
 - Document error codes and troubleshooting
 - **Dependencies**: 4.3
-- **Deliverable**: Complete API documentation
-- **Acceptance**: Developers can implement without additional support
+- **Deliverable**: Complete API documentation for internal team
+- **Acceptance**: Internal developers can implement without additional support
 
-**5.2 User Documentation**
+**5.2 Internal Documentation**
 
-- Create user guide for settings management
-- Add troubleshooting section
-- Create video tutorials for complex features
+- Create internal user guide for settings management
+- Add troubleshooting section for Slack support
+- Create internal documentation for complex features
 - **Dependencies**: 5.1
-- **Deliverable**: User documentation
-- **Acceptance**: Users can use all features without support
+- **Deliverable**: Internal documentation package
+- **Acceptance**: Internal users can use all features with minimal Slack support
 
-**5.3 Store Deployment**
+**5.3 Internal Distribution**
 
-- Package extension for Chrome Web Store
-- Submit to Firefox Add-ons
-- Setup automated deployment pipeline
+- Package extension as ZIP file for internal distribution
+- Setup Slack channel distribution process
+- Create installation guide for end users
 - **Dependencies**: 5.2
-- **Deliverable**: Published extension
-- **Acceptance**: Extension available in both stores
+- **Deliverable**: Simple ZIP distribution via Slack
+- **Acceptance**: Extension available to all 250-300 internal users via Slack
 
 ## 🔗 Integration & Dependencies
 
@@ -1196,9 +1197,10 @@ describe('ContentScriptSettings', () => {
 
 **Browser Compatibility**
 
-- Automated testing in Chrome and Firefox
-- Test extension installation and updates
-- Verify API compatibility across versions
+- Automated testing in Chrome, Edge, and Firefox
+- Test extension installation in developer mode
+- Verify API compatibility across browser versions used internally
+- Test unminified browser-compat.js compatibility layer
 
 ### End-to-End Testing
 
@@ -1222,10 +1224,11 @@ describe('ContentScriptSettings', () => {
 **Functional Requirements**
 
 - ✅ All setting types (boolean, text, longtext, number, JSON) supported
-- ✅ Cross-browser compatibility (Chrome, Firefox)
+- ✅ Cross-browser compatibility (Chrome, Edge, Firefox)
 - ✅ Real-time synchronization across components
 - ✅ Export/import functionality with validation
 - ✅ Content script API with all CRUD operations
+- ✅ Unminified code for fast Firefox security review
 
 **Performance Requirements**
 
@@ -1278,78 +1281,59 @@ describe('ContentScriptSettings', () => {
 
 ### Deployment Process
 
-**Chrome Web Store Deployment**
+**Simple Internal Distribution**
 
-1. Build production package with `web-ext build`
-2. Create store listing with screenshots and descriptions
-3. Upload extension package through Chrome Web Store Developer Dashboard
-4. Submit for review (typically 2-3 days)
-5. Monitor review status and address feedback
+1. Create ZIP file with extension files (excluding dev dependencies)
+2. Post ZIP file to company Slack channel with release notes
+3. Include installation instructions for Chrome, Edge, and Firefox
+4. Users download and install in Developer Mode
+5. Support provided through same Slack channel
 
-**Firefox Add-ons Deployment**
+**Developer Mode Installation**
 
-1. Build production package with `web-ext build`
-2. Create listing on Firefox Add-ons Developer Hub
-3. Upload extension package and metadata
-4. Submit for review (typically 1-2 days for initial review)
-5. Monitor review status and address feedback
+1. Users enable Developer Mode in their browser
+2. Extract ZIP file and load unpacked extension
+3. Manual updates through new ZIP files posted to Slack
+4. No external store approval required
 
-**Automated Deployment Pipeline**
+**Simple Build Process**
 
-```yaml
-# GitHub Actions workflow
-name: Deploy Extension
-on:
-  push:
-    tags: ['v*']
+```bash
+# Local development and packaging
+# 1. Development
+npm install
+npm run lint
+npm run format
 
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Setup Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: '16'
-      - name: Install dependencies
-        run: npm ci
-      - name: Run tests
-        run: npm test
-      - name: Build extension
-        run: npm run build
-      - name: Deploy to Chrome Web Store
-        uses: PlasmoHQ/bpp@v2
-        with:
-          keys: ${{ secrets.CHROME_STORE_KEYS }}
-      - name: Deploy to Firefox Add-ons
-        uses: PlasmoHQ/bpp@v2
-        with:
-          keys: ${{ secrets.FIREFOX_ADDON_KEYS }}
+# 2. Package for distribution
+zip -r settings-extension-v1.0.0.zip . -x "node_modules/*" ".*" "*.md" "package*.json"
+
+# 3. Share in Slack channel
+# Upload ZIP file to company Slack channel with release notes
 ```
 
 ### Monitoring & Analytics
 
 **Performance Monitoring**
 
-- Track settings load times across user base
+- Track settings load times across internal user base
 - Monitor extension memory usage
-- Alert on storage quota issues
-- Track user adoption of features
+- Alert on storage quota issues through Slack
+- Internal performance metrics for optimization
 
 **Error Tracking**
 
-- Implement error reporting for unhandled exceptions
-- Track validation errors and user pain points
+- Implement internal error reporting for unhandled exceptions
+- Track validation errors and user pain points reported via Slack
 - Monitor cross-browser compatibility issues
-- Set up alerts for critical errors
+- Address critical errors through Slack channel communication
 
-**Usage Analytics**
+**Internal Usage Metrics**
 
-- Track most commonly used settings
+- Track most commonly used settings (internal analytics only)
 - Monitor export/import feature usage
-- Analyze user workflow patterns
-- Measure user retention and engagement
+- Analyze user workflow patterns for internal optimization
+- Basic usage metrics for internal team (no external tracking)
 
 ### Scaling Considerations
 
@@ -1383,12 +1367,12 @@ jobs:
 - Maintain compatibility with browser API changes
 - Update dependencies and security patches
 
-**User Support**
+**Internal User Support**
 
-- Monitor user feedback and reviews
-- Provide troubleshooting guides
-- Create video tutorials for complex features
-- Maintain FAQ and common issues documentation
+- Monitor internal user feedback through company Slack channel
+- Provide troubleshooting support directly in Slack
+- Share internal documentation and tips in Slack channel
+- Maintain FAQ and common issues documentation accessible via Slack
 
 **Security Maintenance**
 
@@ -1668,4 +1652,43 @@ window.addEventListener('beforeunload', () => {
 });
 ```
 
-This comprehensive MCD provides a complete blueprint for building a robust Manifest V3 browser extension with extensive settings management capabilities. The implementation covers all requirements while maintaining cross-browser compatibility and following modern web extension best practices.
+**Browser Compatibility Layer (browser-compat.js)**
+
+```javascript
+// lib/browser-compat.js
+// Unminified cross-browser compatibility layer
+// Replaces WebExtension Polyfill to avoid minified code issues
+
+// Detect browser environment
+const isChrome = typeof chrome !== 'undefined' && chrome.runtime;
+const isFirefox = typeof browser !== 'undefined' && browser.runtime;
+const isEdge = isChrome && navigator.userAgent.includes('Edg');
+
+// Use native APIs with fallback detection
+const browserAPI = {
+  storage: {
+    local: isChrome ? chrome.storage.local : (isFirefox ? browser.storage.local : null),
+    sync: isChrome ? chrome.storage.sync : (isFirefox ? browser.storage.sync : null)
+  },
+  runtime: {
+    sendMessage: isChrome ? chrome.runtime.sendMessage : (isFirefox ? browser.runtime.sendMessage : null),
+    onMessage: isChrome ? chrome.runtime.onMessage : (isFirefox ? browser.runtime.onMessage : null)
+  },
+  tabs: {
+    query: isChrome ? chrome.tabs.query : (isFirefox ? browser.tabs.query : null),
+    sendMessage: isChrome ? chrome.tabs.sendMessage : (isFirefox ? browser.tabs.sendMessage : null)
+  },
+  action: {
+    onClicked: isChrome ? chrome.action.onClicked : (isFirefox ? browser.action.onClicked : null)
+  }
+};
+
+// Export for use in other modules
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = browserAPI;
+} else {
+  window.browserAPI = browserAPI;
+}
+```
+
+This comprehensive MCD provides a complete blueprint for building a robust Manifest V3 browser extension with extensive settings management capabilities. The implementation covers all requirements while maintaining cross-browser compatibility for internal company use with Chrome, Edge, and Firefox browsers. The unminified browser compatibility layer ensures fast Firefox security review approval for internal deployment.
