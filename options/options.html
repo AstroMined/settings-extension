@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings Extension - Advanced Options</title>
+    <link rel="stylesheet" href="options.css">
+</head>
+<body>
+    <div class="options-container">
+        <header class="options-header">
+            <div class="header-content">
+                <h1>Settings Extension</h1>
+                <p>Advanced configuration and management</p>
+            </div>
+            <div class="header-actions">
+                <button id="save-all-btn" class="btn btn-primary" disabled>
+                    <svg width="16" height="16" viewBox="0 0 16 16">
+                        <path d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0zM4.5 7.5a.5.5 0 0 0 0 1h5.793l-2.147 2.146a.5.5 0 0 0 .708.708l3-3a.5.5 0 0 0 0-.708l-3-3a.5.5 0 1 0-.708.708L10.293 7.5H4.5z"/>
+                    </svg>
+                    Save All Changes
+                </button>
+            </div>
+        </header>
+
+        <div class="options-main">
+            <nav class="options-nav">
+                <div class="nav-section">
+                    <h3>Settings</h3>
+                    <ul class="nav-list">
+                        <li><a href="#general" class="nav-link active" data-tab="general">General</a></li>
+                        <li><a href="#appearance" class="nav-link" data-tab="appearance">Appearance</a></li>
+                        <li><a href="#advanced" class="nav-link" data-tab="advanced">Advanced</a></li>
+                    </ul>
+                </div>
+                <div class="nav-section">
+                    <h3>Tools</h3>
+                    <ul class="nav-list">
+                        <li><a href="#import-export" class="nav-link" data-tab="import-export">Import/Export</a></li>
+                        <li><a href="#about" class="nav-link" data-tab="about">About</a></li>
+                    </ul>
+                </div>
+            </nav>
+
+            <main class="options-content">
+                <div id="message-container" class="message-container"></div>
+
+                <div id="loading" class="loading">
+                    <div class="spinner"></div>
+                    <span>Loading settings...</span>
+                </div>
+
+                <div class="tab-content" id="general-tab" style="display: none;">
+                    <div class="tab-header">
+                        <h2>General Settings</h2>
+                        <p>Configure the main functionality of the extension</p>
+                    </div>
+                    <div class="settings-grid" id="general-settings">
+                        <!-- General settings will be populated here -->
+                    </div>
+                </div>
+
+                <div class="tab-content" id="appearance-tab" style="display: none;">
+                    <div class="tab-header">
+                        <h2>Appearance</h2>
+                        <p>Customize the visual appearance and styling</p>
+                    </div>
+                    <div class="settings-grid" id="appearance-settings">
+                        <!-- Appearance settings will be populated here -->
+                    </div>
+                </div>
+
+                <div class="tab-content" id="advanced-tab" style="display: none;">
+                    <div class="tab-header">
+                        <h2>Advanced Configuration</h2>
+                        <p>Advanced settings for power users</p>
+                    </div>
+                    <div class="settings-grid" id="advanced-settings">
+                        <!-- Advanced settings will be populated here -->
+                    </div>
+                </div>
+
+                <div class="tab-content" id="import-export-tab" style="display: none;">
+                    <div class="tab-header">
+                        <h2>Import/Export</h2>
+                        <p>Backup and restore your settings</p>
+                    </div>
+                    <div class="import-export-section">
+                        <div class="action-card">
+                            <h3>Export Settings</h3>
+                            <p>Download your current settings as a JSON file for backup or sharing.</p>
+                            <button id="export-btn" class="btn btn-secondary">
+                                <svg width="16" height="16" viewBox="0 0 16 16">
+                                    <path d="M8.5 1.5A1.5 1.5 0 0 1 10 3v5.5l1.25-1.25a.75.75 0 1 1 1.06 1.06L8.56 12.06a.75.75 0 0 1-1.12 0L3.69 8.31a.75.75 0 1 1 1.06-1.06L6 8.5V3a1.5 1.5 0 0 1 1.5-1.5z"/>
+                                </svg>
+                                Export Settings
+                            </button>
+                        </div>
+                        <div class="action-card">
+                            <h3>Import Settings</h3>
+                            <p>Upload a settings file to restore your configuration.</p>
+                            <button id="import-btn" class="btn btn-secondary">
+                                <svg width="16" height="16" viewBox="0 0 16 16">
+                                    <path d="M8.5 11.5A1.5 1.5 0 0 1 10 10V4.5l1.25 1.25a.75.75 0 1 1 1.06-1.06L8.56 0.94a.75.75 0 0 1-1.12 0L3.69 4.69a.75.75 0 1 1 1.06 1.06L6 4.5V10a1.5 1.5 0 0 1 1.5 1.5z"/>
+                                </svg>
+                                Import Settings
+                            </button>
+                        </div>
+                        <div class="action-card danger">
+                            <h3>Reset to Defaults</h3>
+                            <p>Reset all settings to their default values. This action cannot be undone.</p>
+                            <button id="reset-btn" class="btn btn-danger">
+                                <svg width="16" height="16" viewBox="0 0 16 16">
+                                    <path d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/>
+                                    <path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z"/>
+                                </svg>
+                                Reset to Defaults
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-content" id="about-tab" style="display: none;">
+                    <div class="tab-header">
+                        <h2>About</h2>
+                        <p>Information about the Settings Extension</p>
+                    </div>
+                    <div class="about-content">
+                        <div class="about-card">
+                            <h3>Settings Extension</h3>
+                            <p class="version">Version 1.0.0</p>
+                            <p class="description">
+                                A comprehensive Manifest V3 browser extension framework for robust settings management 
+                                across Chrome, Edge, and Firefox browsers.
+                            </p>
+                        </div>
+                        <div class="about-card">
+                            <h3>Features</h3>
+                            <ul class="feature-list">
+                                <li>Cross-browser compatibility (Chrome, Edge, Firefox)</li>
+                                <li>Persistent settings storage with sync capabilities</li>
+                                <li>Multiple data types (boolean, text, number, JSON)</li>
+                                <li>Real-time validation and error handling</li>
+                                <li>Export/import functionality</li>
+                                <li>Content script API for developers</li>
+                            </ul>
+                        </div>
+                        <div class="about-card">
+                            <h3>Support</h3>
+                            <p>
+                                For support and questions, please contact the development team through 
+                                your company's internal communication channels.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="options.js"></script>
+</body>
+</html>

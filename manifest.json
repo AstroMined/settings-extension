@@ -1,0 +1,56 @@
+{
+  "manifest_version": 3,
+  "name": "Settings Extension",
+  "version": "1.0.0",
+  "description": "Comprehensive settings management for browser extensions",
+
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "settings-extension@example.com",
+      "strict_min_version": "109.0"
+    }
+  },
+  
+  "permissions": [
+    "storage",
+    "activeTab"
+  ],
+  
+  "background": {
+    "service_worker": "background.js"
+  },
+  
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["lib/browser-compat.js", "lib/content-settings.js", "content-script.js"]
+    }
+  ],
+  
+  "action": {
+    "default_popup": "popup/popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  
+  "options_ui": {
+    "page": "options/options.html",
+    "open_in_tab": true
+  },
+  
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  
+  "web_accessible_resources": [
+    {
+      "resources": ["config/defaults.json"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}

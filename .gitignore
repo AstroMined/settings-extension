@@ -113,7 +113,7 @@ dist
 .pnp.*
 
 # Browser Extension Specific
-web-ext-artifacts/
+# web-ext-artifacts/  # Keep for internal distribution
 *.xpi
 *.crx
 *.zip
@@ -184,3 +184,8 @@ firefox-profile/
 # Extension store assets (keep in separate assets directory)
 store-assets/screenshots/
 store-assets/icons-store/
+
+# Include distribution packages for internal use
+!web-ext-artifacts/
+!web-ext-artifacts/*.zip
+!web-ext-artifacts/*.xpi

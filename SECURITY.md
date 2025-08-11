@@ -171,7 +171,7 @@ A: No, we do not include any analytics, tracking, or telemetry in the extension.
 - Verification of all third-party code
 
 ### Current Dependencies
-- `webextension-polyfill`: Cross-browser compatibility (Mozilla maintained)
+- No runtime dependencies (uses custom browser compatibility layer)
 - Development dependencies are isolated from production build
 
 ## Incident Response
