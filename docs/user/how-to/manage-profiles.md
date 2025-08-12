@@ -26,6 +26,7 @@ This guide provides detailed instructions for managing multiple settings profile
 **Best for: Developers working on multiple projects**
 
 #### Folder Structure
+
 ```
 Settings Profiles/
 ├── Projects/
@@ -46,6 +47,7 @@ Settings Profiles/
 ```
 
 #### Profile Naming Convention
+
 ```
 [project]-[environment]-[version]-[date].json
 
@@ -56,6 +58,7 @@ shared-baseline-v3.0-2025-08-11.json
 ```
 
 #### Management Workflow
+
 1. **Create project profiles** based on company baseline
 2. **Customize per environment** (dev, staging, prod)
 3. **Version profiles** as project requirements change
@@ -66,6 +69,7 @@ shared-baseline-v3.0-2025-08-11.json
 **Best for: Users with different job functions**
 
 #### Organization by Role
+
 ```
 Role Profiles/
 ├── Developer/
@@ -85,6 +89,7 @@ Role Profiles/
 ```
 
 #### Role Switching Process
+
 1. **Identify current role context**
 2. **Export current settings** as backup
 3. **Import role-appropriate profile**
@@ -96,6 +101,7 @@ Role Profiles/
 **Best for: Users with different daily/weekly needs**
 
 #### Temporal Organization
+
 ```
 Time Profiles/
 ├── Daily-Schedules/
@@ -126,6 +132,7 @@ Time Profiles/
    - Keep minimal for maximum reusability
 
 2. **Environment Templates**
+
    ```json
    // development-template.json
    {
@@ -139,10 +146,10 @@ Time Profiles/
          "description": "Enable main feature functionality"
        },
        "api_key": {
-         "type": "text", 
+         "type": "text",
          "value": "DEV_API_KEY_PLACEHOLDER",
          "description": "Development API key - REPLACE BEFORE USE"
-       },
+       }
        // ... additional development-specific settings
      }
    }
@@ -163,7 +170,7 @@ Time Profiles/
    - Rarely modified
    - Source of truth for shared settings
 
-2. **Child Profiles** 
+2. **Child Profiles**
    - Start from master profile
    - Override only specific settings
    - Maintain link to master version
@@ -172,6 +179,7 @@ Time Profiles/
 #### Implementation Process
 
 1. **Create Master Profile**
+
    ```
    master-baseline-v2.0-2025-08-11.json
    ```
@@ -183,9 +191,10 @@ Time Profiles/
    - Document changes from master
 
 3. **Track Inheritance**
+
    ```
    Profile Documentation:
-   
+
    development-profile.json
    ├── Based on: master-baseline-v2.0
    ├── Changes: API endpoint, debug enabled
@@ -205,6 +214,7 @@ Create profiles that adapt to different environments:
    - Conditional styling/behavior
 
 2. **Multi-Environment Profile**
+
    ```json
    {
      "profile_type": "multi-environment",
@@ -214,7 +224,7 @@ Create profiles that adapt to different environments:
          "debug_mode": true
        },
        "production": {
-         "api_endpoint": "https://api.example.com", 
+         "api_endpoint": "https://api.example.com",
          "debug_mode": false
        }
      }
@@ -233,6 +243,7 @@ Create profiles that adapt to different environments:
 #### Smart Switching Process
 
 1. **Pre-Switch Checklist**
+
    ```
    □ Current work is saved/committed
    □ No pending changes in current profile
@@ -258,23 +269,24 @@ Create profiles that adapt to different environments:
 #### Coordinated Team Switching
 
 1. **Announce Profile Changes**
+
    ```
    Team Notification:
-   
+
    From: [Your name]
    To: [Team distribution]
    Subject: Settings Profile Update - Project Alpha
-   
+
    Team,
-   
+
    Switching to Project Alpha development profile v2.1:
    - New API endpoint: https://alpha-dev.example.com
    - Updated authentication method
    - New debugging features enabled
-   
+
    Profile file: alpha-dev-v2.1-2025-08-11.json
    Location: [Team shared drive]/Profiles/Project-Alpha/
-   
+
    Please switch before 2 PM for team sync.
    ```
 
@@ -290,7 +302,7 @@ Create profiles that adapt to different environments:
 
 1. **Schedule-Driven Switching**
    - Morning: Import "deep work" profile
-   - Midday: Switch to "collaboration" profile  
+   - Midday: Switch to "collaboration" profile
    - Evening: Change to "cleanup" profile
 
 2. **Event-Driven Switching**
@@ -311,6 +323,7 @@ Create profiles that adapt to different environments:
    - Team collaboration platform
 
 2. **Repository Structure**
+
    ```
    Team-Settings-Profiles/
    ├── README.md                    # Usage instructions
@@ -340,22 +353,23 @@ Create profiles that adapt to different environments:
 #### Change Management Process
 
 1. **Profile Change Request**
+
    ```
    Profile Change Request Form:
-   
+
    Profile: [profile-name]
    Requestor: [name]
    Date: [date]
-   
+
    Proposed Changes:
    - [Change 1]: [Justification]
    - [Change 2]: [Justification]
-   
+
    Impact Assessment:
    - Affected team members: [list]
    - Testing required: [yes/no]
    - Rollback plan: [description]
-   
+
    Approval Required From:
    - Team Lead: [ ]
    - Technical Lead: [ ]
@@ -381,12 +395,14 @@ Create profiles that adapt to different environments:
 #### Push vs. Pull Distribution
 
 **Push Distribution:**
+
 - Automatically update team member profiles
 - Suitable for critical updates
 - Requires robust automation
 - Higher complexity, lower user burden
 
 **Pull Distribution:**
+
 - Team members update profiles themselves
 - Notification-based system
 - Lower complexity, higher user burden
@@ -493,6 +509,7 @@ Deprecated → Archived:
 #### Semantic Versioning
 
 Use semantic versioning for profiles:
+
 - **Major (v2.0.0)**: Breaking changes, incompatible with previous versions
 - **Minor (v1.1.0)**: New features, backward compatible
 - **Patch (v1.0.1)**: Bug fixes, no new features
@@ -500,14 +517,15 @@ Use semantic versioning for profiles:
 #### Change Tracking
 
 1. **Profile Changelog**
+
    ```
    ## Profile: development-baseline
-   
+
    ### v2.1.0 (2025-08-11)
    - Added: New API endpoint configuration
    - Changed: Default timeout increased to 10 seconds
    - Fixed: Custom CSS escaping issue
-   
+
    ### v2.0.0 (2025-08-05)
    - Breaking: New settings format
    - Added: Environment-specific configurations
@@ -527,24 +545,25 @@ Use semantic versioning for profiles:
 #### Script-Based Switching
 
 1. **Simple Switch Script** (Bash/PowerShell)
+
    ```bash
    #!/bin/bash
    # profile-switch.sh
-   
+
    PROFILE_DIR="~/Settings-Profiles"
    PROFILE_NAME=$1
-   
+
    if [ -z "$PROFILE_NAME" ]; then
      echo "Usage: ./profile-switch.sh <profile-name>"
      exit 1
    fi
-   
+
    echo "Backing up current settings..."
    # Export current settings
-   
+
    echo "Switching to profile: $PROFILE_NAME"
    # Import specified profile
-   
+
    echo "Profile switch complete!"
    ```
 
@@ -559,25 +578,26 @@ Use semantic versioning for profiles:
 #### Mass Profile Updates
 
 1. **Update All Development Profiles**
+
    ```python
    # bulk-profile-update.py
    import json
    import glob
-   
+
    def update_development_profiles():
        dev_profiles = glob.glob("*/development-*.json")
-       
+
        for profile_path in dev_profiles:
            with open(profile_path, 'r') as f:
                profile = json.load(f)
-           
+
            # Update common development settings
            profile['settings']['debug_mode']['value'] = True
            profile['settings']['api_endpoint']['value'] = 'https://new-dev-api.example.com'
-           
+
            with open(profile_path, 'w') as f:
                json.dump(profile, f, indent=2)
-   
+
    update_development_profiles()
    ```
 
@@ -592,18 +612,21 @@ Use semantic versioning for profiles:
 ### Common Profile Problems
 
 **Profile Import Fails**
+
 1. Check JSON syntax validity
 2. Verify file permissions
 3. Confirm file path is correct
 4. Try different profile file
 
 **Settings Don't Match Profile**
+
 1. Verify correct profile was imported
 2. Check for profile version conflicts
 3. Clear extension cache/data
 4. Re-import profile
 
 **Profile Switching Too Slow**
+
 1. Optimize profile file size
 2. Use selective imports
 3. Automate routine switches
@@ -612,12 +635,14 @@ Use semantic versioning for profiles:
 ### Advanced Troubleshooting
 
 **Profile Conflicts Between Team Members**
+
 1. Establish single source of truth
 2. Use version control for profiles
 3. Implement change management process
 4. Regular team synchronization
 
 **Lost or Corrupted Profiles**
+
 1. Check backup systems
 2. Restore from version control
 3. Recreate from documentation
@@ -626,12 +651,14 @@ Use semantic versioning for profiles:
 ## Quick Reference
 
 ### Essential Commands
+
 - **Create Profile**: Configure settings → Export → Rename descriptively
 - **Switch Profile**: Advanced Settings → Import/Export → Import Profile
 - **Backup Profile**: Export before any changes
 - **Update Profile**: Import → Modify → Export with new version
 
 ### File Organization
+
 ```
 Profiles/
 ├── Active/           # Currently used profiles
@@ -641,6 +668,7 @@ Profiles/
 ```
 
 ### Team Coordination
+
 - Use shared storage for team profiles
 - Version all profile changes
 - Document profile purposes and usage
@@ -649,12 +677,12 @@ Profiles/
 ## References
 
 - [Profile Setup Tutorial](../tutorials/profile-setup.md) - Basic profile concepts
-- [Sync Settings Guide](sync-settings.md) - Synchronizing profiles across devices  
+- [Sync Settings Guide](sync-settings.md) - Synchronizing profiles across devices
 - [Backup and Restore](backup-restore.md) - Profile backup strategies
 - [File Formats](../reference/file-formats.md) - Understanding profile file structure
 
 ## Revision History
 
-| Date | Author | Changes |
-|------|--------|---------|
+| Date       | Author             | Changes                          |
+| ---------- | ------------------ | -------------------------------- |
 | 2025-08-11 | Documentation Team | Initial profile management guide |

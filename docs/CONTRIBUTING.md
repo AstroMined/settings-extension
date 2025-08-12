@@ -32,6 +32,7 @@ This project adheres to a code of conduct adapted from the [Contributor Covenant
 ### Our Standards
 
 **Positive behavior includes:**
+
 - Using welcoming and inclusive language
 - Being respectful of differing viewpoints and experiences
 - Gracefully accepting constructive criticism
@@ -39,6 +40,7 @@ This project adheres to a code of conduct adapted from the [Contributor Covenant
 - Showing empathy towards other community members
 
 **Unacceptable behavior includes:**
+
 - The use of sexualized language or imagery and unwelcome sexual attention or advances
 - Trolling, insulting/derogatory comments, and personal or political attacks
 - Public or private harassment
@@ -63,17 +65,20 @@ Before contributing, ensure you have:
 ### Development Setup
 
 1. **Fork and clone the repository**:
+
    ```bash
    git clone https://github.com/yourusername/settings-extension.git
    cd settings-extension
    ```
 
 2. **Install dependencies**:
+
    ```bash
    npm install
    ```
 
 3. **Verify setup**:
+
    ```bash
    npm run build
    npm test
@@ -120,6 +125,7 @@ We use **Git Flow** with the following branches:
    - Discuss significant changes in issues before starting
 
 2. **Create a branch**:
+
    ```bash
    git checkout develop
    git pull origin develop
@@ -132,6 +138,7 @@ We use **Git Flow** with the following branches:
    - Update documentation as needed
 
 4. **Test your changes**:
+
    ```bash
    npm run lint              # Code quality
    npm test                  # Unit tests
@@ -141,12 +148,14 @@ We use **Git Flow** with the following branches:
    ```
 
 5. **Commit changes**:
+
    ```bash
    git add .
    git commit -m "feat: add your feature description"
    ```
 
 6. **Keep branch updated**:
+
    ```bash
    git checkout develop
    git pull origin develop
@@ -165,18 +174,21 @@ We use **Git Flow** with the following branches:
 ### Code Contributions
 
 **New Features**
+
 - Implement new functionality
 - Follow feature request templates
 - Include comprehensive tests
 - Update user documentation
 
 **Bug Fixes**
+
 - Fix reported issues
 - Include regression tests
 - Verify fix across browsers
 - Update relevant documentation
 
 **Performance Improvements**
+
 - Optimize existing code
 - Include performance benchmarks
 - Verify no functionality regression
@@ -185,18 +197,21 @@ We use **Git Flow** with the following branches:
 ### Documentation Contributions
 
 **User Documentation**
+
 - User guides and tutorials
 - API reference updates
 - How-to guides
 - Conceptual explanations
 
 **Developer Documentation**
+
 - Code comments and JSDoc
 - Architecture documentation
 - Development workflows
 - Best practices guides
 
 **Examples and Samples**
+
 - Code examples
 - Configuration samples
 - Use case demonstrations
@@ -205,12 +220,14 @@ We use **Git Flow** with the following branches:
 ### Testing Contributions
 
 **Test Coverage**
+
 - Unit tests for untested code
 - Integration test scenarios
 - Cross-browser compatibility tests
 - Performance test suites
 
 **Test Infrastructure**
+
 - Testing utilities and helpers
 - Automated test pipelines
 - Test data and fixtures
@@ -219,12 +236,14 @@ We use **Git Flow** with the following branches:
 ### Infrastructure Contributions
 
 **Build and Tooling**
+
 - Build system improvements
 - Development tool enhancements
 - CI/CD pipeline updates
 - Automation scripts
 
 **Project Maintenance**
+
 - Dependency updates
 - Security vulnerability fixes
 - Code cleanup and refactoring
@@ -235,6 +254,7 @@ We use **Git Flow** with the following branches:
 ### Before Submitting
 
 **Self-Review Checklist**:
+
 - [ ] Code follows project [Coding Standards](developer/conventions/coding-standards.md)
 - [ ] All tests pass locally
 - [ ] Changes are tested in both Chrome and Firefox
@@ -249,9 +269,11 @@ Use this template when creating pull requests:
 
 ```markdown
 ## Description
+
 Brief description of what this PR does and why it's needed.
 
 ## Type of Change
+
 - [ ] Bug fix (non-breaking change which fixes an issue)
 - [ ] New feature (non-breaking change which adds functionality)
 - [ ] Breaking change (fix or feature that would cause existing functionality to not work as expected)
@@ -260,12 +282,15 @@ Brief description of what this PR does and why it's needed.
 - [ ] Code cleanup/refactoring
 
 ## How to Test
+
 Step-by-step instructions for testing the changes:
+
 1. Step one
 2. Step two
 3. Expected result
 
 ## Testing Completed
+
 - [ ] Unit tests pass
 - [ ] Integration tests pass
 - [ ] Manual testing in Chrome
@@ -274,14 +299,17 @@ Step-by-step instructions for testing the changes:
 - [ ] Performance testing (if applicable)
 
 ## Screenshots
+
 Include screenshots of UI changes or new features.
 
 ## Related Issues
+
 - Closes #123
 - Related to #456
 - Fixes #789
 
 ## Checklist
+
 - [ ] My code follows the style guidelines of this project
 - [ ] I have performed a self-review of my own code
 - [ ] I have commented my code, particularly in hard-to-understand areas
@@ -291,12 +319,14 @@ Include screenshots of UI changes or new features.
 - [ ] New and existing unit tests pass locally with my changes
 
 ## Additional Notes
+
 Any additional information that reviewers should know.
 ```
 
 ### Review Process
 
 **What Reviewers Look For**:
+
 - Code quality and adherence to standards
 - Test coverage and quality
 - Documentation completeness
@@ -306,11 +336,13 @@ Any additional information that reviewers should know.
 - User experience impact
 
 **Review Timeline**:
+
 - Initial review within 2 business days
 - Follow-up reviews within 1 business day
 - Authors should respond to feedback within 2 business days
 
 **Approval Requirements**:
+
 - At least 1 approval from a code owner
 - All automated checks must pass
 - No unresolved review conversations
@@ -321,6 +353,7 @@ Any additional information that reviewers should know.
 ### Required Testing
 
 **Unit Tests**
+
 ```bash
 # All unit tests must pass
 npm test
@@ -330,6 +363,7 @@ npm run test:coverage
 ```
 
 **Cross-Browser Testing**
+
 ```bash
 # Test in Chrome
 npm run test:chrome
@@ -342,6 +376,7 @@ npm run test:all
 ```
 
 **Code Quality**
+
 ```bash
 # Linting must pass
 npm run lint
@@ -356,19 +391,22 @@ npm run validate
 ### Test Writing Guidelines
 
 **For New Features**:
+
 - Write unit tests for all new functions
 - Include integration tests for component interactions
 - Add cross-browser compatibility tests
 - Test error conditions and edge cases
 
 **For Bug Fixes**:
+
 - Write regression tests that fail without the fix
 - Verify tests pass with the fix
 - Test related functionality for side effects
 
 **Test Structure Example**:
+
 ```javascript
-describe('SettingsManager', () => {
+describe("SettingsManager", () => {
   let settingsManager;
   let mockChrome;
 
@@ -378,25 +416,25 @@ describe('SettingsManager', () => {
     settingsManager = new SettingsManager();
   });
 
-  describe('saveSettings', () => {
-    test('should save valid settings to storage', async () => {
-      const settings = { theme: 'dark', notifications: true };
-      
+  describe("saveSettings", () => {
+    test("should save valid settings to storage", async () => {
+      const settings = { theme: "dark", notifications: true };
+
       const result = await settingsManager.saveSettings(settings);
-      
+
       expect(result.success).toBe(true);
-      
-      const stored = await mockChrome.storage.local.get(['settings']);
+
+      const stored = await mockChrome.storage.local.get(["settings"]);
       expect(stored.settings).toEqual(settings);
     });
 
-    test('should handle storage errors gracefully', async () => {
-      mockChrome.storage.local.simulateError('QUOTA_EXCEEDED');
-      
+    test("should handle storage errors gracefully", async () => {
+      mockChrome.storage.local.simulateError("QUOTA_EXCEEDED");
+
       const result = await settingsManager.saveSettings({});
-      
+
       expect(result.success).toBe(false);
-      expect(result.error).toContain('quota');
+      expect(result.error).toContain("quota");
     });
   });
 });
@@ -407,6 +445,7 @@ describe('SettingsManager', () => {
 ### When to Update Documentation
 
 **Always update documentation for**:
+
 - New features or functionality
 - Changes to existing APIs
 - New configuration options
@@ -417,18 +456,21 @@ describe('SettingsManager', () => {
 ### Documentation Types
 
 **User Documentation** (`docs/user/`):
+
 - Getting started guides
 - How-to instructions
 - API reference
 - Troubleshooting guides
 
 **Developer Documentation** (`docs/developer/`):
+
 - Setup and workflow guides
 - Architecture explanations
 - Contributing guidelines
 - API implementation details
 
 **Code Documentation**:
+
 - JSDoc comments for public APIs
 - Inline comments for complex logic
 - README files for modules
@@ -437,18 +479,21 @@ describe('SettingsManager', () => {
 ### Documentation Standards
 
 **Writing Style**:
+
 - Clear, concise language
 - Active voice when possible
 - Step-by-step instructions
 - Examples and code samples
 
 **Structure**:
+
 - Executive summary for each document
 - Table of contents for long documents
 - Consistent formatting and headings
 - Cross-references to related documentation
 
 **Maintenance**:
+
 - Keep documentation up-to-date with code changes
 - Review documentation during code reviews
 - Test all code examples and instructions
@@ -466,6 +511,7 @@ A clear and concise description of what the bug is.
 
 **To Reproduce**
 Steps to reproduce the behavior:
+
 1. Go to '...'
 2. Click on '....'
 3. Scroll down to '....'
@@ -478,9 +524,10 @@ A clear and concise description of what you expected to happen.
 If applicable, add screenshots to help explain your problem.
 
 **Environment:**
- - OS: [e.g. macOS 13.0]
- - Browser: [e.g. Chrome 118, Firefox 119]
- - Extension Version: [e.g. 1.2.3]
+
+- OS: [e.g. macOS 13.0]
+- Browser: [e.g. Chrome 118, Firefox 119]
+- Extension Version: [e.g. 1.2.3]
 
 **Additional Context**
 Add any other context about the problem here.
@@ -515,6 +562,7 @@ If you have ideas about how this could be implemented, please share them.
 We use these labels to categorize issues:
 
 **Type Labels**:
+
 - `bug`: Something isn't working
 - `enhancement`: New feature or request
 - `documentation`: Improvements or additions to documentation
@@ -522,17 +570,20 @@ We use these labels to categorize issues:
 - `security`: Security-related issues
 
 **Priority Labels**:
+
 - `priority:high`: High priority issues
-- `priority:medium`: Medium priority issues  
+- `priority:medium`: Medium priority issues
 - `priority:low`: Low priority issues
 
 **Status Labels**:
+
 - `good first issue`: Good for newcomers
 - `help wanted`: Extra attention is needed
 - `wontfix`: This will not be worked on
 - `duplicate`: This issue or pull request already exists
 
 **Component Labels**:
+
 - `component:background`: Background script issues
 - `component:content`: Content script issues
 - `component:popup`: Popup interface issues
@@ -546,6 +597,7 @@ We use these labels to categorize issues:
 **GitHub Issues**: Primary place for bug reports, feature requests, and project discussions
 
 **Discussions**: Use GitHub Discussions for:
+
 - General questions about the project
 - Ideas and brainstorming
 - Show and tell
@@ -554,12 +606,14 @@ We use these labels to categorize issues:
 ### Getting Help
 
 **For Contributors**:
+
 - Check existing [documentation](developer/README.md)
 - Search existing issues and discussions
 - Ask questions in GitHub Discussions
 - Reach out to maintainers for guidance
 
 **For Users**:
+
 - Check [user documentation](user/README.md)
 - Look at [troubleshooting guides](user/how-to/troubleshooting.md)
 - Search existing issues
@@ -577,12 +631,14 @@ We value all contributions! Contributors are recognized through:
 ### Maintainer Responsibilities
 
 **Code Owners**:
+
 - Review pull requests promptly
 - Provide constructive feedback
 - Maintain coding standards
 - Guide architectural decisions
 
 **Community Managers**:
+
 - Respond to issues and discussions
 - Help new contributors get started
 - Maintain project documentation
@@ -626,6 +682,7 @@ A: Yes, regularly rebase your feature branch on the latest develop branch to avo
 ## Resources
 
 ### Documentation
+
 - **[Complete Documentation Hub](README.md)** - Main navigation and documentation map
 - [Developer Documentation](developer/README.md) - Complete developer guides
 - [User Documentation](user/README.md) - End-user guides and references
@@ -633,12 +690,14 @@ A: Yes, regularly rebase your feature branch on the latest develop branch to avo
 - [Documentation Map](DOCUMENTATION-MAP.md) - Cross-reference relationships and navigation paths
 
 ### External Resources
+
 - [Chrome Extension Documentation](https://developer.chrome.com/docs/extensions/)
 - [Firefox WebExtension APIs](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions)
 - [JavaScript Testing with Jest](https://jestjs.io/docs/getting-started)
 - [Git Documentation](https://git-scm.com/doc)
 
 ### Tools and Setup
+
 - [Node.js Installation](https://nodejs.org/en/download/)
 - [Git Installation](https://git-scm.com/downloads)
 - [VS Code](https://code.visualstudio.com/) with recommended extensions
@@ -657,4 +716,4 @@ Welcome to the Settings Extension community! 🎉
 
 ---
 
-*This contributing guide is a living document. If you find ways to improve it, please submit a pull request or open an issue with suggestions.*
+_This contributing guide is a living document. If you find ways to improve it, please submit a pull request or open an issue with suggestions._

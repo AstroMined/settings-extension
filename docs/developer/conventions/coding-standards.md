@@ -74,10 +74,10 @@ class StorageService {}
 
 // ✅ Good: Use SCREAMING_SNAKE_CASE for constants
 const MAX_RETRY_ATTEMPTS = 3;
-const DEFAULT_THEME = 'light';
+const DEFAULT_THEME = "light";
 const API_ENDPOINTS = {
-  SETTINGS: '/api/settings',
-  SYNC: '/api/sync'
+  SETTINGS: "/api/settings",
+  SYNC: "/api/sync",
 };
 
 // ✅ Good: Use descriptive names
@@ -86,7 +86,7 @@ const hasValidSettings = validateSettings(data);
 
 // ❌ Bad: Vague or abbreviated names
 const d = new Date(); // Use 'currentDate'
-const btn = document.getElementById('save'); // Use 'saveButton'
+const btn = document.getElementById("save"); // Use 'saveButton'
 const usr = getCurrentUser(); // Use 'currentUser'
 ```
 
@@ -105,28 +105,32 @@ function validateEmail(email) {
 }
 
 function sanitizeInput(input) {
-  return input.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
+  return input.replace(
+    /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi,
+    "",
+  );
 }
 
 // ✅ Good: Async/await over promises
 async function loadSettings() {
   try {
-    const response = await chrome.storage.local.get(['settings']);
+    const response = await chrome.storage.local.get(["settings"]);
     return response.settings || getDefaultSettings();
   } catch (error) {
-    console.error('Failed to load settings:', error);
+    console.error("Failed to load settings:", error);
     return getDefaultSettings();
   }
 }
 
 // ❌ Bad: Nested promise chains
 function loadSettingsBad() {
-  return chrome.storage.local.get(['settings'])
-    .then(response => {
+  return chrome.storage.local
+    .get(["settings"])
+    .then((response) => {
       return response.settings || getDefaultSettings();
     })
-    .catch(error => {
-      console.error('Failed to load settings:', error);
+    .catch((error) => {
+      console.error("Failed to load settings:", error);
       return getDefaultSettings();
     });
 }
@@ -141,17 +145,17 @@ function loadSettingsBad() {
  */
 async function saveSettings(settings, options = {}) {
   const { syncEnabled = true } = options;
-  
+
   try {
     await chrome.storage.local.set({ settings });
-    
+
     if (syncEnabled) {
       await chrome.storage.sync.set({ settings });
     }
-    
+
     return true;
   } catch (error) {
-    console.error('Save failed:', error);
+    console.error("Save failed:", error);
     return false;
   }
 }
@@ -164,8 +168,8 @@ async function saveSettings(settings, options = {}) {
 class SettingsManager {
   async saveSettings(settings) {
     // Validate input
-    if (!settings || typeof settings !== 'object') {
-      throw new Error('Settings must be a valid object');
+    if (!settings || typeof settings !== "object") {
+      throw new Error("Settings must be a valid object");
     }
 
     try {
@@ -174,20 +178,20 @@ class SettingsManager {
       return { success: true };
     } catch (error) {
       // Handle specific error types
-      if (error.message.includes('QUOTA_EXCEEDED')) {
-        return { 
-          success: false, 
-          error: 'Storage quota exceeded',
-          code: 'QUOTA_EXCEEDED'
+      if (error.message.includes("QUOTA_EXCEEDED")) {
+        return {
+          success: false,
+          error: "Storage quota exceeded",
+          code: "QUOTA_EXCEEDED",
         };
       }
 
       // Generic error handling
-      console.error('Settings save failed:', error);
-      return { 
-        success: false, 
+      console.error("Settings save failed:", error);
+      return {
+        success: false,
         error: error.message,
-        code: 'SAVE_FAILED'
+        code: "SAVE_FAILED",
       };
     }
   }
@@ -198,7 +202,7 @@ async function withErrorBoundary(operation, fallback = null) {
   try {
     return await operation();
   } catch (error) {
-    console.error('Operation failed:', error);
+    console.error("Operation failed:", error);
     return fallback;
   }
 }
@@ -206,7 +210,7 @@ async function withErrorBoundary(operation, fallback = null) {
 // Usage
 const settings = await withErrorBoundary(
   () => loadSettings(),
-  getDefaultSettings()
+  getDefaultSettings(),
 );
 ```
 
@@ -229,17 +233,19 @@ export default new StorageManager();
 
 // ✅ Good: Clear import statements
 // background.js
-import StorageManager, { StorageManager as StorageClass } from './lib/storage-manager.js';
-import { validateSettings, sanitizeInput } from './lib/utils.js';
+import StorageManager, {
+  StorageManager as StorageClass,
+} from "./lib/storage-manager.js";
+import { validateSettings, sanitizeInput } from "./lib/utils.js";
 
 // ✅ Good: Barrel exports for cleaner imports
 // lib/index.js
-export { default as StorageManager } from './storage-manager.js';
-export { default as SettingsValidator } from './settings-validator.js';
-export { default as MessageHandler } from './message-handler.js';
+export { default as StorageManager } from "./storage-manager.js";
+export { default as SettingsValidator } from "./settings-validator.js";
+export { default as MessageHandler } from "./message-handler.js";
 
 // Usage
-import { StorageManager, SettingsValidator } from './lib/index.js';
+import { StorageManager, SettingsValidator } from "./lib/index.js";
 ```
 
 ### Class Standards
@@ -251,18 +257,18 @@ class ExtensionComponent {
     // Dependency injection for testability
     this.storage = dependencies.storage || chrome.storage.local;
     this.messaging = dependencies.messaging || chrome.runtime;
-    
+
     // Initialize state
     this.isInitialized = false;
     this.listeners = new Set();
-    
+
     // Bind methods to maintain context
     this.handleMessage = this.handleMessage.bind(this);
   }
 
   async init() {
     if (this.isInitialized) {
-      console.warn('Component already initialized');
+      console.warn("Component already initialized");
       return;
     }
 
@@ -271,16 +277,16 @@ class ExtensionComponent {
       await this.loadInitialData();
       this.isInitialized = true;
     } catch (error) {
-      console.error('Initialization failed:', error);
+      console.error("Initialization failed:", error);
       throw error;
     }
   }
 
   async setupEventListeners() {
     this.messaging.onMessage.addListener(this.handleMessage);
-    this.listeners.add({ 
-      target: this.messaging.onMessage, 
-      handler: this.handleMessage 
+    this.listeners.add({
+      target: this.messaging.onMessage,
+      handler: this.handleMessage,
     });
   }
 
@@ -294,7 +300,7 @@ class ExtensionComponent {
       target.removeListener(handler);
     });
     this.listeners.clear();
-    
+
     this.isInitialized = false;
   }
 
@@ -307,7 +313,7 @@ class ExtensionComponent {
 // ✅ Good: Static methods for utilities
 class SettingsUtils {
   static validateSettingsObject(settings) {
-    return settings && typeof settings === 'object' && !Array.isArray(settings);
+    return settings && typeof settings === "object" && !Array.isArray(settings);
   }
 
   static mergeSettings(defaults, userSettings) {
@@ -315,8 +321,11 @@ class SettingsUtils {
   }
 
   static sanitizeSettingsValue(value) {
-    if (typeof value === 'string') {
-      return value.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
+    if (typeof value === "string") {
+      return value.replace(
+        /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi,
+        "",
+      );
     }
     return value;
   }
@@ -331,49 +340,49 @@ class SettingsUtils {
 <!-- ✅ Good: Semantic HTML structure -->
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Settings Extension - Options</title>
-  <link rel="stylesheet" href="options.css">
-</head>
-<body>
-  <header class="options-header">
-    <h1>Extension Settings</h1>
-    <nav class="options-nav">
-      <button class="nav-tab active" data-tab="general">General</button>
-      <button class="nav-tab" data-tab="advanced">Advanced</button>
-    </nav>
-  </header>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Settings Extension - Options</title>
+    <link rel="stylesheet" href="options.css" />
+  </head>
+  <body>
+    <header class="options-header">
+      <h1>Extension Settings</h1>
+      <nav class="options-nav">
+        <button class="nav-tab active" data-tab="general">General</button>
+        <button class="nav-tab" data-tab="advanced">Advanced</button>
+      </nav>
+    </header>
 
-  <main class="options-main">
-    <section id="general-section" class="settings-section active">
-      <h2>General Settings</h2>
-      
-      <fieldset class="setting-group">
-        <legend>Appearance</legend>
-        
-        <div class="setting-item">
-          <label for="theme-select">Theme:</label>
-          <select id="theme-select" name="theme">
-            <option value="light">Light</option>
-            <option value="dark">Dark</option>
-            <option value="auto">Auto</option>
-          </select>
-        </div>
+    <main class="options-main">
+      <section id="general-section" class="settings-section active">
+        <h2>General Settings</h2>
 
-        <div class="setting-item">
-          <label>
-            <input type="checkbox" id="notifications" name="notifications">
-            Enable notifications
-          </label>
-        </div>
-      </fieldset>
-    </section>
-  </main>
+        <fieldset class="setting-group">
+          <legend>Appearance</legend>
 
-  <script src="options.js" type="module"></script>
-</body>
+          <div class="setting-item">
+            <label for="theme-select">Theme:</label>
+            <select id="theme-select" name="theme">
+              <option value="light">Light</option>
+              <option value="dark">Dark</option>
+              <option value="auto">Auto</option>
+            </select>
+          </div>
+
+          <div class="setting-item">
+            <label>
+              <input type="checkbox" id="notifications" name="notifications" />
+              Enable notifications
+            </label>
+          </div>
+        </fieldset>
+      </section>
+    </main>
+
+    <script src="options.js" type="module"></script>
+  </body>
 </html>
 ```
 
@@ -383,16 +392,16 @@ class SettingsUtils {
 <!-- ✅ Good: Accessible form elements -->
 <div class="setting-item">
   <label for="sync-interval">Sync Interval (minutes):</label>
-  <input 
-    type="number" 
-    id="sync-interval" 
+  <input
+    type="number"
+    id="sync-interval"
     name="syncInterval"
-    min="5" 
+    min="5"
     max="1440"
     step="5"
     aria-describedby="sync-interval-help"
     required
-  >
+  />
   <div id="sync-interval-help" class="help-text">
     How often settings should sync across devices (5-1440 minutes)
   </div>
@@ -411,7 +420,7 @@ class SettingsUtils {
 </nav>
 
 <!-- ✅ Good: Keyboard navigation support -->
-<button 
+<button
   class="tab-button"
   role="tab"
   aria-selected="true"
@@ -449,8 +458,9 @@ class SettingsUtils {
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 
-               'Helvetica Neue', Arial, sans-serif;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue",
+    Arial, sans-serif;
   font-size: 14px;
   line-height: 1.5;
   color: var(--text-color);
@@ -552,7 +562,7 @@ body {
   .setting-item {
     align-items: flex-start;
   }
-  
+
   .setting-item__label {
     min-width: 150px;
   }
@@ -563,7 +573,7 @@ body {
   .options-container {
     max-width: 800px;
   }
-  
+
   .settings-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -587,7 +597,7 @@ body {
     --text-color: #fff;
     --border-color: #555;
   }
-  
+
   body {
     background-color: #1a1a1a;
   }
@@ -600,10 +610,10 @@ body {
 
 ```javascript
 // ✅ Good: Function-style tests with descriptive names
-import { SettingsManager } from '../lib/settings-manager.js';
-import { createMockChrome } from './helpers/chrome-mock.js';
+import { SettingsManager } from "../lib/settings-manager.js";
+import { createMockChrome } from "./helpers/chrome-mock.js";
 
-describe('SettingsManager', () => {
+describe("SettingsManager", () => {
   let settingsManager;
   let mockChrome;
 
@@ -611,7 +621,7 @@ describe('SettingsManager', () => {
     // Setup real objects, not mocks when possible
     mockChrome = createMockChrome();
     global.chrome = mockChrome;
-    
+
     settingsManager = new SettingsManager();
   });
 
@@ -621,69 +631,69 @@ describe('SettingsManager', () => {
     delete global.chrome;
   });
 
-  describe('saveSettings', () => {
-    test('should save valid settings to local storage', async () => {
+  describe("saveSettings", () => {
+    test("should save valid settings to local storage", async () => {
       const testSettings = {
-        theme: 'dark',
+        theme: "dark",
         notifications: true,
-        syncInterval: 30
+        syncInterval: 30,
       };
 
       const result = await settingsManager.saveSettings(testSettings);
-      
+
       expect(result.success).toBe(true);
-      
+
       // Verify with actual storage call
-      const stored = await mockChrome.storage.local.get(['settings']);
+      const stored = await mockChrome.storage.local.get(["settings"]);
       expect(stored.settings).toEqual(testSettings);
     });
 
-    test('should reject invalid settings input', async () => {
-      const invalidInputs = [null, undefined, 'string', 123, []];
+    test("should reject invalid settings input", async () => {
+      const invalidInputs = [null, undefined, "string", 123, []];
 
       for (const input of invalidInputs) {
-        await expect(settingsManager.saveSettings(input))
-          .rejects
-          .toThrow('Settings must be a valid object');
+        await expect(settingsManager.saveSettings(input)).rejects.toThrow(
+          "Settings must be a valid object",
+        );
       }
     });
 
-    test('should handle storage quota exceeded error', async () => {
+    test("should handle storage quota exceeded error", async () => {
       // Create realistic error condition
-      mockChrome.storage.local.simulateError('QUOTA_EXCEEDED');
-      
+      mockChrome.storage.local.simulateError("QUOTA_EXCEEDED");
+
       const largeSettings = {
-        data: 'x'.repeat(10000000) // Large data
+        data: "x".repeat(10000000), // Large data
       };
 
       const result = await settingsManager.saveSettings(largeSettings);
-      
+
       expect(result.success).toBe(false);
-      expect(result.code).toBe('QUOTA_EXCEEDED');
+      expect(result.code).toBe("QUOTA_EXCEEDED");
     });
   });
 
-  describe('loadSettings', () => {
-    test('should return default settings when none exist', async () => {
+  describe("loadSettings", () => {
+    test("should return default settings when none exist", async () => {
       const settings = await settingsManager.loadSettings();
-      
+
       expect(settings).toMatchObject({
-        theme: 'light',
+        theme: "light",
         notifications: false,
-        syncInterval: 60
+        syncInterval: 60,
       });
     });
 
-    test('should merge user settings with defaults', async () => {
-      const userSettings = { theme: 'dark' };
+    test("should merge user settings with defaults", async () => {
+      const userSettings = { theme: "dark" };
       await mockChrome.storage.local.set({ settings: userSettings });
 
       const settings = await settingsManager.loadSettings();
-      
+
       expect(settings).toMatchObject({
-        theme: 'dark', // User preference
+        theme: "dark", // User preference
         notifications: false, // Default value
-        syncInterval: 60 // Default value
+        syncInterval: 60, // Default value
       });
     });
   });
@@ -694,7 +704,7 @@ describe('SettingsManager', () => {
 
 ```javascript
 // ✅ Good: Integration tests with real component interaction
-describe('Settings Sync Integration', () => {
+describe("Settings Sync Integration", () => {
   let backgroundScript;
   let contentScript;
   let mockChrome;
@@ -706,19 +716,19 @@ describe('Settings Sync Integration', () => {
     // Initialize real components
     backgroundScript = new BackgroundScript();
     contentScript = new ContentScript();
-    
+
     await backgroundScript.init();
     await contentScript.init();
   });
 
-  test('should sync settings between background and content script', async () => {
-    const newSettings = { theme: 'dark', autoFill: true };
+  test("should sync settings between background and content script", async () => {
+    const newSettings = { theme: "dark", autoFill: true };
 
     // Update settings in background
     await backgroundScript.updateSettings(newSettings);
 
     // Allow message propagation
-    await new Promise(resolve => setTimeout(resolve, 50));
+    await new Promise((resolve) => setTimeout(resolve, 50));
 
     // Verify content script received update
     const contentSettings = contentScript.getCurrentSettings();
@@ -737,7 +747,7 @@ class StorageManager {
   constructor() {
     // Use Map for better performance with frequent key lookups
     this.cache = new Map();
-    
+
     // WeakSet allows garbage collection of removed listeners
     this.listeners = new WeakSet();
   }
@@ -752,7 +762,7 @@ class StorageManager {
     try {
       const result = await chrome.storage.local.get([key]);
       const value = result[key] !== undefined ? result[key] : defaultValue;
-      
+
       // Cache successful reads to improve performance
       this.cache.set(key, value);
       return value;
@@ -773,13 +783,13 @@ class StorageManager {
 // ✅ Good: JSDoc for public APIs
 /**
  * Validates and sanitizes user settings before storage
- * 
+ *
  * @param {Object} settings - Raw settings object from user input
  * @param {Object} schema - Validation schema with type and constraint info
  * @returns {Object} Validated and sanitized settings object
- * 
+ *
  * @throws {ValidationError} When settings don't match schema requirements
- * 
+ *
  * @example
  * const validated = validateSettings(
  *   { theme: 'dark', interval: '30' },
@@ -795,34 +805,37 @@ function validateSettings(settings, schema) {
 
 Each module should have clear documentation:
 
-```markdown
+````markdown
 # StorageManager
 
 ## Overview
+
 Manages persistent storage for extension settings with caching and error handling.
 
 ## Usage
 
 ```javascript
-import StorageManager from './storage-manager.js';
+import StorageManager from "./storage-manager.js";
 
 // Get a setting with default fallback
-const theme = await StorageManager.get('theme', 'light');
+const theme = await StorageManager.get("theme", "light");
 
 // Save a setting
-await StorageManager.set('theme', 'dark');
+await StorageManager.set("theme", "dark");
 
 // Listen for changes
 const unsubscribe = StorageManager.onChange((key, value) => {
   console.log(`Setting ${key} changed to:`, value);
 });
 ```
+````
 
 ## API Reference
 
 ### Methods
 
 #### `get(key, defaultValue)`
+
 Retrieves a value from storage with optional default.
 
 - **key** (string): Storage key to retrieve
@@ -830,12 +843,14 @@ Retrieves a value from storage with optional default.
 - **Returns**: Promise<any> - The stored value or default
 
 #### `set(key, value)`
+
 Stores a value in storage with automatic caching.
 
 - **key** (string): Storage key to set
 - **value** (any): Value to store (must be JSON serializable)
 - **Returns**: Promise<boolean> - Success status
-```
+
+````
 
 ## Performance Standards
 
@@ -845,13 +860,13 @@ Stores a value in storage with automatic caching.
 // ✅ Good: Batch DOM operations
 function updateMultipleElements(updates) {
   const fragment = document.createDocumentFragment();
-  
+
   updates.forEach(({ element, content }) => {
     const newElement = document.createElement(element.tagName);
     newElement.textContent = content;
     fragment.appendChild(newElement);
   });
-  
+
   // Single DOM write operation
   document.getElementById('container').appendChild(fragment);
 }
@@ -859,10 +874,10 @@ function updateMultipleElements(updates) {
 // ✅ Good: Debounce expensive operations
 function createDebouncedSave(saveFunction, delay = 1000) {
   let timeoutId;
-  
+
   return function debouncedSave(...args) {
     clearTimeout(timeoutId);
-    
+
     timeoutId = setTimeout(() => {
       saveFunction.apply(this, args);
     }, delay);
@@ -907,7 +922,7 @@ class ComponentWithCleanup {
     this.timers.length = 0;
   }
 }
-```
+````
 
 ## Security Standards
 
@@ -917,26 +932,30 @@ class ComponentWithCleanup {
 // ✅ Good: Input validation
 class SecurityUtils {
   static validateSettingsInput(input) {
-    if (typeof input !== 'object' || input === null) {
-      throw new Error('Settings must be an object');
+    if (typeof input !== "object" || input === null) {
+      throw new Error("Settings must be an object");
     }
 
     // Check for prototype pollution
-    if ('__proto__' in input || 'constructor' in input || 'prototype' in input) {
-      throw new Error('Invalid property names detected');
+    if (
+      "__proto__" in input ||
+      "constructor" in input ||
+      "prototype" in input
+    ) {
+      throw new Error("Invalid property names detected");
     }
 
     return true;
   }
 
   static sanitizeString(str) {
-    if (typeof str !== 'string') return str;
-    
+    if (typeof str !== "string") return str;
+
     // Remove potentially harmful content
     return str
-      .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
-      .replace(/javascript:/gi, '')
-      .replace(/on\w+\s*=/gi, '');
+      .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "")
+      .replace(/javascript:/gi, "")
+      .replace(/on\w+\s*=/gi, "");
   }
 
   static validateOrigin(origin, allowedOrigins) {
@@ -947,14 +966,14 @@ class SecurityUtils {
 // ✅ Good: Secure message handling
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   // Validate message structure
-  if (!message || typeof message.type !== 'string') {
-    sendResponse({ error: 'Invalid message format' });
+  if (!message || typeof message.type !== "string") {
+    sendResponse({ error: "Invalid message format" });
     return;
   }
 
   // Validate sender (if needed)
   if (sender.id !== chrome.runtime.id) {
-    sendResponse({ error: 'Unauthorized sender' });
+    sendResponse({ error: "Unauthorized sender" });
     return;
   }
 
@@ -963,8 +982,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     const result = handleSecureMessage(message);
     sendResponse({ success: true, result });
   } catch (error) {
-    console.error('Message processing error:', error);
-    sendResponse({ error: 'Processing failed' });
+    console.error("Message processing error:", error);
+    sendResponse({ error: "Processing failed" });
   }
 });
 ```
@@ -982,17 +1001,9 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     }
   },
   "lint-staged": {
-    "*.{js,jsx,ts,tsx}": [
-      "eslint --fix",
-      "prettier --write"
-    ],
-    "*.{css,scss}": [
-      "stylelint --fix",
-      "prettier --write"
-    ],
-    "*.{md,json}": [
-      "prettier --write"
-    ]
+    "*.{js,jsx,ts,tsx}": ["eslint --fix", "prettier --write"],
+    "*.{css,scss}": ["stylelint --fix", "prettier --write"],
+    "*.{md,json}": ["prettier --write"]
   }
 }
 ```
@@ -1012,17 +1023,17 @@ jobs:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
         with:
-          node-version: '18'
-      
+          node-version: "18"
+
       - name: Install dependencies
         run: npm ci
-      
+
       - name: Run ESLint
         run: npm run lint
-      
+
       - name: Check Prettier formatting
         run: npm run format:check
-      
+
       - name: Run tests
         run: npm test
 ```
@@ -1037,6 +1048,6 @@ jobs:
 
 ## Revision History
 
-| Date | Author | Changes |
-|------|--------|---------|
+| Date       | Author         | Changes                  |
+| ---------- | -------------- | ------------------------ |
 | 2025-08-11 | Developer Team | Initial coding standards |

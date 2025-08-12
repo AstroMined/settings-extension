@@ -15,6 +15,7 @@ This tutorial walks you through creating your first settings backup using the Se
 ## What You'll Learn
 
 By the end of this tutorial, you'll know how to:
+
 1. Understand why backups are important
 2. Export settings from the popup interface
 3. Export settings from advanced options
@@ -26,6 +27,7 @@ By the end of this tutorial, you'll know how to:
 ### Protection Against Data Loss
 
 Settings backups protect you from:
+
 - **Accidental changes**: Easily restore if you modify something incorrectly
 - **Extension updates**: Preserve settings during version upgrades
 - **Browser issues**: Restore settings after browser problems
@@ -35,6 +37,7 @@ Settings backups protect you from:
 ### When to Create Backups
 
 Create backups:
+
 - Before making major configuration changes
 - Before browser or extension updates
 - Weekly for important configurations
@@ -55,7 +58,7 @@ The fastest way to create a backup is through the extension popup:
    - At the bottom of the popup
    - Shows a download arrow icon and "Export" text
 
-*Screenshot placeholder: [Popup interface with Export button highlighted]*
+_Screenshot placeholder: [Popup interface with Export button highlighted]_
 
 3. **Click Export**
    - Click the "Export" button
@@ -64,11 +67,13 @@ The fastest way to create a backup is through the extension popup:
 ### Understanding the Downloaded File
 
 Your browser will download a file named:
+
 ```
 settings-extension-backup-2025-08-11-14-30-25.json
 ```
 
 **File name breakdown:**
+
 - `settings-extension-backup`: Identifies the file type
 - `2025-08-11`: Date (YYYY-MM-DD format)
 - `14-30-25`: Time (HH-MM-SS format)
@@ -77,6 +82,7 @@ settings-extension-backup-2025-08-11-14-30-25.json
 ### File Location
 
 The file downloads to your browser's default download location:
+
 - **Windows**: `C:\Users\[YourName]\Downloads\`
 - **macOS**: `/Users/[YourName]/Downloads/`
 - **Linux**: `/home/[yourname]/Downloads/`
@@ -95,7 +101,7 @@ For more control over your backup, use the advanced settings page:
    - Click "Import/Export" in the left sidebar
    - The backup tools appear in the main area
 
-*Screenshot placeholder: [Advanced settings showing Import/Export tab]*
+_Screenshot placeholder: [Advanced settings showing Import/Export tab]_
 
 ### Using the Advanced Export
 
@@ -114,6 +120,7 @@ For more control over your backup, use the advanced settings page:
 ### Advantages of Advanced Export
 
 The advanced export offers:
+
 - More visible interface for less experienced users
 - Clear descriptions of what's being exported
 - Better integration with other backup tools
@@ -137,21 +144,25 @@ The advanced export offers:
 Consider renaming your backups with descriptive names:
 
 **Before major changes:**
+
 ```
 settings-backup-before-api-update-2025-08-11.json
 ```
 
 **Regular weekly backups:**
+
 ```
 settings-weekly-backup-2025-week-32.json
 ```
 
 **Configuration snapshots:**
+
 ```
 settings-production-config-2025-08-11.json
 ```
 
 **Project-specific:**
+
 ```
 settings-project-alpha-config-2025-08-11.json
 ```
@@ -176,6 +187,7 @@ It's important to verify your backup was created successfully:
    - Or drag the file to your preferred text editor
 
 2. **Verify the structure:**
+
    ```json
    {
      "version": "1.0",
@@ -185,7 +197,7 @@ It's important to verify your backup was created successfully:
          "type": "boolean",
          "value": true,
          "description": "Enable main feature functionality"
-       },
+       }
        // ... more settings
      }
    }
@@ -196,7 +208,7 @@ It's important to verify your backup was created successfully:
    - Verify values match your current configuration
    - Ensure all settings are present
 
-*Screenshot placeholder: [JSON file open in text editor showing structure]*
+_Screenshot placeholder: [JSON file open in text editor showing structure]_
 
 ### Test Import (Optional)
 
@@ -211,14 +223,16 @@ For extra confidence, test that your backup works:
 ### Regular Backup Schedule
 
 Establish a routine:
+
 - **Daily**: If you frequently modify settings
-- **Weekly**: For most users with stable configurations  
+- **Weekly**: For most users with stable configurations
 - **Before changes**: Always backup before major modifications
 - **Before updates**: Backup before browser or extension updates
 
 ### Multiple Backup Locations
 
 Store backups in multiple places:
+
 - **Local folder**: Quick access on your computer
 - **Cloud storage**: Google Drive, OneDrive, Dropbox
 - **Network drive**: Company shared storage (if allowed)
@@ -227,30 +241,37 @@ Store backups in multiple places:
 ### Backup Retention
 
 Keep backups organized:
+
 - Keep daily backups for 1 week
-- Keep weekly backups for 1 month  
+- Keep weekly backups for 1 month
 - Keep monthly backups for 1 year
 - Keep yearly backups indefinitely
 
 ## Common Backup Issues
 
 ### Download Doesn't Start
+
 **Problem**: Clicking Export doesn't download a file
 **Solutions**:
+
 - Check if downloads are blocked in your browser
 - Try refreshing the page and exporting again
 - Check browser download permissions
 
 ### File Size is Too Small
+
 **Problem**: Backup file is only a few bytes
 **Possible causes**:
+
 - Settings may not be loaded properly
 - Try refreshing and exporting again
 - Verify settings show properly in the interface
 
 ### Can't Find Downloaded File
+
 **Problem**: Export seems to work but can't find the file
 **Solutions**:
+
 - Check your browser's download history (Ctrl+J)
 - Look in the default Downloads folder
 - Search your computer for "settings-extension-backup"
@@ -260,6 +281,7 @@ Keep backups organized:
 ### Sensitive Information
 
 Your backup may contain:
+
 - API keys and tokens
 - Custom CSS with company branding
 - Configuration data specific to your organization
@@ -304,6 +326,6 @@ Now that you can create backups, learn about:
 
 ## Revision History
 
-| Date | Author | Changes |
-|------|--------|---------|
+| Date       | Author             | Changes                 |
+| ---------- | ------------------ | ----------------------- |
 | 2025-08-11 | Documentation Team | Initial backup tutorial |

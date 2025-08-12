@@ -15,6 +15,7 @@ This tutorial teaches you how to create and manage multiple settings profiles us
 ## What You'll Learn
 
 By the end of this tutorial, you'll know how to:
+
 1. Understand what profiles are and why they're useful
 2. Create your first profile configuration
 3. Export and organize profile-specific backups
@@ -29,6 +30,7 @@ By the end of this tutorial, you'll know how to:
 Settings profiles are different configurations of your extension settings that you can save, name, and switch between. Think of them as presets for different situations.
 
 **Examples of profiles:**
+
 - **Development**: Settings optimized for development work
 - **Production**: Settings for live environments
 - **Testing**: Configuration for testing scenarios
@@ -46,6 +48,7 @@ Settings profiles are different configurations of your extension settings that y
 ### How Profiles Work
 
 Since the Settings Extension doesn't have built-in profile management (yet), we'll use a file-based approach:
+
 - Each profile is a separate backup file
 - Use descriptive naming to identify profiles
 - Import different backup files to switch profiles
@@ -60,18 +63,21 @@ Before creating profiles, plan what you need:
 Consider your different working scenarios:
 
 **For Developers:**
+
 - Development environment settings
 - Staging environment settings
 - Production environment settings
 - Personal experimentation settings
 
 **For Teams:**
+
 - Individual user preferences
 - Team standard configuration
 - Project-specific settings
 - Client-specific configurations
 
 **For Different Projects:**
+
 - Project A configuration
 - Project B configuration
 - General-purpose settings
@@ -81,12 +87,12 @@ Consider your different working scenarios:
 
 Write down your needed profiles:
 
-| Profile Name | Purpose | Key Settings | Usage Frequency |
-|--------------|---------|--------------|-----------------|
-| Development | Local development | Debug enabled, dev API | Daily |
-| Production | Live environment | Production API, optimized | Weekly |
-| Team Standard | Company defaults | Standard config | Monthly |
-| Experimental | Testing new features | Various test settings | As needed |
+| Profile Name  | Purpose              | Key Settings              | Usage Frequency |
+| ------------- | -------------------- | ------------------------- | --------------- |
+| Development   | Local development    | Debug enabled, dev API    | Daily           |
+| Production    | Live environment     | Production API, optimized | Weekly          |
+| Team Standard | Company defaults     | Standard config           | Monthly         |
+| Experimental  | Testing new features | Various test settings     | As needed       |
 
 ## Step 3: Creating Your First Profile
 
@@ -105,9 +111,9 @@ Let's create a "Development" profile as an example:
    - **Custom CSS**: Add development-specific styles:
      ```css
      /* Development Environment Styles */
-     .debug-mode { 
-       border: 2px solid red; 
-       background: yellow; 
+     .debug-mode {
+       border: 2px solid red;
+       background: yellow;
      }
      ```
 
@@ -124,7 +130,7 @@ Let's create a "Development" profile as an example:
      }
      ```
 
-*Screenshot placeholder: [Settings configured for development environment]*
+_Screenshot placeholder: [Settings configured for development environment]_
 
 ### Export the Development Profile
 
@@ -156,7 +162,7 @@ Let's create a "Development" profile as an example:
    - **Custom CSS**: Production-optimized styles:
      ```css
      /* Production Environment Styles */
-     .optimized { 
+     .optimized {
        performance: optimized;
        debug: none;
      }
@@ -194,6 +200,7 @@ Let's create a "Development" profile as an example:
 ### Create a Profile Management System
 
 1. **Folder Structure**
+
    ```
    Documents/
    └── Browser Extension Backups/
@@ -211,23 +218,24 @@ Let's create a "Development" profile as an example:
 
 2. **Profile Documentation File**
    Create a text file documenting your profiles:
+
    ```
    Profile Documentation - Settings Extension
-   
+
    DEVELOPMENT PROFILE
    - Purpose: Local development work
    - API: dev-api.example.com
    - Refresh: 30 seconds
    - Debug: Enabled
    - Last Updated: 2025-08-11
-   
-   PRODUCTION PROFILE  
+
+   PRODUCTION PROFILE
    - Purpose: Live environment settings
    - API: api.example.com
    - Refresh: 5 minutes
    - Debug: Disabled
    - Last Updated: 2025-08-11
-   
+
    TEAM STANDARD PROFILE
    - Purpose: Company default settings
    - Approved by: Team Lead
@@ -240,10 +248,12 @@ Let's create a "Development" profile as an example:
 Keep track of profile changes:
 
 **Naming Convention:**
+
 - `settings-profile-[name]-[version]-[date].json`
 - Example: `settings-profile-development-v2-2025-08-11.json`
 
 **Change Log:**
+
 - Document what changed in each version
 - Note why changes were made
 - Track who made the changes
@@ -267,7 +277,7 @@ Keep track of profile changes:
    - Test functionality if needed
    - Make note of the current active profile
 
-*Screenshot placeholder: [Import dialog showing profile selection]*
+_Screenshot placeholder: [Import dialog showing profile selection]_
 
 ### Creating a Profile Quick-Switch Guide
 
@@ -326,9 +336,10 @@ When sharing profiles with team members:
    - Document required customizations
 
 2. **Create Setup Instructions**
+
    ```
    DEVELOPMENT PROFILE SETUP
-   
+
    1. Import settings-profile-development-shared.json
    2. Update API key in settings:
       - Go to Advanced Settings > General
@@ -359,22 +370,28 @@ For advanced users, consider automation:
 ## Common Profile Management Issues
 
 ### Profile Import Fails
+
 **Problem**: Error importing profile file
 **Solutions**:
+
 - Check file isn't corrupted
 - Verify JSON syntax is valid
 - Try importing a known-good backup first
 
 ### Settings Don't Match Profile
+
 **Problem**: After import, settings aren't as expected
 **Solutions**:
+
 - Verify you imported the correct file
 - Check if extension was updated (breaking changes)
 - Re-export and import the profile
 
 ### Lost Profile Files
+
 **Problem**: Can't find profile files
 **Prevention**:
+
 - Use cloud storage backup
 - Maintain multiple copies
 - Document profile locations
@@ -382,18 +399,21 @@ For advanced users, consider automation:
 ## Best Practices Summary
 
 ### Organization
+
 - Use descriptive, consistent naming
 - Maintain folder structure
 - Document profile purposes and changes
 - Keep profiles up to date
 
 ### Safety
+
 - Always backup before switching
 - Test profiles before relying on them
 - Keep multiple versions of critical profiles
 - Remove sensitive data from shared profiles
 
 ### Maintenance
+
 - Review profiles quarterly
 - Update outdated configurations
 - Clean up unused profiles
@@ -432,6 +452,6 @@ Now that you can manage profiles effectively:
 
 ## Revision History
 
-| Date | Author | Changes |
-|------|--------|---------|
+| Date       | Author             | Changes                             |
+| ---------- | ------------------ | ----------------------------------- |
 | 2025-08-11 | Documentation Team | Initial profile management tutorial |

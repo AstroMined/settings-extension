@@ -24,6 +24,7 @@ This guide shows you how to synchronize your Settings Extension configuration ac
 ### What Can Be Synced
 
 The Settings Extension can synchronize:
+
 - **All extension settings**: Feature toggles, text inputs, numbers
 - **Custom configurations**: API keys, CSS styles, JSON objects
 - **User preferences**: Interface settings and customizations
@@ -32,6 +33,7 @@ The Settings Extension can synchronize:
 ### What Cannot Be Synced
 
 Some limitations exist:
+
 - **Browser-specific features**: Items that don't work across browsers
 - **Local file references**: Paths that don't exist on other devices
 - **Machine-specific settings**: Hardware or OS-dependent configurations
@@ -39,12 +41,12 @@ Some limitations exist:
 
 ### Sync Methods Available
 
-| Method | Speed | Ease | Cross-Browser | Real-time |
-|--------|-------|------|---------------|-----------|
-| Browser Native | Fast | Easy | No | Yes |
-| Manual Export/Import | Slow | Moderate | Yes | No |
-| Cloud Storage | Fast | Easy | Yes | Semi |
-| Script Automation | Fast | Hard | Yes | Yes |
+| Method               | Speed | Ease     | Cross-Browser | Real-time |
+| -------------------- | ----- | -------- | ------------- | --------- |
+| Browser Native       | Fast  | Easy     | No            | Yes       |
+| Manual Export/Import | Slow  | Moderate | Yes           | No        |
+| Cloud Storage        | Fast  | Easy     | Yes           | Semi      |
+| Script Automation    | Fast  | Hard     | Yes           | Yes       |
 
 ## Browser Native Sync
 
@@ -73,11 +75,13 @@ Some limitations exist:
 #### Using Chrome Sync
 
 **On Primary Device:**
+
 1. Configure your settings as desired
 2. Changes sync automatically to Google account
 3. No manual action required
 
 **On Secondary Devices:**
+
 1. Sign in with same Google account
 2. Enable Chrome sync
 3. Install Settings Extension
@@ -122,12 +126,14 @@ Some limitations exist:
 #### Sync from Device A to Device B
 
 **On Device A (Source):**
+
 1. Open Settings Extension
 2. Go to Import/Export tab
 3. Click "Export Settings"
 4. Save file to shared location (cloud drive, email, USB)
 
 **On Device B (Target):**
+
 1. Access the exported file
 2. Open Settings Extension
 3. Go to Import/Export tab
@@ -180,6 +186,7 @@ Some limitations exist:
 #### Setup Cloud Sync Folder
 
 1. **Create Sync Folder**
+
    ```
    Cloud Drive/
    └── Settings Extension Sync/
@@ -200,11 +207,13 @@ Some limitations exist:
 #### Daily Sync Routine
 
 **Export Daily (Each Device):**
+
 1. Export settings to: `settings-[devicename]-[date].json`
 2. Save to cloud sync folder
 3. File syncs automatically across devices
 
 **Import as Needed:**
+
 1. Check cloud folder for newer settings
 2. Import settings from other devices
 3. Maintain current settings backup
@@ -216,6 +225,7 @@ Some limitations exist:
 #### Create Sync Script
 
 **Windows Batch Script Example:**
+
 ```batch
 @echo off
 echo Exporting Settings Extension settings...
@@ -226,6 +236,7 @@ pause
 ```
 
 **macOS/Linux Shell Script Example:**
+
 ```bash
 #!/bin/bash
 echo "Syncing Settings Extension..."
@@ -274,12 +285,14 @@ echo "Sync complete"
 #### Cross-Browser Sync Process
 
 **Setup Phase:**
+
 1. Install Settings Extension on all browsers
 2. Configure cloud storage access
 3. Create shared sync folder
 4. Test export/import on each browser
 
 **Regular Sync:**
+
 1. Export from primary browser daily
 2. Import to secondary browsers as needed
 3. Keep one "master" configuration
@@ -288,16 +301,19 @@ echo "Sync complete"
 ### Browser-Specific Considerations
 
 **Chrome Specifics:**
+
 - Native sync works well within Chrome ecosystem
 - Easy to sync across Chrome installations
 - Limited to Chrome family browsers
 
 **Firefox Specifics:**
+
 - Firefox sync less reliable for extension data
 - Manual backup/restore recommended
 - Works well with cloud storage approach
 
 **Edge Specifics:**
+
 - Uses Chrome sync infrastructure
 - Compatible with Chrome extension formats
 - Seamless sync with Microsoft account
@@ -307,18 +323,21 @@ echo "Sync complete"
 ### Common Sync Problems
 
 **Settings Don't Appear on New Device**
+
 1. Check browser sync is enabled
 2. Verify extension is installed
 3. Try manual export/import
 4. Check sync service status
 
 **Settings Appear But Are Wrong**
+
 1. Check timestamp of synced settings
 2. Verify you're importing correct file
 3. Look for version conflicts
 4. Try importing fresh backup
 
 **Sync Takes Too Long**
+
 1. Check internet connection
 2. Try manual sync method
 3. Verify cloud storage is working
@@ -327,18 +346,21 @@ echo "Sync complete"
 ### Advanced Troubleshooting
 
 **Sync Conflicts**
+
 - When settings differ between devices
 - Choose authoritative source
 - Export/import to resolve conflicts
 - Document which device has correct settings
 
 **Version Mismatches**
+
 - Different extension versions on devices
 - Update all devices to same version
 - Re-sync after updates
 - Check for breaking changes
 
 **Data Loss Prevention**
+
 - Always backup before resolving conflicts
 - Keep multiple device backups
 - Test imports on non-critical settings first
@@ -347,12 +369,14 @@ echo "Sync complete"
 ### Recovery Procedures
 
 **Complete Sync Failure**
+
 1. Export settings from each device
 2. Compare files to identify differences
 3. Merge settings manually if needed
 4. Re-establish sync from clean state
 
 **Partial Data Loss**
+
 1. Check recent backups from all devices
 2. Identify which settings are missing
 3. Restore missing settings manually
@@ -363,18 +387,21 @@ echo "Sync complete"
 ### Sync Strategy Planning
 
 **Choose Primary Device**
+
 - Designate one device as "master"
 - Make changes primarily on master device
 - Sync from master to others regularly
 - Reduces conflicts and confusion
 
 **Regular Sync Schedule**
+
 - Daily sync for active development
 - Weekly sync for stable configurations
 - Before/after major changes
 - Before traveling or device switches
 
 **Backup Before Sync**
+
 - Always backup current settings before importing
 - Keep device-specific backups
 - Maintain rollback capability
@@ -383,6 +410,7 @@ echo "Sync complete"
 ### Organization Best Practices
 
 **File Naming Standards**
+
 ```
 settings-[browser]-[device]-[version]-[date].json
 
@@ -393,6 +421,7 @@ settings-edge-work-v1.0-2025-08-11.json
 ```
 
 **Folder Structure**
+
 ```
 Settings Sync/
 ├── Current/           # Latest from each device
@@ -405,6 +434,7 @@ Settings Sync/
 ```
 
 **Documentation**
+
 - Maintain sync log with changes and dates
 - Document device-specific customizations
 - Record sync procedures for team members
@@ -413,12 +443,14 @@ Settings Sync/
 ### Security Considerations
 
 **Data Protection**
+
 - Use encrypted cloud storage
 - Remove sensitive data before sharing
 - Control access to sync files
 - Regular security reviews
 
 **Access Management**
+
 - Limit who can access sync files
 - Use strong passwords for cloud accounts
 - Enable two-factor authentication
@@ -427,12 +459,14 @@ Settings Sync/
 ## Quick Reference
 
 ### Sync Methods Summary
+
 - **Chrome/Edge**: Enable browser sync, set extension to sync storage
 - **Firefox**: Manual export/import recommended
 - **Cross-browser**: Cloud storage + export/import
 - **Automated**: Scripts + cloud storage
 
 ### Troubleshooting Checklist
+
 1. Check browser sync status
 2. Verify extension installation
 3. Test manual export/import
@@ -440,6 +474,7 @@ Settings Sync/
 5. Review sync service availability
 
 ### Emergency Procedures
+
 1. Backup current settings immediately
 2. Try manual sync method
 3. Check all devices for recent backups
@@ -455,6 +490,6 @@ Settings Sync/
 
 ## Revision History
 
-| Date | Author | Changes |
-|------|--------|---------|
+| Date       | Author             | Changes                     |
+| ---------- | ------------------ | --------------------------- |
 | 2025-08-11 | Documentation Team | Initial sync settings guide |

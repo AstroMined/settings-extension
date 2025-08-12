@@ -12,6 +12,8 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
     "test:chrome": "web-ext run --target=chromium --source-dir=dist",
     "test:firefox": "web-ext run --target=firefox-desktop --source-dir=dist",
     "test:all": "npm run test:chrome && npm run test:firefox",
@@ -49,6 +51,7 @@
   },
   "homepage": "https://github.com/yourusername/settings-extension#readme",
   "devDependencies": {
+    "@playwright/test": "^1.54.2",
     "@types/chrome": "^0.0.250",
     "@types/jest": "^29.5.0",
     "@types/node": "^20.8.0",

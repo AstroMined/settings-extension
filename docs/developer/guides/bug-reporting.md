@@ -15,6 +15,7 @@ Comprehensive guide for effectively reporting bugs in the Settings Extension pro
 ### What Constitutes a Bug
 
 A bug is any behavior that:
+
 - **Deviates from intended functionality**
 - **Causes crashes or errors**
 - **Produces incorrect results**
@@ -41,13 +42,13 @@ A bug is any behavior that:
 
 ### Bug vs Feature Request
 
-| Bug | Feature Request |
-|-----|-----------------|
-| Something is broken | Something is missing |
-| Unintended behavior | Desired new behavior |
-| Error messages/crashes | Enhancement suggestions |
-| Performance degradation | Performance improvements |
-| Security vulnerabilities | New security features |
+| Bug                      | Feature Request          |
+| ------------------------ | ------------------------ |
+| Something is broken      | Something is missing     |
+| Unintended behavior      | Desired new behavior     |
+| Error messages/crashes   | Enhancement suggestions  |
+| Performance degradation  | Performance improvements |
+| Security vulnerabilities | New security features    |
 
 ## Before Reporting
 
@@ -64,6 +65,7 @@ A bug is any behavior that:
 ```
 
 **Search Strategy**:
+
 - Use specific error messages as search terms
 - Try different keyword combinations
 - Check both bug reports and discussions
@@ -72,6 +74,7 @@ A bug is any behavior that:
 ### 2. Verify the Bug
 
 **Reproduce Consistently**:
+
 ```bash
 # Steps to verify:
 1. Can you reproduce the bug multiple times?
@@ -82,6 +85,7 @@ A bug is any behavior that:
 ```
 
 **Test in Clean Environment**:
+
 ```bash
 # Chrome clean profile
 google-chrome --user-data-dir=/tmp/chrome-clean --no-extensions
@@ -93,6 +97,7 @@ firefox -profile /tmp/firefox-clean
 ### 3. Gather Information
 
 **System Information**:
+
 ```bash
 # Collect system details
 echo "OS: $(uname -a)"
@@ -103,6 +108,7 @@ echo "Extension Version: $(cat manifest.json | jq -r '.version')"
 ```
 
 **Browser Console Logs**:
+
 ```javascript
 // Open browser console (F12) and look for:
 // - Error messages
@@ -111,10 +117,11 @@ echo "Extension Version: $(cat manifest.json | jq -r '.version')"
 // - Extension-specific logs
 
 // Copy all relevant messages
-console.log('Extension logs would appear here');
+console.log("Extension logs would appear here");
 ```
 
 **Extension Context Information**:
+
 ```javascript
 // Gather extension-specific data
 chrome.runtime.getManifest(); // Extension manifest
@@ -129,18 +136,21 @@ navigator.userAgent; // Browser details
 
 ```markdown
 ## Bug Description
+
 **Brief Summary**: One-line description of the issue
 
-**Detailed Description**: 
+**Detailed Description**:
 Clear and detailed description of what is happening vs. what should happen.
 
 ## Environment
+
 - **OS**: macOS 13.0 / Windows 11 / Ubuntu 22.04
 - **Browser**: Chrome 118.0.5993.70 / Firefox 119.0
 - **Extension Version**: 1.2.3
 - **Other Extensions**: List other installed extensions that might interfere
 
 ## Steps to Reproduce
+
 1. Open extension popup
 2. Click on "Settings" button
 3. Change theme to "Dark"
@@ -148,16 +158,20 @@ Clear and detailed description of what is happening vs. what should happen.
 5. Notice that theme doesn't change
 
 ## Expected Behavior
+
 Theme should change to dark mode immediately after clicking save.
 
 ## Actual Behavior
+
 Theme remains in light mode. No visual change occurs.
 
 ## Error Messages
 ```
+
 Uncaught TypeError: Cannot read properties of undefined (reading 'theme')
-    at saveSettings (popup.js:45:12)
-    at HTMLButtonElement.onclick (popup.js:89:5)
+at saveSettings (popup.js:45:12)
+at HTMLButtonElement.onclick (popup.js:89:5)
+
 ```
 
 ## Screenshots/Videos
@@ -165,9 +179,11 @@ Uncaught TypeError: Cannot read properties of undefined (reading 'theme')
 
 ## Browser Console Logs
 ```
+
 [Extension] popup.js:45 Uncaught TypeError: Cannot read properties of undefined
 [Extension] background.js:123 Storage quota exceeded
 [Extension] content-script.js:67 Failed to inject styles
+
 ```
 
 ## Additional Context
@@ -191,6 +207,7 @@ Uncaught TypeError: Cannot read properties of undefined (reading 'theme')
 ### Title Guidelines
 
 **Good Bug Titles**:
+
 ```
 ✅ Popup crashes when selecting theme on Firefox
 ✅ Settings not saved when storage quota exceeded
@@ -200,6 +217,7 @@ Uncaught TypeError: Cannot read properties of undefined (reading 'theme')
 ```
 
 **Bad Bug Titles**:
+
 ```
 ❌ Bug in extension
 ❌ It doesn't work
@@ -209,6 +227,7 @@ Uncaught TypeError: Cannot read properties of undefined (reading 'theme')
 ```
 
 **Title Format**:
+
 ```
 [Component] Brief description of issue [Browser if specific]
 
@@ -222,23 +241,27 @@ Examples:
 
 ### Severity Levels
 
-**Critical**: 
+**Critical**:
+
 - Extension completely unusable
 - Data loss or corruption
 - Security vulnerabilities
 - Browser crashes
 
 **High**:
+
 - Major features not working
 - Significant performance issues
 - Affects majority of users
 
 **Medium**:
+
 - Some features not working
 - Minor performance issues
 - Affects some users or scenarios
 
 **Low**:
+
 - Cosmetic issues
 - Edge case problems
 - Minor inconveniences
@@ -250,7 +273,7 @@ Use these labels to categorize your bug:
 ```markdown
 **Background Script**: Issues with service worker, message handling, storage operations
 
-**Content Script**: Problems with page injection, DOM manipulation, script conflicts  
+**Content Script**: Problems with page injection, DOM manipulation, script conflicts
 
 **Popup Interface**: UI issues, form problems, display glitches
 
@@ -270,6 +293,7 @@ Use these labels to categorize your bug:
 ### For Developers
 
 **Include Code Context**:
+
 ```javascript
 // Problematic code section
 async function saveSettings(settings) {
@@ -277,16 +301,17 @@ async function saveSettings(settings) {
     // This line throws the error
     await chrome.storage.local.set({ settings: settings.data });
   } catch (error) {
-    console.error('Save failed:', error);
+    console.error("Save failed:", error);
     // Error: Cannot read properties of undefined (reading 'data')
   }
 }
 
 // Call that triggers the bug
-saveSettings({ theme: 'dark' }); // Missing 'data' property
+saveSettings({ theme: "dark" }); // Missing 'data' property
 ```
 
 **Provide Stack Traces**:
+
 ```
 Error: Cannot read properties of undefined (reading 'data')
     at saveSettings (lib/settings-manager.js:45:12)
@@ -295,15 +320,15 @@ Error: Cannot read properties of undefined (reading 'data')
 ```
 
 **Include Test Cases**:
+
 ```javascript
 // Test that demonstrates the bug
-describe('Settings Save Bug', () => {
-  test('should handle invalid settings object', async () => {
-    const invalidSettings = { theme: 'dark' }; // Missing 'data' wrapper
-    
+describe("Settings Save Bug", () => {
+  test("should handle invalid settings object", async () => {
+    const invalidSettings = { theme: "dark" }; // Missing 'data' wrapper
+
     // This should not throw, but currently does
-    await expect(settingsManager.save(invalidSettings))
-      .resolves.not.toThrow();
+    await expect(settingsManager.save(invalidSettings)).resolves.not.toThrow();
   });
 });
 ```
@@ -311,11 +336,12 @@ describe('Settings Save Bug', () => {
 ### Performance Issues
 
 **Include Profiling Data**:
+
 ```javascript
 // Memory usage tracking
-console.log('Memory before:', performance.memory);
+console.log("Memory before:", performance.memory);
 // ... perform operation ...
-console.log('Memory after:', performance.memory);
+console.log("Memory after:", performance.memory);
 
 // Timing measurements
 const start = performance.now();
@@ -325,12 +351,13 @@ console.log(`Operation took ${duration}ms`);
 ```
 
 **Provide Reproduction Scripts**:
+
 ```javascript
 // Script to reproduce memory leak
 for (let i = 0; i < 1000; i++) {
   // This operation leaks memory
-  document.addEventListener('click', function handler() {
-    console.log('Click', i);
+  document.addEventListener("click", function handler() {
+    console.log("Click", i);
     // Handler is never removed
   });
 }
@@ -342,14 +369,16 @@ for (let i = 0; i < 1000; i++) {
 For security vulnerabilities, email [security@settings-extension.dev] before creating public issues.
 
 **Include Proof of Concept**:
+
 ```javascript
 // Example XSS vulnerability
 const userInput = '<script>alert("XSS")</script>';
 // This input is not sanitized before insertion
-document.getElementById('settings-display').innerHTML = userInput;
+document.getElementById("settings-display").innerHTML = userInput;
 ```
 
 **Describe Impact**:
+
 ```markdown
 **Vulnerability**: Cross-site scripting in settings display
 **Impact**: Attacker could execute arbitrary JavaScript
@@ -363,29 +392,31 @@ document.getElementById('settings-display').innerHTML = userInput;
 ### Browser Developer Tools
 
 **Chrome DevTools**:
+
 ```javascript
 // Inspect extension context
 chrome.runtime.getBackgroundPage((bg) => {
-  console.log('Background page:', bg);
-  console.log('Extension context:', bg.document);
+  console.log("Background page:", bg);
+  console.log("Extension context:", bg.document);
 });
 
 // Monitor extension messages
 chrome.runtime.onMessage.addListener((msg, sender, response) => {
-  console.log('Message:', msg, 'From:', sender);
+  console.log("Message:", msg, "From:", sender);
 });
 
 // Check storage contents
 chrome.storage.local.get(null, (data) => {
-  console.log('All storage:', data);
+  console.log("All storage:", data);
 });
 ```
 
 **Firefox Developer Tools**:
+
 ```javascript
 // Access extension APIs in Firefox
 browser.runtime.getBackgroundPage().then((bg) => {
-  console.log('Background page:', bg);
+  console.log("Background page:", bg);
 });
 
 // Monitor network requests
@@ -395,6 +426,7 @@ browser.runtime.getBackgroundPage().then((bg) => {
 ### Network Analysis
 
 **Capture Network Issues**:
+
 ```bash
 # Using browser network tools:
 1. Open F12 -> Network tab
@@ -404,7 +436,7 @@ browser.runtime.getBackgroundPage().then((bg) => {
 
 # Common network issues:
 - API requests failing
-- CORS policy violations  
+- CORS policy violations
 - Timeout errors
 - SSL/TLS certificate issues
 ```
@@ -412,34 +444,39 @@ browser.runtime.getBackgroundPage().then((bg) => {
 ### Extension-Specific Debugging
 
 **Service Worker Issues**:
+
 ```javascript
 // Check service worker state
-navigator.serviceWorker.getRegistrations().then(regs => {
-  regs.forEach(reg => {
-    console.log('SW state:', reg.active?.state);
-    console.log('SW script:', reg.active?.scriptURL);
+navigator.serviceWorker.getRegistrations().then((regs) => {
+  regs.forEach((reg) => {
+    console.log("SW state:", reg.active?.state);
+    console.log("SW script:", reg.active?.scriptURL);
   });
 });
 
 // Monitor service worker lifecycle
 chrome.runtime.onInstalled.addListener((details) => {
-  console.log('Extension installed/updated:', details);
+  console.log("Extension installed/updated:", details);
 });
 ```
 
 **Permission Issues**:
+
 ```javascript
 // Check extension permissions
 chrome.permissions.getAll((permissions) => {
-  console.log('Granted permissions:', permissions);
+  console.log("Granted permissions:", permissions);
 });
 
 // Test permission requests
-chrome.permissions.request({
-  permissions: ['activeTab']
-}, (granted) => {
-  console.log('Permission granted:', granted);
-});
+chrome.permissions.request(
+  {
+    permissions: ["activeTab"],
+  },
+  (granted) => {
+    console.log("Permission granted:", granted);
+  },
+);
 ```
 
 ## Follow-up and Resolution
@@ -447,14 +484,17 @@ chrome.permissions.request({
 ### After Submitting a Bug
 
 **Monitor Your Report**:
+
 - Enable GitHub notifications for the issue
 - Respond promptly to requests for additional information
 - Test proposed fixes when provided
 - Provide feedback on resolution effectiveness
 
 **Update the Report**:
+
 ```markdown
 ## Updates
+
 **2025-08-11**: Added additional browser console logs
 **2025-08-12**: Confirmed bug also occurs in Edge browser
 **2025-08-13**: Tested proposed fix - partially resolves issue
@@ -463,11 +503,13 @@ chrome.permissions.request({
 ### Working with Maintainers
 
 **Respond to Questions**:
+
 - Answer requests for clarification promptly
 - Provide additional details when asked
 - Test reproduction steps if they don't work for maintainers
 
 **Test Fixes**:
+
 ```bash
 # When maintainers provide a fix:
 1. Check out the fix branch
@@ -477,8 +519,10 @@ chrome.permissions.request({
 ```
 
 **Verify Resolution**:
+
 ```markdown
 ## Fix Verification
+
 ✅ Original bug scenario resolved
 ✅ No regression in related functionality  
 ✅ Works in both Chrome and Firefox
@@ -490,6 +534,7 @@ chrome.permissions.request({
 Before submitting, verify your report includes:
 
 **Essential Information**:
+
 - [ ] Clear, descriptive title
 - [ ] Step-by-step reproduction instructions
 - [ ] Expected vs actual behavior
@@ -497,18 +542,21 @@ Before submitting, verify your report includes:
 - [ ] Error messages or console logs
 
 **Supporting Evidence**:
+
 - [ ] Screenshots or videos demonstrating the issue
 - [ ] Relevant code snippets (for technical bugs)
 - [ ] Browser console output
 - [ ] Network request details (if applicable)
 
 **Context and Impact**:
+
 - [ ] Frequency of occurrence
 - [ ] Impact on functionality
 - [ ] Workarounds (if any)
 - [ ] Related issues or discussions
 
 **Reproducibility**:
+
 - [ ] Bug can be reproduced consistently
 - [ ] Tested in clean browser environment
 - [ ] Verified not caused by other extensions
@@ -519,33 +567,37 @@ Before submitting, verify your report includes:
 ### Storage Issues
 
 **Symptoms**:
+
 - Settings not persisting
-- Data loss after browser restart  
+- Data loss after browser restart
 - Sync failures between devices
 - Quota exceeded errors
 
 **Information to Include**:
+
 ```javascript
 // Storage state before/after operation
 chrome.storage.local.getBytesInUse((bytes) => {
-  console.log('Storage usage:', bytes);
+  console.log("Storage usage:", bytes);
 });
 
 // Storage change events
 chrome.storage.onChanged.addListener((changes, areaName) => {
-  console.log('Storage changed:', changes, 'in', areaName);
+  console.log("Storage changed:", changes, "in", areaName);
 });
 ```
 
 ### UI/UX Issues
 
 **Symptoms**:
+
 - Visual glitches or layout problems
 - Unresponsive interface elements
 - Incorrect styling or theming
 - Accessibility problems
 
 **Information to Include**:
+
 - Screenshots in different browsers
 - Screen reader compatibility (if applicable)
 - Mobile/responsive behavior
@@ -554,12 +606,14 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
 ### Cross-Browser Compatibility
 
 **Symptoms**:
+
 - Works in Chrome but not Firefox
 - Different behavior across browsers
 - Browser-specific API issues
 - Extension packaging problems
 
 **Information to Include**:
+
 - Behavior comparison across browsers
 - Browser-specific console messages
 - Different manifest version impacts
@@ -568,12 +622,14 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
 ### Performance Problems
 
 **Symptoms**:
+
 - Slow operations or UI lag
 - High CPU/memory usage
 - Battery drain on mobile
 - Extension timeout errors
 
 **Information to Include**:
+
 ```javascript
 // Performance measurements
 const start = performance.now();
@@ -582,10 +638,10 @@ const duration = performance.now() - start;
 
 // Memory usage
 if (performance.memory) {
-  console.log('Memory usage:', {
+  console.log("Memory usage:", {
     used: performance.memory.usedJSHeapSize,
     total: performance.memory.totalJSHeapSize,
-    limit: performance.memory.jsHeapSizeLimit
+    limit: performance.memory.jsHeapSizeLimit,
   });
 }
 ```
@@ -595,22 +651,26 @@ if (performance.memory) {
 ### Browser Extensions
 
 **Chrome**:
+
 - Bug Magnet: Test data generator
 - Screencastify: Screen recording
 - Full Page Screen Capture: Screenshots
 
 **Firefox**:
+
 - Screenshots: Built-in screenshot tool
 - Firefox Screenshots: Enhanced capture
 
 ### External Tools
 
 **Screen Recording**:
+
 - OBS Studio (free)
 - Loom (web-based)
 - Kap (macOS)
 
 **Log Collection**:
+
 ```bash
 # Chrome logs
 chrome://extensions-internals/
@@ -622,6 +682,7 @@ about:performance
 ```
 
 **Network Analysis**:
+
 - Browser DevTools Network tab
 - Charles Proxy
 - Wireshark
@@ -632,16 +693,16 @@ about:performance
 
 ```javascript
 // After fixing a bug, add a regression test
-describe('Bug #123 - Settings Save Failure', () => {
-  test('should handle undefined settings gracefully', async () => {
+describe("Bug #123 - Settings Save Failure", () => {
+  test("should handle undefined settings gracefully", async () => {
     // This used to throw an error
     const result = await settingsManager.save(undefined);
     expect(result.success).toBe(false);
-    expect(result.error).toBe('Invalid settings');
+    expect(result.error).toBe("Invalid settings");
   });
-  
-  test('should save valid settings successfully', async () => {
-    const settings = { theme: 'dark' };
+
+  test("should save valid settings successfully", async () => {
+    const settings = { theme: "dark" };
     const result = await settingsManager.save(settings);
     expect(result.success).toBe(true);
   });
@@ -651,6 +712,7 @@ describe('Bug #123 - Settings Save Failure', () => {
 ### Code Review Checklist
 
 **Common Bug Patterns**:
+
 - Undefined/null checking
 - Async/await error handling
 - Browser API compatibility
@@ -666,6 +728,6 @@ describe('Bug #123 - Settings Save Failure', () => {
 
 ## Revision History
 
-| Date | Author | Changes |
-|------|--------|---------|
+| Date       | Author         | Changes                     |
+| ---------- | -------------- | --------------------------- |
 | 2025-08-11 | Developer Team | Initial bug reporting guide |

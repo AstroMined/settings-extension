@@ -26,6 +26,7 @@ This guide teaches you how to synchronize only specific settings rather than you
 Selective sync allows you to choose which specific settings synchronize between devices, browsers, or team members while keeping others local or private.
 
 **Common Use Cases:**
+
 - Sync team standards but keep personal preferences local
 - Share feature configurations but not API keys
 - Sync appearance settings but not security credentials
@@ -34,16 +35,19 @@ Selective sync allows you to choose which specific settings synchronize between 
 ### Benefits of Selective Sync
 
 **Privacy Protection**
+
 - Keep sensitive settings (API keys, tokens) local
 - Share only appropriate configuration data
 - Maintain personal customizations
 
 **Performance Optimization**
+
 - Sync only necessary settings
 - Reduce bandwidth usage
 - Faster synchronization times
 
 **Flexibility**
+
 - Different sync rules for different contexts
 - Granular control over shared vs private data
 - Customized sync profiles for different needs
@@ -149,23 +153,23 @@ const settingCategories = {
   team_shared: {
     description: "Settings shared across team",
     settings: ["feature_enabled", "refresh_interval"],
-    sync_priority: "high"
+    sync_priority: "high",
   },
   appearance: {
-    description: "Visual customization settings", 
+    description: "Visual customization settings",
     settings: ["custom_css", "theme_preferences"],
-    sync_priority: "medium"
+    sync_priority: "medium",
   },
   security: {
     description: "Security and authentication",
     settings: ["api_key", "authentication_token"],
-    sync_priority: "never"
+    sync_priority: "never",
   },
   personal: {
     description: "Individual user preferences",
     settings: ["debug_mode", "personal_shortcuts"],
-    sync_priority: "never"
-  }
+    sync_priority: "never",
+  },
 };
 ```
 
@@ -178,30 +182,33 @@ function exportByCategory(categories) {
     timestamp: new Date().toISOString(),
     export_type: "category_selective",
     categories: categories,
-    settings: {}
+    settings: {},
   };
-  
+
   // Get all current settings
-  getCurrentSettings().then(allSettings => {
-    categories.forEach(categoryName => {
+  getCurrentSettings().then((allSettings) => {
+    categories.forEach((categoryName) => {
       const category = settingCategories[categoryName];
       if (category) {
-        category.settings.forEach(settingKey => {
+        category.settings.forEach((settingKey) => {
           if (allSettings[settingKey]) {
             categoryExport.settings[settingKey] = allSettings[settingKey];
           }
         });
       }
     });
-    
+
     // Download category-based export
-    downloadJSON(categoryExport, `settings-${categories.join('-')}-export.json`);
+    downloadJSON(
+      categoryExport,
+      `settings-${categories.join("-")}-export.json`,
+    );
   });
 }
 
 // Usage examples:
-exportByCategory(['team_shared', 'appearance']); // Sync team and appearance settings
-exportByCategory(['team_shared']); // Only team settings
+exportByCategory(["team_shared", "appearance"]); // Sync team and appearance settings
+exportByCategory(["team_shared"]); // Only team settings
 ```
 
 ## Sync Categories and Groups
@@ -223,7 +230,7 @@ exportByCategory(['team_shared']); // Only team settings
       "sync_reason": "Ensures all team members have same features enabled"
     },
     "refresh_interval": {
-      "type": "number", 
+      "type": "number",
       "value": 300,
       "sync_reason": "Standard refresh rate for performance consistency"
     }
@@ -270,7 +277,7 @@ exportByCategory(['team_shared']); // Only team settings
   "settings": {
     "api_endpoint": {
       "type": "text",
-      "value": "https://dev-api.example.com", 
+      "value": "https://dev-api.example.com",
       "sync_reason": "Development API endpoint"
     },
     "debug_logging": {
@@ -287,9 +294,10 @@ exportByCategory(['team_shared']); // Only team settings
 #### Define Your Own Categories
 
 1. **Identify Common Setting Groups**
+
    ```
    Category Planning Worksheet:
-   
+
    Category Name: [descriptive name]
    Purpose: [why these settings belong together]
    Settings Included: [list of setting keys]
@@ -299,6 +307,7 @@ exportByCategory(['team_shared']); // Only team settings
    ```
 
 2. **Create Category Export Template**
+
    ```json
    {
      "category_template": "custom_category_name",
@@ -312,6 +321,7 @@ exportByCategory(['team_shared']); // Only team settings
    ```
 
 3. **Implement Category Logic**
+
    ```javascript
    function createCustomCategory(categoryName, settingsList, description) {
      return {
@@ -319,17 +329,17 @@ exportByCategory(['team_shared']); // Only team settings
        description: description,
        settings: settingsList,
        created: new Date().toISOString(),
-       export: function() {
+       export: function () {
          return exportByCategory([categoryName]);
-       }
+       },
      };
    }
-   
+
    // Usage
    const myCategory = createCustomCategory(
-     'performance_settings',
-     ['refresh_interval', 'timeout_values', 'cache_settings'],
-     'Settings that affect extension performance'
+     "performance_settings",
+     ["refresh_interval", "timeout_values", "cache_settings"],
+     "Settings that affect extension performance",
    );
    ```
 
@@ -345,78 +355,82 @@ Create rules that determine what to sync based on context:
 const syncRules = {
   by_environment: {
     development: {
-      sync: ['debug_settings', 'dev_api_endpoints'],
-      exclude: ['production_api_keys', 'performance_optimizations']
+      sync: ["debug_settings", "dev_api_endpoints"],
+      exclude: ["production_api_keys", "performance_optimizations"],
     },
     production: {
-      sync: ['performance_settings', 'production_config'],
-      exclude: ['debug_settings', 'experimental_features']
-    }
+      sync: ["performance_settings", "production_config"],
+      exclude: ["debug_settings", "experimental_features"],
+    },
   },
   by_role: {
     developer: {
-      sync: ['development_tools', 'debugging_options'],
-      exclude: ['management_dashboards', 'reporting_settings']
+      sync: ["development_tools", "debugging_options"],
+      exclude: ["management_dashboards", "reporting_settings"],
     },
     manager: {
-      sync: ['reporting_settings', 'team_configurations'],
-      exclude: ['debugging_options', 'developer_tools']
-    }
+      sync: ["reporting_settings", "team_configurations"],
+      exclude: ["debugging_options", "developer_tools"],
+    },
   },
   by_device: {
     laptop: {
-      sync: ['portable_settings', 'offline_configurations'],
-      exclude: ['desktop_optimizations', 'large_screen_layouts']
+      sync: ["portable_settings", "offline_configurations"],
+      exclude: ["desktop_optimizations", "large_screen_layouts"],
     },
     desktop: {
-      sync: ['desktop_optimizations', 'large_screen_layouts'],
-      exclude: ['portable_settings', 'battery_optimizations']
-    }
-  }
+      sync: ["desktop_optimizations", "large_screen_layouts"],
+      exclude: ["portable_settings", "battery_optimizations"],
+    },
+  },
 };
 ```
 
 #### Implementing Conditional Sync
 
 1. **Detect Current Context**
+
    ```javascript
    function getCurrentContext() {
      return {
        environment: detectEnvironment(),
        role: getUserRole(),
        device: detectDevice(),
-       project: getCurrentProject()
+       project: getCurrentProject(),
      };
    }
    ```
 
 2. **Apply Sync Rules**
+
    ```javascript
    function getSelectiveSyncSettings(context) {
      const rules = syncRules;
      let settingsToSync = [];
      let settingsToExclude = [];
-     
+
      // Apply environment rules
      if (rules.by_environment[context.environment]) {
        const envRules = rules.by_environment[context.environment];
        settingsToSync.push(...envRules.sync);
        settingsToExclude.push(...envRules.exclude);
      }
-     
+
      // Apply role rules
      if (rules.by_role[context.role]) {
        const roleRules = rules.by_role[context.role];
        settingsToSync.push(...roleRules.sync);
        settingsToExclude.push(...roleRules.exclude);
      }
-     
+
      // Remove duplicates and resolve conflicts
      settingsToSync = [...new Set(settingsToSync)];
      settingsToExclude = [...new Set(settingsToExclude)];
-     
+
      // Exclusions take precedence
-     return settingsToSync.filter(setting => !settingsToExclude.includes(setting));
+     return settingsToSync.filter(
+       (setting) => !settingsToExclude.includes(setting),
+     );
    }
    ```
 
@@ -429,17 +443,17 @@ Sync different settings at different intervals:
 ```javascript
 const syncSchedule = {
   daily: {
-    settings: ['feature_flags', 'temporary_configs'],
-    description: "Settings that change frequently"
+    settings: ["feature_flags", "temporary_configs"],
+    description: "Settings that change frequently",
   },
   weekly: {
-    settings: ['team_standards', 'project_configs'],
-    description: "Stable team and project settings"
+    settings: ["team_standards", "project_configs"],
+    description: "Stable team and project settings",
   },
   monthly: {
-    settings: ['global_policies', 'security_configs'],
-    description: "Infrequently changing organizational settings"
-  }
+    settings: ["global_policies", "security_configs"],
+    description: "Infrequently changing organizational settings",
+  },
 };
 ```
 
@@ -450,17 +464,17 @@ Sync settings based on specific events:
 ```javascript
 const eventSyncTriggers = {
   project_switch: {
-    sync: ['project_configs', 'environment_settings'],
-    reason: "New project requires different configuration"
+    sync: ["project_configs", "environment_settings"],
+    reason: "New project requires different configuration",
   },
   team_join: {
-    sync: ['team_standards', 'collaboration_tools'],
-    reason: "New team member needs standard configuration"
+    sync: ["team_standards", "collaboration_tools"],
+    reason: "New team member needs standard configuration",
   },
   environment_change: {
-    sync: ['environment_configs', 'api_endpoints'],
-    reason: "Environment switch requires different settings"
-  }
+    sync: ["environment_configs", "api_endpoints"],
+    reason: "Environment switch requires different settings",
+  },
 };
 ```
 
@@ -471,44 +485,49 @@ const eventSyncTriggers = {
 When selective sync conflicts with local settings:
 
 1. **Merge Strategy Options**
+
    ```javascript
    const mergeStrategies = {
      overwrite: {
        description: "Synced settings always override local",
-       implementation: (local, synced) => ({ ...local, ...synced })
+       implementation: (local, synced) => ({ ...local, ...synced }),
      },
      preserve_local: {
        description: "Local settings take precedence",
-       implementation: (local, synced) => ({ ...synced, ...local })
+       implementation: (local, synced) => ({ ...synced, ...local }),
      },
      smart_merge: {
        description: "Merge based on setting priority and timestamp",
-       implementation: (local, synced) => smartMerge(local, synced)
-     }
+       implementation: (local, synced) => smartMerge(local, synced),
+     },
    };
    ```
 
 2. **Smart Merge Logic**
+
    ```javascript
    function smartMerge(localSettings, syncedSettings) {
      const merged = { ...localSettings };
-     
+
      for (const [key, syncedSetting] of Object.entries(syncedSettings)) {
        const localSetting = localSettings[key];
-       
+
        if (!localSetting) {
          // New setting from sync
          merged[key] = syncedSetting;
-       } else if (syncedSetting.priority === 'high') {
+       } else if (syncedSetting.priority === "high") {
          // High priority synced settings override local
          merged[key] = syncedSetting;
-       } else if (new Date(syncedSetting.lastModified) > new Date(localSetting.lastModified)) {
+       } else if (
+         new Date(syncedSetting.lastModified) >
+         new Date(localSetting.lastModified)
+       ) {
          // Newer synced settings override older local
          merged[key] = syncedSetting;
        }
        // Otherwise keep local setting
      }
-     
+
      return merged;
    }
    ```
@@ -520,69 +539,75 @@ When selective sync conflicts with local settings:
 #### Defining Team Sync Standards
 
 1. **Create Team Sync Policy Document**
+
    ```markdown
    # Team Selective Sync Policy
-   
+
    ## Settings Categories
-   
+
    ### MUST SYNC (Required for all team members)
+
    - Feature flags for current sprint
    - API endpoints for active projects
    - Team coding standards configurations
    - Shared development environment settings
-   
+
    ### SHOULD SYNC (Recommended for consistency)
+
    - UI theme and appearance settings
    - Common keyboard shortcuts
    - Shared custom CSS for team projects
    - Performance optimization settings
-   
+
    ### MUST NOT SYNC (Keep local/private)
+
    - Personal API keys and tokens
    - Individual debugging preferences
    - Personal productivity shortcuts
    - Local development paths
-   
+
    ### CAN SYNC (Optional/situational)
+
    - Experimental feature settings
    - Personal workflow customizations
    - Device-specific optimizations
    ```
 
 2. **Implement Policy Enforcement**
+
    ```javascript
    const teamSyncPolicy = {
-     required: ['team_feature_flags', 'project_api_endpoints'],
-     recommended: ['shared_css', 'team_shortcuts'],
-     forbidden: ['personal_api_keys', 'debug_preferences'],
-     optional: ['experimental_features', 'personal_workflows']
+     required: ["team_feature_flags", "project_api_endpoints"],
+     recommended: ["shared_css", "team_shortcuts"],
+     forbidden: ["personal_api_keys", "debug_preferences"],
+     optional: ["experimental_features", "personal_workflows"],
    };
-   
+
    function validateSyncCompliance(settingsToSync) {
      const issues = [];
-     
+
      // Check required settings are included
-     teamSyncPolicy.required.forEach(requiredSetting => {
+     teamSyncPolicy.required.forEach((requiredSetting) => {
        if (!settingsToSync.includes(requiredSetting)) {
          issues.push({
-           type: 'missing_required',
+           type: "missing_required",
            setting: requiredSetting,
-           severity: 'high'
+           severity: "high",
          });
        }
      });
-     
+
      // Check forbidden settings are not included
-     teamSyncPolicy.forbidden.forEach(forbiddenSetting => {
+     teamSyncPolicy.forbidden.forEach((forbiddenSetting) => {
        if (settingsToSync.includes(forbiddenSetting)) {
          issues.push({
-           type: 'forbidden_included',
+           type: "forbidden_included",
            setting: forbiddenSetting,
-           severity: 'high'
+           severity: "high",
          });
        }
      });
-     
+
      return issues;
    }
    ```
@@ -617,30 +642,32 @@ class TeamSelectiveSync {
     this.memberRole = teamConfig.memberRole;
     this.syncPolicies = teamConfig.policies;
   }
-  
+
   async pullTeamUpdates() {
     // Get latest team-approved selective sync
-    const teamSettings = await fetch(`${this.syncEndpoint}/team/${this.teamId}/selective-sync`);
+    const teamSettings = await fetch(
+      `${this.syncEndpoint}/team/${this.teamId}/selective-sync`,
+    );
     const selectiveSettings = await teamSettings.json();
-    
+
     // Validate against team policies
     const validationIssues = this.validateTeamSync(selectiveSettings);
     if (validationIssues.length > 0) {
       throw new Error(`Team sync validation failed: ${validationIssues}`);
     }
-    
+
     // Apply team selective sync
     await this.applySelectiveSync(selectiveSettings);
   }
-  
+
   async pushMemberUpdates(settings) {
     // Filter settings based on what member is allowed to share
     const sharableSettings = this.filterShareableSettings(settings);
-    
+
     // Push to team sync endpoint
     await fetch(`${this.syncEndpoint}/team/${this.teamId}/member-updates`, {
-      method: 'POST',
-      body: JSON.stringify(sharableSettings)
+      method: "POST",
+      body: JSON.stringify(sharableSettings),
     });
   }
 }
@@ -651,18 +678,21 @@ class TeamSelectiveSync {
 ### Common Selective Sync Issues
 
 **Some Settings Not Syncing**
+
 1. Check selective export includes desired settings
 2. Verify import process completed successfully
 3. Confirm setting names match exactly
 4. Check for typos in setting keys
 
 **Wrong Settings Being Synced**
+
 1. Review selective sync configuration
 2. Check category definitions
 3. Verify export file contents
 4. Update sync rules if needed
 
 **Sync Conflicts Between Team Members**
+
 1. Establish single source of truth
 2. Use merge strategies consistently
 3. Communicate changes to affected team
@@ -671,18 +701,21 @@ class TeamSelectiveSync {
 ### Advanced Troubleshooting
 
 **Selective Sync Performance Issues**
+
 - Optimize selective sync file sizes
 - Reduce sync frequency for large setting groups
 - Use incremental sync where possible
 - Monitor sync operation performance
 
 **Partial Sync Failures**
+
 - Implement retry logic for failed settings
 - Log detailed error information
 - Create fallback sync mechanisms
 - Maintain sync operation audit trail
 
 **Team Sync Coordination Problems**
+
 - Establish clear sync schedules
 - Use notification systems for sync updates
 - Implement sync status tracking
@@ -697,31 +730,37 @@ function validateSelectiveSync(syncConfig) {
   const validationResults = {
     valid: true,
     errors: [],
-    warnings: []
+    warnings: [],
   };
-  
+
   // Check required fields
   if (!syncConfig.settings || Object.keys(syncConfig.settings).length === 0) {
-    validationResults.errors.push('No settings specified for sync');
+    validationResults.errors.push("No settings specified for sync");
     validationResults.valid = false;
   }
-  
+
   // Validate setting structure
   for (const [key, setting] of Object.entries(syncConfig.settings)) {
-    if (!setting.type || !setting.hasOwnProperty('value')) {
+    if (!setting.type || !setting.hasOwnProperty("value")) {
       validationResults.errors.push(`Invalid setting structure: ${key}`);
       validationResults.valid = false;
     }
   }
-  
+
   // Check for sensitive data
-  const sensitiveSettings = ['api_key', 'password', 'token', 'secret'];
+  const sensitiveSettings = ["api_key", "password", "token", "secret"];
   for (const key of Object.keys(syncConfig.settings)) {
-    if (sensitiveSettings.some(sensitive => key.toLowerCase().includes(sensitive))) {
-      validationResults.warnings.push(`Potentially sensitive setting in sync: ${key}`);
+    if (
+      sensitiveSettings.some((sensitive) =>
+        key.toLowerCase().includes(sensitive),
+      )
+    ) {
+      validationResults.warnings.push(
+        `Potentially sensitive setting in sync: ${key}`,
+      );
     }
   }
-  
+
   return validationResults;
 }
 ```
@@ -794,18 +833,21 @@ function validateSelectiveSync(syncConfig) {
 ## Quick Reference
 
 ### Selective Sync Methods
+
 - **Manual**: Edit export files to include only desired settings
 - **Category-based**: Group settings by type and sync categories
 - **Rule-based**: Use conditional logic to determine what syncs
 - **Template-based**: Create reusable selective sync templates
 
 ### Common Use Cases
+
 - **Team standards**: Sync company-wide consistent settings
 - **Project configs**: Share project-specific configurations
 - **Environment settings**: Sync development/staging/production settings
 - **Feature flags**: Distribute feature toggle updates
 
 ### Security Guidelines
+
 - Never sync API keys, passwords, or tokens
 - Review sync contents before distribution
 - Use least-privilege principle for shared settings
@@ -820,6 +862,6 @@ function validateSelectiveSync(syncConfig) {
 
 ## Revision History
 
-| Date | Author | Changes |
-|------|--------|---------|
+| Date       | Author             | Changes                      |
+| ---------- | ------------------ | ---------------------------- |
 | 2025-08-11 | Documentation Team | Initial selective sync guide |

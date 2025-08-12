@@ -18,7 +18,7 @@ Practical guide for developing browser extensions with focus on Manifest V3, cro
 Extension Architecture
 ├── Background Script (Service Worker)
 │   ├── Event handling
-│   ├── API coordination  
+│   ├── API coordination
 │   ├── Storage management
 │   └── Cross-component communication
 ├── Content Scripts
@@ -54,17 +54,19 @@ Options    Storage             Web Page
   "name": "Settings Extension",
   "version": "1.0.0",
   "description": "Comprehensive settings management",
-  
+
   "background": {
     "service_worker": "background.js"
   },
-  
-  "content_scripts": [{
-    "matches": ["<all_urls>"],
-    "js": ["content-script.js"],
-    "run_at": "document_idle"
-  }],
-  
+
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content-script.js"],
+      "run_at": "document_idle"
+    }
+  ],
+
   "action": {
     "default_popup": "popup/popup.html",
     "default_title": "Settings Extension",
@@ -75,18 +77,12 @@ Options    Storage             Web Page
       "128": "icons/icon-128.png"
     }
   },
-  
+
   "options_page": "options/options.html",
-  
-  "permissions": [
-    "storage",
-    "activeTab",
-    "contextMenus"
-  ],
-  
-  "host_permissions": [
-    "https://*/*"
-  ]
+
+  "permissions": ["storage", "activeTab", "contextMenus"],
+
+  "host_permissions": ["https://*/*"]
 }
 ```
 
@@ -103,24 +99,24 @@ class BackgroundService {
     // Service Worker lifecycle
     chrome.runtime.onInstalled.addListener(this.handleInstalled.bind(this));
     chrome.runtime.onStartup.addListener(this.handleStartup.bind(this));
-    
+
     // Message handling
     chrome.runtime.onMessage.addListener(this.handleMessage.bind(this));
-    
+
     // Context menu setup
     this.setupContextMenus();
-    
+
     // Periodic tasks
-    chrome.alarms.create('syncCheck', { periodInMinutes: 30 });
+    chrome.alarms.create("syncCheck", { periodInMinutes: 30 });
     chrome.alarms.onAlarm.addListener(this.handleAlarm.bind(this));
   }
 
   handleInstalled(details) {
-    if (details.reason === 'install') {
+    if (details.reason === "install") {
       // First-time setup
       this.initializeSettings();
-      chrome.tabs.create({ url: 'options/options.html' });
-    } else if (details.reason === 'update') {
+      chrome.tabs.create({ url: "options/options.html" });
+    } else if (details.reason === "update") {
       // Handle updates
       this.migrateSettings(details.previousVersion);
     }
@@ -128,32 +124,32 @@ class BackgroundService {
 
   handleMessage(message, sender, sendResponse) {
     const { type, data } = message;
-    
+
     switch (type) {
-      case 'GET_SETTINGS':
+      case "GET_SETTINGS":
         this.getSettings().then(sendResponse);
         return true; // Keep channel open for async response
-        
-      case 'SAVE_SETTINGS':
+
+      case "SAVE_SETTINGS":
         this.saveSettings(data).then(sendResponse);
         return true;
-        
-      case 'SYNC_REQUEST':
+
+      case "SYNC_REQUEST":
         this.syncSettings().then(sendResponse);
         return true;
-        
+
       default:
-        console.warn('Unknown message type:', type);
-        sendResponse({ error: 'Unknown message type' });
+        console.warn("Unknown message type:", type);
+        sendResponse({ error: "Unknown message type" });
     }
   }
 
   async getSettings() {
     try {
-      const result = await chrome.storage.local.get(['settings']);
+      const result = await chrome.storage.local.get(["settings"]);
       return { success: true, settings: result.settings || {} };
     } catch (error) {
-      console.error('Failed to get settings:', error);
+      console.error("Failed to get settings:", error);
       return { success: false, error: error.message };
     }
   }
@@ -161,16 +157,16 @@ class BackgroundService {
   async saveSettings(settings) {
     try {
       await chrome.storage.local.set({ settings });
-      
+
       // Notify other components
       chrome.runtime.sendMessage({
-        type: 'SETTINGS_UPDATED',
-        settings
+        type: "SETTINGS_UPDATED",
+        settings,
       });
-      
+
       return { success: true };
     } catch (error) {
-      console.error('Failed to save settings:', error);
+      console.error("Failed to save settings:", error);
       return { success: false, error: error.message };
     }
   }
@@ -192,8 +188,8 @@ class ContentScriptManager {
 
   async init() {
     // Wait for page to be ready
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', () => this.setup());
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", () => this.setup());
     } else {
       this.setup();
     }
@@ -203,24 +199,23 @@ class ContentScriptManager {
     try {
       // Get settings from background
       const response = await chrome.runtime.sendMessage({
-        type: 'GET_SETTINGS'
+        type: "GET_SETTINGS",
       });
-      
+
       if (response.success) {
         this.settings = response.settings;
         this.applySettings();
       }
-      
+
       // Listen for settings updates
       chrome.runtime.onMessage.addListener(this.handleMessage.bind(this));
-      
     } catch (error) {
-      console.error('Content script setup failed:', error);
+      console.error("Content script setup failed:", error);
     }
   }
 
   handleMessage(message, sender, sendResponse) {
-    if (message.type === 'SETTINGS_UPDATED') {
+    if (message.type === "SETTINGS_UPDATED") {
       this.settings = message.settings;
       this.applySettings();
     }
@@ -246,14 +241,14 @@ class ContentScriptManager {
   }
 
   applyTheme(theme) {
-    document.documentElement.setAttribute('data-extension-theme', theme);
+    document.documentElement.setAttribute("data-extension-theme", theme);
   }
 
   setupAutoFill() {
-    const forms = document.querySelectorAll('form');
-    forms.forEach(form => {
-      const inputs = form.querySelectorAll('input, select, textarea');
-      inputs.forEach(input => {
+    const forms = document.querySelectorAll("form");
+    forms.forEach((form) => {
+      const inputs = form.querySelectorAll("input, select, textarea");
+      inputs.forEach((input) => {
         const fieldName = input.name || input.id;
         if (fieldName && this.settings.formData[fieldName]) {
           input.value = this.settings.formData[fieldName];
@@ -282,21 +277,25 @@ Our custom browser compatibility layer (`lib/browser-compat.js`) provides a unif
 // Replaces WebExtension Polyfill to avoid minified code issues
 
 // Detect browser environment
-const isChrome = typeof chrome !== 'undefined' && chrome.runtime;
-const isFirefox = typeof browser !== 'undefined' && browser.runtime;
-const isEdge = isChrome && navigator.userAgent.includes('Edg');
+const isChrome = typeof chrome !== "undefined" && chrome.runtime;
+const isFirefox = typeof browser !== "undefined" && browser.runtime;
+const isEdge = isChrome && navigator.userAgent.includes("Edg");
 
 // Promise wrapper for Chrome callback APIs
 function promisify(fn, context) {
-  if (!fn || typeof fn !== 'function') {
+  if (!fn || typeof fn !== "function") {
     return () => Promise.resolve();
   }
-  
-  return function(...args) {
+
+  return function (...args) {
     return new Promise((resolve, reject) => {
       try {
         fn.call(context, ...args, (result) => {
-          if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.lastError) {
+          if (
+            typeof chrome !== "undefined" &&
+            chrome.runtime &&
+            chrome.runtime.lastError
+          ) {
             reject(new Error(chrome.runtime.lastError.message));
           } else {
             resolve(result);
@@ -313,27 +312,30 @@ function promisify(fn, context) {
 const browserAPI = {
   storage: {
     local: {
-      get: isChrome ? promisify(chrome.storage.local.get, chrome.storage.local) 
-                    : browser.storage.local.get.bind(browser.storage.local),
-      set: isChrome ? promisify(chrome.storage.local.set, chrome.storage.local) 
-                    : browser.storage.local.set.bind(browser.storage.local),
+      get: isChrome
+        ? promisify(chrome.storage.local.get, chrome.storage.local)
+        : browser.storage.local.get.bind(browser.storage.local),
+      set: isChrome
+        ? promisify(chrome.storage.local.set, chrome.storage.local)
+        : browser.storage.local.set.bind(browser.storage.local),
       // ... other methods
-    }
+    },
   },
-  
+
   runtime: {
-    sendMessage: isChrome ? promisify(chrome.runtime.sendMessage, chrome.runtime) 
-                         : browser.runtime.sendMessage.bind(browser.runtime),
+    sendMessage: isChrome
+      ? promisify(chrome.runtime.sendMessage, chrome.runtime)
+      : browser.runtime.sendMessage.bind(browser.runtime),
     // ... other methods
   },
-  
+
   // Browser environment detection
   environment: {
     isChrome,
     isFirefox,
-    isEdge
+    isEdge,
   },
-  
+
   // Utility functions
   utils: {
     safeSendMessage: async (message, tabId = null) => {
@@ -344,15 +346,15 @@ const browserAPI = {
           return await browserAPI.runtime.sendMessage(message);
         }
       } catch (error) {
-        console.warn('Message sending failed:', error);
+        console.warn("Message sending failed:", error);
         return { error: error.message };
       }
     },
-    
-    checkStorageQuota: async (storageArea = 'local') => {
+
+    checkStorageQuota: async (storageArea = "local") => {
       // Implementation for storage quota monitoring
-    }
-  }
+    },
+  },
 };
 ```
 
@@ -369,13 +371,13 @@ class BrowserCompat {
   static async requestPermission(permission) {
     if (this.isManifestV3()) {
       // Manifest V3 approach
-      return await chrome.permissions.request({ 
-        permissions: [permission] 
+      return await chrome.permissions.request({
+        permissions: [permission],
       });
     } else {
       // Manifest V2 fallback
-      return await chrome.permissions.request({ 
-        permissions: [permission] 
+      return await chrome.permissions.request({
+        permissions: [permission],
       });
     }
   }
@@ -392,11 +394,11 @@ class BrowserCompat {
         const quota = chrome.storage.local.QUOTA_BYTES || 5242880; // 5MB
         return { used, quota, available: quota - used };
       }
-      
+
       // Firefox fallback (no quota API)
       return { used: 0, quota: Infinity, available: Infinity };
     } catch (error) {
-      console.warn('Storage quota check failed:', error);
+      console.warn("Storage quota check failed:", error);
       return null;
     }
   }
@@ -424,7 +426,7 @@ class StorageManager {
     try {
       const result = await chrome.storage.local.get([key]);
       const value = result[key] !== undefined ? result[key] : defaultValue;
-      
+
       // Cache the result
       this.cache.set(key, value);
       return value;
@@ -437,23 +439,23 @@ class StorageManager {
   async set(key, value) {
     try {
       await chrome.storage.local.set({ [key]: value });
-      
+
       // Update cache
       this.cache.set(key, value);
-      
+
       // Notify listeners
       this.notifyListeners(key, value);
-      
+
       return true;
     } catch (error) {
       console.error(`Storage set failed for key ${key}:`, error);
-      
+
       // Handle quota exceeded
-      if (error.message.includes('QUOTA_EXCEEDED')) {
+      if (error.message.includes("QUOTA_EXCEEDED")) {
         await this.cleanupOldData();
-        throw new Error('Storage quota exceeded. Please free up space.');
+        throw new Error("Storage quota exceeded. Please free up space.");
       }
-      
+
       return false;
     }
   }
@@ -476,11 +478,11 @@ class StorageManager {
   }
 
   notifyListeners(key, value) {
-    this.listeners.forEach(callback => {
+    this.listeners.forEach((callback) => {
       try {
         callback(key, value);
       } catch (error) {
-        console.error('Storage listener error:', error);
+        console.error("Storage listener error:", error);
       }
     });
   }
@@ -489,12 +491,12 @@ class StorageManager {
     // Remove old cached data or compress existing data
     const allData = await chrome.storage.local.get();
     const keys = Object.keys(allData);
-    
+
     // Remove items older than 30 days
     for (const key of keys) {
-      if (key.startsWith('cache_')) {
+      if (key.startsWith("cache_")) {
         const item = allData[key];
-        if (item.timestamp < Date.now() - (30 * 24 * 60 * 60 * 1000)) {
+        if (item.timestamp < Date.now() - 30 * 24 * 60 * 60 * 1000) {
           await this.remove(key);
         }
       }
@@ -512,19 +514,19 @@ export default new StorageManager();
 class SettingsValidator {
   constructor() {
     this.schema = {
-      theme: { type: 'string', enum: ['light', 'dark', 'auto'] },
-      notifications: { type: 'boolean' },
-      autoSave: { type: 'boolean' },
-      syncInterval: { type: 'number', min: 5, max: 3600 },
-      customCSS: { type: 'string', maxLength: 10000 },
-      formData: { type: 'object' },
-      profiles: { type: 'array' }
+      theme: { type: "string", enum: ["light", "dark", "auto"] },
+      notifications: { type: "boolean" },
+      autoSave: { type: "boolean" },
+      syncInterval: { type: "number", min: 5, max: 3600 },
+      customCSS: { type: "string", maxLength: 10000 },
+      formData: { type: "object" },
+      profiles: { type: "array" },
     };
   }
 
   validate(settings) {
     const errors = [];
-    
+
     for (const [key, value] of Object.entries(settings)) {
       const rule = this.schema[key];
       if (!rule) {
@@ -540,31 +542,31 @@ class SettingsValidator {
 
     return {
       valid: errors.length === 0,
-      errors
+      errors,
     };
   }
 
   validateValue(key, value, rule) {
     // Type checking
-    if (rule.type === 'string' && typeof value !== 'string') {
+    if (rule.type === "string" && typeof value !== "string") {
       return `${key} must be a string`;
     }
-    
-    if (rule.type === 'boolean' && typeof value !== 'boolean') {
+
+    if (rule.type === "boolean" && typeof value !== "boolean") {
       return `${key} must be a boolean`;
     }
-    
-    if (rule.type === 'number' && typeof value !== 'number') {
+
+    if (rule.type === "number" && typeof value !== "number") {
       return `${key} must be a number`;
     }
 
     // Enum validation
     if (rule.enum && !rule.enum.includes(value)) {
-      return `${key} must be one of: ${rule.enum.join(', ')}`;
+      return `${key} must be one of: ${rule.enum.join(", ")}`;
     }
 
     // Range validation
-    if (rule.type === 'number') {
+    if (rule.type === "number") {
       if (rule.min !== undefined && value < rule.min) {
         return `${key} must be at least ${rule.min}`;
       }
@@ -574,7 +576,11 @@ class SettingsValidator {
     }
 
     // String length validation
-    if (rule.type === 'string' && rule.maxLength && value.length > rule.maxLength) {
+    if (
+      rule.type === "string" &&
+      rule.maxLength &&
+      value.length > rule.maxLength
+    ) {
       return `${key} must be no longer than ${rule.maxLength} characters`;
     }
 
@@ -583,7 +589,7 @@ class SettingsValidator {
 
   sanitize(settings) {
     const sanitized = {};
-    
+
     for (const [key, value] of Object.entries(settings)) {
       if (this.schema[key]) {
         sanitized[key] = this.sanitizeValue(value, this.schema[key]);
@@ -594,13 +600,14 @@ class SettingsValidator {
   }
 
   sanitizeValue(value, rule) {
-    if (rule.type === 'string') {
+    if (rule.type === "string") {
       // Sanitize HTML and scripts
-      return value.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
-                  .replace(/<[^>]*>?/gm, '');
+      return value
+        .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "")
+        .replace(/<[^>]*>?/gm, "");
     }
-    
-    if (rule.type === 'number') {
+
+    if (rule.type === "number") {
       const num = Number(value);
       if (rule.min !== undefined) return Math.max(num, rule.min);
       if (rule.max !== undefined) return Math.min(num, rule.max);
@@ -632,16 +639,16 @@ class PopupManager {
       this.renderUI();
       this.setupEventListeners();
     } catch (error) {
-      console.error('Popup initialization failed:', error);
-      this.showError('Failed to load extension');
+      console.error("Popup initialization failed:", error);
+      this.showError("Failed to load extension");
     }
   }
 
   async loadSettings() {
     const response = await chrome.runtime.sendMessage({
-      type: 'GET_SETTINGS'
+      type: "GET_SETTINGS",
     });
-    
+
     if (response.success) {
       this.settings = response.settings;
     } else {
@@ -650,8 +657,8 @@ class PopupManager {
   }
 
   renderUI() {
-    const container = document.getElementById('popup-container');
-    
+    const container = document.getElementById("popup-container");
+
     container.innerHTML = `
       <div class="popup-header">
         <h2>Settings Extension</h2>
@@ -673,7 +680,7 @@ class PopupManager {
       <div class="setting-item">
         <label>
           <input type="checkbox" id="notifications" 
-                 ${this.settings.notifications ? 'checked' : ''}>
+                 ${this.settings.notifications ? "checked" : ""}>
           Enable Notifications
         </label>
       </div>
@@ -681,16 +688,16 @@ class PopupManager {
       <div class="setting-item">
         <label>Theme:</label>
         <select id="theme">
-          <option value="light" ${this.settings.theme === 'light' ? 'selected' : ''}>Light</option>
-          <option value="dark" ${this.settings.theme === 'dark' ? 'selected' : ''}>Dark</option>
-          <option value="auto" ${this.settings.theme === 'auto' ? 'selected' : ''}>Auto</option>
+          <option value="light" ${this.settings.theme === "light" ? "selected" : ""}>Light</option>
+          <option value="dark" ${this.settings.theme === "dark" ? "selected" : ""}>Dark</option>
+          <option value="auto" ${this.settings.theme === "auto" ? "selected" : ""}>Auto</option>
         </select>
       </div>
       
       <div class="setting-item">
         <label>
           <input type="checkbox" id="autoSave" 
-                 ${this.settings.autoSave ? 'checked' : ''}>
+                 ${this.settings.autoSave ? "checked" : ""}>
           Auto-save Settings
         </label>
       </div>
@@ -699,40 +706,41 @@ class PopupManager {
 
   setupEventListeners() {
     // Options button
-    document.getElementById('options-btn').addEventListener('click', () => {
-      chrome.tabs.create({ url: 'options/options.html' });
+    document.getElementById("options-btn").addEventListener("click", () => {
+      chrome.tabs.create({ url: "options/options.html" });
       window.close();
     });
 
     // Sync button
-    document.getElementById('sync-btn').addEventListener('click', 
-      this.handleSync.bind(this));
+    document
+      .getElementById("sync-btn")
+      .addEventListener("click", this.handleSync.bind(this));
 
     // Quick settings
     this.setupQuickSettingListeners();
   }
 
   setupQuickSettingListeners() {
-    const inputs = document.querySelectorAll('input, select');
-    
-    inputs.forEach(input => {
-      input.addEventListener('change', async (e) => {
+    const inputs = document.querySelectorAll("input, select");
+
+    inputs.forEach((input) => {
+      input.addEventListener("change", async (e) => {
         const { id, type, checked, value } = e.target;
-        const settingValue = type === 'checkbox' ? checked : value;
-        
+        const settingValue = type === "checkbox" ? checked : value;
+
         // Update local settings
         this.settings[id] = settingValue;
-        
+
         // Save to background
         const response = await chrome.runtime.sendMessage({
-          type: 'SAVE_SETTINGS',
-          data: this.settings
+          type: "SAVE_SETTINGS",
+          data: this.settings,
         });
-        
+
         if (!response.success) {
-          console.error('Failed to save setting:', response.error);
+          console.error("Failed to save setting:", response.error);
           // Revert UI change
-          if (type === 'checkbox') {
+          if (type === "checkbox") {
             e.target.checked = !checked;
           } else {
             e.target.value = this.settings[id];
@@ -743,45 +751,45 @@ class PopupManager {
   }
 
   async handleSync() {
-    const syncBtn = document.getElementById('sync-btn');
+    const syncBtn = document.getElementById("sync-btn");
     syncBtn.disabled = true;
-    syncBtn.textContent = 'Syncing...';
-    
+    syncBtn.textContent = "Syncing...";
+
     try {
       const response = await chrome.runtime.sendMessage({
-        type: 'SYNC_REQUEST'
+        type: "SYNC_REQUEST",
       });
-      
+
       if (response.success) {
-        this.showMessage('Sync completed', 'success');
+        this.showMessage("Sync completed", "success");
         await this.loadSettings();
         this.renderUI();
         this.setupEventListeners();
       } else {
-        this.showMessage('Sync failed: ' + response.error, 'error');
+        this.showMessage("Sync failed: " + response.error, "error");
       }
     } catch (error) {
-      this.showMessage('Sync error: ' + error.message, 'error');
+      this.showMessage("Sync error: " + error.message, "error");
     } finally {
       syncBtn.disabled = false;
-      syncBtn.textContent = 'Sync Now';
+      syncBtn.textContent = "Sync Now";
     }
   }
 
-  showMessage(text, type = 'info') {
-    const message = document.createElement('div');
+  showMessage(text, type = "info") {
+    const message = document.createElement("div");
     message.className = `popup-message ${type}`;
     message.textContent = text;
-    
+
     document.body.appendChild(message);
-    
+
     setTimeout(() => {
       message.remove();
     }, 3000);
   }
 
   showError(error) {
-    document.getElementById('popup-container').innerHTML = `
+    document.getElementById("popup-container").innerHTML = `
       <div class="error-state">
         <h3>Error</h3>
         <p>${error}</p>
@@ -792,7 +800,7 @@ class PopupManager {
 }
 
 // Initialize when DOM is ready
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener("DOMContentLoaded", () => {
   new PopupManager();
 });
 ```
@@ -815,8 +823,8 @@ class OptionsManager {
   }
 
   renderTabs() {
-    const container = document.getElementById('options-container');
-    
+    const container = document.getElementById("options-container");
+
     container.innerHTML = `
       <nav class="options-nav">
         <button class="nav-tab active" data-tab="general">General</button>
@@ -846,19 +854,19 @@ class OptionsManager {
   }
 
   setupNavigation() {
-    const tabs = document.querySelectorAll('.nav-tab');
-    const contents = document.querySelectorAll('.tab-content');
-    
-    tabs.forEach(tab => {
-      tab.addEventListener('click', () => {
+    const tabs = document.querySelectorAll(".nav-tab");
+    const contents = document.querySelectorAll(".tab-content");
+
+    tabs.forEach((tab) => {
+      tab.addEventListener("click", () => {
         const tabId = tab.dataset.tab;
-        
+
         // Update active states
-        tabs.forEach(t => t.classList.remove('active'));
-        contents.forEach(c => c.classList.remove('active'));
-        
-        tab.classList.add('active');
-        document.getElementById(`${tabId}-tab`).classList.add('active');
+        tabs.forEach((t) => t.classList.remove("active"));
+        contents.forEach((c) => c.classList.remove("active"));
+
+        tab.classList.add("active");
+        document.getElementById(`${tabId}-tab`).classList.add("active");
       });
     });
   }
@@ -885,20 +893,20 @@ class LazyLoader {
   static async loadComponent(componentId, loader) {
     const element = document.getElementById(componentId);
     if (!element || element.dataset.loaded) return;
-    
+
     try {
       element.innerHTML = '<div class="loading">Loading...</div>';
-      
+
       const component = await loader();
-      element.innerHTML = '';
-      
-      if (typeof component.render === 'function') {
+      element.innerHTML = "";
+
+      if (typeof component.render === "function") {
         component.render(element);
       } else {
         element.appendChild(component);
       }
-      
-      element.dataset.loaded = 'true';
+
+      element.dataset.loaded = "true";
     } catch (error) {
       element.innerHTML = `<div class="error">Failed to load: ${error.message}</div>`;
     }
@@ -918,7 +926,7 @@ class MemoryManager {
 
   addEventListener(element, event, handler) {
     element.addEventListener(event, handler);
-    
+
     // Track for cleanup
     if (!this.listeners.has(element)) {
       this.listeners.set(element, []);
@@ -934,9 +942,9 @@ class MemoryManager {
 
   cleanup() {
     // Clear all timers
-    this.timers.forEach(timerId => clearInterval(timerId));
+    this.timers.forEach((timerId) => clearInterval(timerId));
     this.timers.clear();
-    
+
     // Event listeners are automatically cleaned up via WeakMap
     // when elements are garbage collected
   }
@@ -946,7 +954,7 @@ class MemoryManager {
       return {
         used: Math.round(performance.memory.usedJSHeapSize / 1048576),
         total: Math.round(performance.memory.totalJSHeapSize / 1048576),
-        limit: Math.round(performance.memory.jsHeapSizeLimit / 1048576)
+        limit: Math.round(performance.memory.jsHeapSizeLimit / 1048576),
       };
     }
     return null;
@@ -969,19 +977,19 @@ class ErrorHandler {
 
   setupGlobalHandlers() {
     // Unhandled promise rejections
-    window.addEventListener('unhandledrejection', (event) => {
-      this.handleError('Promise rejection', event.reason);
+    window.addEventListener("unhandledrejection", (event) => {
+      this.handleError("Promise rejection", event.reason);
       event.preventDefault(); // Prevent console logging
     });
 
     // JavaScript errors
-    window.addEventListener('error', (event) => {
-      this.handleError('JavaScript error', {
+    window.addEventListener("error", (event) => {
+      this.handleError("JavaScript error", {
         message: event.message,
         filename: event.filename,
         lineno: event.lineno,
         colno: event.colno,
-        stack: event.error?.stack
+        stack: event.error?.stack,
       });
     });
   }
@@ -993,7 +1001,7 @@ class ErrorHandler {
       stack: error.stack,
       timestamp: Date.now(),
       userAgent: navigator.userAgent,
-      url: window.location.href
+      url: window.location.href,
     };
 
     // Log locally
@@ -1004,43 +1012,45 @@ class ErrorHandler {
 
     // Show user-friendly message if critical
     if (this.isCriticalError(error)) {
-      this.showUserError('Something went wrong. Please try refreshing the page.');
+      this.showUserError(
+        "Something went wrong. Please try refreshing the page.",
+      );
     }
   }
 
   async storeError(errorData) {
     try {
-      const existing = await chrome.storage.local.get(['errorLogs']);
+      const existing = await chrome.storage.local.get(["errorLogs"]);
       const logs = existing.errorLogs || [];
-      
+
       logs.push(errorData);
-      
+
       // Keep only last 50 errors
       if (logs.length > 50) {
         logs.splice(0, logs.length - 50);
       }
-      
+
       await chrome.storage.local.set({ errorLogs: logs });
     } catch (storageError) {
-      console.error('Failed to store error log:', storageError);
+      console.error("Failed to store error log:", storageError);
     }
   }
 
   isCriticalError(error) {
     const criticalMessages = [
-      'Extension context invalidated',
-      'Storage quota exceeded',
-      'Network request failed'
+      "Extension context invalidated",
+      "Storage quota exceeded",
+      "Network request failed",
     ];
-    
+
     const message = error.message || error.toString();
-    return criticalMessages.some(critical => message.includes(critical));
+    return criticalMessages.some((critical) => message.includes(critical));
   }
 
   showUserError(message) {
     // Create error notification
-    const errorDiv = document.createElement('div');
-    errorDiv.className = 'error-notification';
+    const errorDiv = document.createElement("div");
+    errorDiv.className = "error-notification";
     errorDiv.innerHTML = `
       <div class="error-content">
         <span class="error-icon">⚠️</span>
@@ -1059,7 +1069,7 @@ class ErrorHandler {
     }, 5000);
 
     // Manual close
-    errorDiv.querySelector('.error-close').addEventListener('click', () => {
+    errorDiv.querySelector(".error-close").addEventListener("click", () => {
       errorDiv.remove();
     });
   }
@@ -1148,37 +1158,40 @@ class TestableComponent {
 // Easy to test with mocks
 const component = new TestableComponent({
   storage: mockStorage,
-  messaging: mockMessaging
+  messaging: mockMessaging,
 });
 ```
 
 ## Common Pitfalls
 
 ### 1. Service Worker Lifecycle
+
 ```javascript
 // ❌ Bad: Assuming background script runs continuously
 let globalState = {};
 
 // ✅ Good: Store state persistently
 async function getState() {
-  const result = await chrome.storage.local.get(['state']);
+  const result = await chrome.storage.local.get(["state"]);
   return result.state || {};
 }
 ```
 
 ### 2. Content Script Context
+
 ```javascript
 // ❌ Bad: Conflicting with page scripts
 window.myExtensionData = data;
 
 // ✅ Good: Use isolated scope
-(function() {
+(function () {
   const extensionData = data;
   // Extension logic here
 })();
 ```
 
 ### 3. Message Passing Errors
+
 ```javascript
 // ❌ Bad: Not handling async responses
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
@@ -1196,31 +1209,39 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 ## Related Documentation
 
 ### Architecture Implementation
+
 Understanding the system design enhances development:
+
 - **[Building Blocks View](../../architecture/05-building-blocks.md)** - Component structure this guide implements
 - **[Architecture Decisions](../../architecture/09-architecture-decisions/)** - Technical decisions behind these patterns
 - **[Quality Requirements](../../architecture/10-quality-requirements.md)** - Performance and reliability targets to meet
 - **[Crosscutting Concepts](../../architecture/08-crosscutting-concepts.md)** - System-wide patterns and concepts
 
 ### Development Workflows
+
 Essential processes for extension development:
+
 - **[Local Setup Guide](../workflows/local-setup.md)** - Development environment setup
 - **[Testing Guide](../workflows/testing-guide.md)** - Testing procedures and requirements
 - **[Debugging Guide](../workflows/debugging-guide.md)** - Debugging techniques for extensions
 - **[Performance Profiling](performance-profiling.md)** - Extension performance optimization
 
 ### User Context
+
 Understanding user needs improves development decisions:
+
 - **[Settings Types Reference](../../user/reference/settings-types.md)** - User-facing API this guide implements
 - **[Core Concepts](../../user/explanation/concepts.md)** - User mental models for the system
 - **[Security & Privacy](../../user/explanation/security.md)** - User security expectations and requirements
 
 ### Team Standards
+
 - **[Coding Standards](../conventions/coding-standards.md)** - Code quality requirements for extension development
 - **[Code Review Guide](code-review.md)** - Review criteria for extension code
 - **[Git Workflow](../conventions/git-workflow.md)** - Version control practices
 
 ### External Resources
+
 - **[Chrome Extension Development Guide](https://developer.chrome.com/docs/extensions/)** - Official Chrome documentation
 - **[Firefox WebExtension API](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions)** - Mozilla WebExtensions reference
 - **[Manifest V3 Migration Guide](https://developer.chrome.com/docs/extensions/migrating/)** - Migration from Manifest V2
@@ -1228,6 +1249,6 @@ Understanding user needs improves development decisions:
 
 ## Revision History
 
-| Date | Author | Changes |
-|------|--------|---------|
+| Date       | Author         | Changes                             |
+| ---------- | -------------- | ----------------------------------- |
 | 2025-08-11 | Developer Team | Initial extension development guide |

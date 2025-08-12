@@ -27,24 +27,28 @@ The Settings Extension follows these core security principles:
 Understanding potential threats helps implement appropriate protections:
 
 **Local Threats**:
+
 - Unauthorized access to your device
 - Malicious software on your computer
 - Browser vulnerabilities
 - Physical theft of devices
 
 **Network Threats**:
+
 - Man-in-the-middle attacks during sync
 - Unsecured network connections
 - DNS hijacking or spoofing
 - Network traffic interception
 
 **Service Threats**:
+
 - Compromise of cloud sync services
 - Unauthorized access to shared storage
 - Data breaches at service providers
 - Account takeover attacks
 
 **Social Threats**:
+
 - Accidental sharing of sensitive data
 - Insider threats within teams
 - Social engineering attacks
@@ -59,18 +63,21 @@ Understanding potential threats helps implement appropriate protections:
 Modern browsers provide several security layers:
 
 **Process Isolation**:
+
 - Extensions run in isolated processes
 - Settings data isolated from other extensions
 - Protection from malicious websites
 - Memory protection between processes
 
 **Extension Sandboxing**:
+
 - Limited file system access
 - Restricted network permissions
 - Controlled access to browser APIs
 - Mandatory permission declarations
 
 **Storage Encryption**:
+
 - Browser storage encrypted at rest (varies by browser)
 - Operating system level encryption
 - User profile protection
@@ -79,6 +86,7 @@ Modern browsers provide several security layers:
 #### Storage Location Security
 
 **Chrome/Edge Storage**:
+
 ```
 Windows: %LocalAppData%\Google\Chrome\User Data\Default\Local Extension Settings\
 macOS: ~/Library/Application Support/Google/Chrome/Default/Local Extension Settings/
@@ -86,6 +94,7 @@ Linux: ~/.config/google-chrome/Default/Local Extension Settings/
 ```
 
 **Firefox Storage**:
+
 ```
 Windows: %AppData%\Mozilla\Firefox\Profiles\[profile]\extension-data\
 macOS: ~/Library/Application Support/Firefox/Profiles/[profile]/extension-data/
@@ -93,6 +102,7 @@ Linux: ~/.mozilla/firefox/[profile]/extension-data/
 ```
 
 **Protection Methods**:
+
 - File system permissions restrict access
 - Browser profile encryption (when enabled)
 - Operating system user account separation
@@ -103,12 +113,14 @@ Linux: ~/.mozilla/firefox/[profile]/extension-data/
 #### Browser Sync Security
 
 **Chrome/Edge Sync**:
+
 - Data encrypted in transit using TLS
 - Data encrypted at rest on Google/Microsoft servers
 - Account-based access control
 - Two-factor authentication support
 
 **Firefox Sync**:
+
 - End-to-end encryption with client-generated keys
 - Zero-knowledge architecture (Mozilla can't decrypt)
 - Account password protects encryption keys
@@ -117,12 +129,14 @@ Linux: ~/.mozilla/firefox/[profile]/extension-data/
 #### Sync Security Considerations
 
 **Account Security**:
+
 - Strong passwords for browser sync accounts
 - Two-factor authentication enabled
 - Regular password updates
 - Monitoring for unauthorized access
 
 **Network Security**:
+
 - Always use HTTPS connections
 - Avoid public WiFi for sensitive sync operations
 - Use VPN when syncing over untrusted networks
@@ -135,24 +149,28 @@ Linux: ~/.mozilla/firefox/[profile]/extension-data/
 #### High-Risk Data Types
 
 **Authentication Credentials**:
+
 - API keys and tokens
 - Passwords and passphrases
 - Authentication certificates
 - OAuth tokens and refresh tokens
 
 **Personal Information**:
+
 - Email addresses and usernames
 - Phone numbers and addresses
 - Social security or national ID numbers
 - Personal identification details
 
 **Business Information**:
+
 - Company internal URLs and endpoints
 - Proprietary configuration details
 - Customer or client information
 - Trade secrets or confidential processes
 
 **Financial Information**:
+
 - Credit card or payment details
 - Banking information
 - Financial account numbers
@@ -161,12 +179,14 @@ Linux: ~/.mozilla/firefox/[profile]/extension-data/
 #### Medium-Risk Data Types
 
 **System Information**:
+
 - Internal IP addresses and network topology
 - Server names and infrastructure details
 - Development environment configurations
 - System performance and capacity data
 
 **Usage Patterns**:
+
 - Browsing history and patterns
 - Application usage statistics
 - Performance metrics
@@ -177,6 +197,7 @@ Linux: ~/.mozilla/firefox/[profile]/extension-data/
 #### Data Classification
 
 **Public**: Safe to share with anyone
+
 ```json
 {
   "feature_enabled": true,
@@ -186,6 +207,7 @@ Linux: ~/.mozilla/firefox/[profile]/extension-data/
 ```
 
 **Internal**: Safe within organization
+
 ```json
 {
   "company_api_endpoint": "https://internal-api.company.com",
@@ -195,6 +217,7 @@ Linux: ~/.mozilla/firefox/[profile]/extension-data/
 ```
 
 **Confidential**: Restricted access only
+
 ```json
 {
   "api_key": "CONFIDENTIAL_DO_NOT_SHARE",
@@ -204,6 +227,7 @@ Linux: ~/.mozilla/firefox/[profile]/extension-data/
 ```
 
 **Secret**: Highest protection level
+
 ```json
 {
   "master_api_key": "SECRET_MASTER_KEY",
@@ -217,6 +241,7 @@ Linux: ~/.mozilla/firefox/[profile]/extension-data/
 **Before Sharing Settings**:
 
 1. **Remove Authentication Data**:
+
 ```json
 // Original settings
 {
@@ -232,6 +257,7 @@ Linux: ~/.mozilla/firefox/[profile]/extension-data/
 ```
 
 2. **Replace Personal Information**:
+
 ```json
 // Original settings
 {
@@ -247,6 +273,7 @@ Linux: ~/.mozilla/firefox/[profile]/extension-data/
 ```
 
 3. **Remove Internal References**:
+
 ```json
 // Original settings
 {
@@ -268,12 +295,14 @@ Linux: ~/.mozilla/firefox/[profile]/extension-data/
 #### HTTPS Protection
 
 **What HTTPS Provides**:
+
 - Encryption of data in transit
 - Authentication of server identity
 - Protection against tampering
 - Protection against eavesdropping
 
 **HTTPS Best Practices**:
+
 - Verify SSL/TLS certificates
 - Use modern TLS versions (1.2 or higher)
 - Avoid mixed content warnings
@@ -282,24 +311,26 @@ Linux: ~/.mozilla/firefox/[profile]/extension-data/
 #### API Security
 
 **Secure API Configuration**:
+
 ```json
 {
   "advanced_config": {
-    "endpoint": "https://api.example.com/v1",  // Always use HTTPS
+    "endpoint": "https://api.example.com/v1", // Always use HTTPS
     "timeout": 10000,
     "retries": 3,
     "headers": {
       "User-Agent": "SettingsExtension/1.0",
       "Accept": "application/json",
-      "Authorization": "Bearer YOUR_TOKEN_HERE"  // Secure authentication
+      "Authorization": "Bearer YOUR_TOKEN_HERE" // Secure authentication
     },
-    "ssl_verify": true,  // Verify SSL certificates
-    "follow_redirects": false  // Prevent redirect attacks
+    "ssl_verify": true, // Verify SSL certificates
+    "follow_redirects": false // Prevent redirect attacks
   }
 }
 ```
 
 **API Security Considerations**:
+
 - Use API keys with limited scope and permissions
 - Implement proper rate limiting
 - Monitor API usage for anomalies
@@ -311,12 +342,14 @@ Linux: ~/.mozilla/firefox/[profile]/extension-data/
 #### Man-in-the-Middle Protection
 
 **Detection**:
+
 - Certificate pinning where possible
 - Monitoring for certificate changes
 - Using certificate transparency logs
 - Validating certificate chains
 
 **Prevention**:
+
 - Always use HTTPS for sensitive operations
 - Avoid public WiFi for configuration sync
 - Use VPN for additional protection
@@ -325,12 +358,14 @@ Linux: ~/.mozilla/firefox/[profile]/extension-data/
 #### DNS Security
 
 **DNS over HTTPS (DoH)**:
+
 - Encrypts DNS queries
 - Prevents DNS manipulation
 - Protects against DNS hijacking
 - Available in modern browsers
 
 **DNS Configuration**:
+
 - Use reputable DNS providers
 - Enable DNS filtering for malware protection
 - Monitor for DNS manipulation
@@ -343,18 +378,21 @@ Linux: ~/.mozilla/firefox/[profile]/extension-data/
 #### What Data is Collected
 
 **Settings Data**:
+
 - Setting names, types, and values
 - Timestamps of setting changes
 - Validation rules and constraints
 - User-provided descriptions and metadata
 
 **Usage Data** (if enabled):
+
 - Export/import operations
 - Setting change frequency
 - Error messages and diagnostics
 - Performance metrics
 
 **Sync Data**:
+
 - Synchronization timestamps
 - Device identifiers (for sync coordination)
 - Sync success/failure status
@@ -365,6 +403,7 @@ Linux: ~/.mozilla/firefox/[profile]/extension-data/
 **Principle**: Collect only necessary data for functionality
 
 **Implementation**:
+
 - No tracking of personal browsing behavior
 - No collection of website content or passwords
 - Minimal metadata collection
@@ -375,18 +414,21 @@ Linux: ~/.mozilla/firefox/[profile]/extension-data/
 #### User Control Over Data
 
 **Export Control**:
+
 - Users can export all their data
 - Clear format for exported data
 - No vendor lock-in
 - Complete data portability
 
 **Deletion Control**:
+
 - Users can delete all settings
 - Clear reset functionality
 - No hidden data retention
 - Immediate effect of deletion
 
 **Sync Control**:
+
 - Users control what syncs
 - Option to disable sync completely
 - Selective sync capabilities
@@ -395,6 +437,7 @@ Linux: ~/.mozilla/firefox/[profile]/extension-data/
 #### Privacy-Friendly Defaults
 
 **Default Configuration**:
+
 - Minimal data collection enabled by default
 - User consent required for additional features
 - Clear privacy policy and terms
@@ -413,12 +456,14 @@ Linux: ~/.mozilla/firefox/[profile]/extension-data/
 #### Implementation
 
 **Data Processing Lawful Basis**:
+
 - Legitimate interest for core functionality
 - User consent for optional features
 - Clear consent mechanisms
 - Withdrawal of consent support
 
 **Privacy by Design**:
+
 - Privacy considerations in all features
 - Data minimization by default
 - Security built-in from the start
@@ -431,6 +476,7 @@ Linux: ~/.mozilla/firefox/[profile]/extension-data/
 #### Access Control
 
 **Role-Based Access**:
+
 ```
 Roles and Permissions:
 
@@ -462,6 +508,7 @@ Guest:
 #### Configuration Governance
 
 **Change Management Process**:
+
 1. **Change Request**: Formal request with justification
 2. **Impact Assessment**: Analysis of security and functional impact
 3. **Review Process**: Technical and security review
@@ -470,6 +517,7 @@ Guest:
 6. **Validation**: Verification of successful deployment
 
 **Configuration Standards**:
+
 - Mandatory security settings
 - Approved API endpoints and services
 - Standard authentication mechanisms
@@ -480,12 +528,14 @@ Guest:
 #### Single Sign-On (SSO)
 
 **Benefits**:
+
 - Centralized authentication management
 - Reduced password fatigue
 - Better security monitoring
 - Compliance with enterprise policies
 
 **Implementation Considerations**:
+
 - Integration with existing identity providers
 - Support for SAML, OAuth, or other protocols
 - Fallback authentication methods
@@ -494,12 +544,14 @@ Guest:
 #### Audit and Compliance
 
 **Audit Logging**:
+
 - Configuration changes with timestamps
 - User access and authentication events
 - Export/import operations
 - Security-relevant events
 
 **Compliance Requirements**:
+
 - Data retention policies
 - Access control documentation
 - Security assessment reports
@@ -512,12 +564,14 @@ Guest:
 #### Account Security
 
 **Strong Authentication**:
+
 - Use strong, unique passwords for browser accounts
 - Enable two-factor authentication where available
 - Regular password updates
 - Monitor for unauthorized access
 
 **Device Security**:
+
 - Keep browsers and extensions updated
 - Use device encryption (FileVault, BitLocker)
 - Enable device lock screens
@@ -526,12 +580,14 @@ Guest:
 #### Configuration Security
 
 **Sensitive Data Handling**:
+
 - Never store passwords in settings
 - Use environment-specific API keys
 - Regularly rotate authentication tokens
 - Remove sensitive data before sharing
 
 **Backup Security**:
+
 - Encrypt backup files containing sensitive data
 - Store backups in secure locations
 - Limit access to backup files
@@ -542,12 +598,14 @@ Guest:
 #### Shared Configuration Management
 
 **Access Control**:
+
 - Implement role-based access control
 - Regular access reviews and audits
 - Principle of least privilege
 - Clear onboarding/offboarding procedures
 
 **Change Management**:
+
 - Version control for configuration changes
 - Peer review for sensitive changes
 - Testing in non-production environments
@@ -556,12 +614,14 @@ Guest:
 #### Communication Security
 
 **Secure Sharing**:
+
 - Use encrypted channels for sensitive configurations
 - Avoid email for sensitive data
 - Use secure file sharing platforms
 - Clear data retention policies
 
 **Team Training**:
+
 - Security awareness training
 - Configuration security best practices
 - Incident response procedures
@@ -572,12 +632,14 @@ Guest:
 #### Governance and Policies
 
 **Security Policies**:
+
 - Data classification and handling policies
 - Access control and authentication policies
 - Configuration management policies
 - Incident response and recovery policies
 
 **Compliance Management**:
+
 - Regular compliance assessments
 - Documentation of security controls
 - Third-party security audits
@@ -586,12 +648,14 @@ Guest:
 #### Risk Management
 
 **Risk Assessment**:
+
 - Regular security risk assessments
 - Threat modeling for configuration data
 - Vulnerability assessments
 - Business impact analysis
 
 **Risk Mitigation**:
+
 - Implementation of security controls
 - Regular security testing
 - Employee security training
@@ -604,12 +668,14 @@ Guest:
 #### Data Exposure Incidents
 
 **Accidental Sharing**:
+
 - Settings file shared with wrong people
 - Sensitive data included in team configurations
 - Public posting of configuration files
 - Unintended email distribution
 
 **Response Steps**:
+
 1. **Immediate**: Stop further sharing, recall if possible
 2. **Assessment**: Determine what sensitive data was exposed
 3. **Notification**: Inform affected parties and stakeholders
@@ -619,12 +685,14 @@ Guest:
 #### Account Compromise
 
 **Signs of Compromise**:
+
 - Unexpected configuration changes
 - Settings sync to unknown devices
 - Unusual access patterns
 - Modified API keys or credentials
 
 **Response Steps**:
+
 1. **Secure Account**: Change passwords, enable 2FA
 2. **Revoke Access**: Remove compromised credentials
 3. **Assess Damage**: Check what data may have been accessed
@@ -634,12 +702,14 @@ Guest:
 #### System Compromise
 
 **Malware or System Breach**:
+
 - Unexpected behavior from extension
 - Unauthorized configuration modifications
 - Suspicious network activity
 - System performance issues
 
 **Response Steps**:
+
 1. **Isolate**: Disconnect from network if needed
 2. **Scan**: Full system malware scan
 3. **Backup**: Export clean configuration if possible
@@ -651,6 +721,7 @@ Guest:
 #### Configuration Recovery
 
 **From Backup**:
+
 1. Identify last known good configuration backup
 2. Verify backup integrity and authenticity
 3. Test import in safe environment
@@ -658,6 +729,7 @@ Guest:
 5. Validate functionality and security
 
 **From Default State**:
+
 1. Reset extension to default settings
 2. Configure basic functionality
 3. Gradually add customizations
@@ -671,12 +743,14 @@ Guest:
 #### ISO 27001 Alignment
 
 **Information Security Management**:
+
 - Risk assessment and management
 - Security controls implementation
 - Regular security audits
 - Continuous improvement processes
 
 **Applicable Controls**:
+
 - Access control (A.9)
 - Cryptography (A.10)
 - Operations security (A.12)
@@ -685,6 +759,7 @@ Guest:
 #### NIST Framework Alignment
 
 **Framework Functions**:
+
 - **Identify**: Understand security risks and requirements
 - **Protect**: Implement appropriate safeguards
 - **Detect**: Monitor for security events
@@ -696,6 +771,7 @@ Guest:
 #### GDPR Compliance
 
 **Data Protection Principles**:
+
 - Lawfulness, fairness, and transparency
 - Purpose limitation
 - Data minimization
@@ -704,6 +780,7 @@ Guest:
 - Integrity and confidentiality
 
 **User Rights Support**:
+
 - Data access and portability
 - Rectification and erasure
 - Objection and restriction
@@ -712,12 +789,14 @@ Guest:
 #### Other Regulations
 
 **CCPA (California)**:
+
 - Consumer privacy rights
 - Data disclosure requirements
 - Opt-out mechanisms
 - Non-discrimination provisions
 
 **HIPAA (Healthcare)**:
+
 - Protected health information safeguards
 - Access controls and audit logging
 - Breach notification requirements
@@ -728,12 +807,14 @@ Guest:
 ### Emerging Threats
 
 **Supply Chain Attacks**:
+
 - Compromised browser extensions
 - Malicious updates or dependencies
 - Third-party service breaches
 - Developer account takeovers
 
 **Advanced Persistent Threats**:
+
 - Long-term compromise of systems
 - Gradual data exfiltration
 - Living-off-the-land techniques
@@ -742,12 +823,14 @@ Guest:
 ### Technology Evolution
 
 **Enhanced Encryption**:
+
 - Post-quantum cryptography
 - End-to-end encryption improvements
 - Zero-knowledge architectures
 - Homomorphic encryption applications
 
 **Privacy Technologies**:
+
 - Differential privacy
 - Secure multi-party computation
 - Privacy-preserving analytics
@@ -778,30 +861,36 @@ Guest:
 ## Related Documentation
 
 ### User Security Guides
+
 - **[Configuration Reference](../reference/configuration.md)** - Security-relevant configuration options and parameters
 - **[Sync Mechanism Explained](sync-mechanism.md)** - Security aspects of synchronization and data transfer
 - **[Export/Import Guide](../how-to/export-import.md)** - Secure handling of settings files and backups
 - **[Core Concepts](concepts.md)** - Security implications of fundamental concepts
 
 ### Architecture Security
+
 Technical security implementation details:
+
 - **[System Constraints](../../architecture/02-constraints.md)** - Security constraints shaping the system design
 - **[Crosscutting Concepts](../../architecture/08-crosscutting-concepts.md)** - Security patterns and implementation
 - **[Architecture Decisions](../../architecture/09-architecture-decisions/)** - Security-relevant technical decisions
 
 ### Developer Security Resources
+
 For advanced security understanding and development:
+
 - **[Extension Development](../../developer/guides/extension-development.md)** - Secure development practices
 - **[Bug Reporting](../../developer/guides/bug-reporting.md)** - Security vulnerability reporting procedures
 - **[Coding Standards](../../developer/conventions/coding-standards.md)** - Security coding practices
 
 ### External Security Resources
+
 - **[OWASP Security Guidelines](https://owasp.org/)** - Web application security best practices
 - **[Chrome Extension Security](https://developer.chrome.com/docs/extensions/mv3/security/)** - Browser extension security guidelines
 - **[Mozilla Extension Security](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/Security_best_practices)** - Firefox extension security
 
 ## Revision History
 
-| Date | Author | Changes |
-|------|--------|---------|
+| Date       | Author             | Changes                                  |
+| ---------- | ------------------ | ---------------------------------------- |
 | 2025-08-11 | Documentation Team | Initial security and privacy explanation |

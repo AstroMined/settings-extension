@@ -1,6 +1,7 @@
 # ADR-001: Adoption of Manifest V3 Architecture
 
 ## Status
+
 **Accepted** - 2025-08-11
 
 ## Context
@@ -14,6 +15,7 @@ Browser extension platforms are transitioning from Manifest V2 to Manifest V3, w
 ### Key Considerations
 
 **Technical Factors:**
+
 - Chrome Web Store will stop accepting new Manifest V2 extensions (2024)
 - Existing Manifest V2 extensions will stop running (2025)
 - Firefox supports both but is moving toward Manifest V3
@@ -21,12 +23,14 @@ Browser extension platforms are transitioning from Manifest V2 to Manifest V3, w
 - Different permission and API models between versions
 
 **Business Factors:**
+
 - Long-term viability and distribution through official stores
 - Development and maintenance effort
 - User adoption and browser compatibility
 - Team expertise and learning curve
 
 **Security Factors:**
+
 - Manifest V3 provides enhanced security model
 - More granular permissions
 - Content Security Policy (CSP) requirements
@@ -34,12 +38,12 @@ Browser extension platforms are transitioning from Manifest V2 to Manifest V3, w
 
 ### Current Market Situation
 
-| Browser | Manifest V2 Status | Manifest V3 Status | Timeline |
-|---------|-------------------|-------------------|----------|
-| **Chrome** | Deprecated | Required for new extensions | 2024-2025 |
-| **Firefox** | Supported | Partial support, improving | 2024-2025 |
-| **Edge** | Following Chrome | Required for new extensions | 2024-2025 |
-| **Safari** | N/A | Limited support | Unknown |
+| Browser     | Manifest V2 Status | Manifest V3 Status          | Timeline  |
+| ----------- | ------------------ | --------------------------- | --------- |
+| **Chrome**  | Deprecated         | Required for new extensions | 2024-2025 |
+| **Firefox** | Supported          | Partial support, improving  | 2024-2025 |
+| **Edge**    | Following Chrome   | Required for new extensions | 2024-2025 |
+| **Safari**  | N/A                | Limited support             | Unknown   |
 
 ## Decision
 
@@ -66,26 +70,31 @@ Browser extension platforms are transitioning from Manifest V2 to Manifest V3, w
 ### Positive Consequences
 
 ✅ **Future-Proof Architecture**
+
 - Extension will remain compatible with evolving browser platforms
 - No migration required when Manifest V2 is fully deprecated
 - Access to new browser features and APIs
 
 ✅ **Enhanced Security**
+
 - More restrictive permission model reduces security risks
 - Content Security Policy enforcement prevents code injection
 - Service worker isolation improves stability
 
 ✅ **Simplified Development**
+
 - Single architecture reduces complexity
 - No need to maintain multiple codebases
 - Clear development path and best practices
 
 ✅ **Better Performance**
+
 - Service workers provide better resource management
 - Event-driven architecture improves efficiency
 - Reduced memory footprint when inactive
 
 ✅ **Official Distribution**
+
 - Can be distributed through Chrome Web Store
 - Compatible with Firefox Add-ons (AMO)
 - Meets store requirements for approval
@@ -93,21 +102,25 @@ Browser extension platforms are transitioning from Manifest V2 to Manifest V3, w
 ### Negative Consequences
 
 ❌ **Learning Curve**
+
 - Team needs to learn service worker patterns
 - Different programming model from background pages
 - New debugging and testing approaches required
 
 ❌ **Limited Backwards Compatibility**
+
 - Cannot support very old browser versions
 - Some legacy APIs not available
 - Potential compatibility issues during Firefox transition
 
 ❌ **Development Complexity**
+
 - Service worker lifecycle management
 - Message passing complexity
 - Storage limitations and patterns
 
 ❌ **Early Adoption Risks**
+
 - Potential browser bugs in new implementations
 - Less community knowledge and examples
 - Evolving best practices and patterns
@@ -124,16 +137,19 @@ Since this is a new project, there is no migration impact. However, this decisio
 ### Mitigation Strategies
 
 **For Learning Curve:**
+
 - Team training on service worker patterns
 - Prototype development to validate approach
 - Regular architecture reviews and knowledge sharing
 
 **For Compatibility Issues:**
+
 - Browser compatibility layer implementation
 - Feature detection and graceful degradation
 - Comprehensive cross-browser testing
 
 **For Development Complexity:**
+
 - Well-defined architecture patterns
 - Comprehensive error handling
 - Automated testing for service worker lifecycle
@@ -141,22 +157,24 @@ Since this is a new project, there is no migration impact. However, this decisio
 ## Implementation Details
 
 ### Service Worker Architecture
+
 ```javascript
 // background.js - Service worker implementation
-self.addEventListener('install', (event) => {
+self.addEventListener("install", (event) => {
   // Extension installation logic
 });
 
-self.addEventListener('activate', (event) => {
-  // Extension activation logic  
+self.addEventListener("activate", (event) => {
+  // Extension activation logic
 });
 
-self.addEventListener('message', (event) => {
+self.addEventListener("message", (event) => {
   // Message handling logic
 });
 ```
 
 ### Storage Pattern
+
 ```javascript
 // Use browser.storage APIs instead of localStorage
 const storage = chrome.storage.local;
@@ -172,13 +190,11 @@ async function setSetting(key, value) {
 ```
 
 ### Permission Model
+
 ```json
 {
   "manifest_version": 3,
-  "permissions": [
-    "storage",
-    "activeTab"
-  ],
+  "permissions": ["storage", "activeTab"],
   "background": {
     "service_worker": "background.js"
   }
@@ -188,21 +204,27 @@ async function setSetting(key, value) {
 ## Alternatives Considered
 
 ### Alternative 1: Manifest V2 Support
+
 **Rejected** because:
+
 - Limited future viability due to deprecation
 - Cannot be distributed through official stores long-term
 - Missing security enhancements
 - Technical debt from supporting legacy architecture
 
 ### Alternative 2: Dual Manifest Support
+
 **Rejected** because:
+
 - Significantly increases development and maintenance complexity
 - Requires maintaining two different codebases
 - Testing complexity doubles
 - Limited team resources for such complexity
 
 ### Alternative 3: Framework-Based Approach
+
 **Considered** but decided to combine with Manifest V3:
+
 - Frameworks like Plasmo support Manifest V3
 - Adds dependency and complexity
 - Team preference for vanilla JavaScript
@@ -221,8 +243,9 @@ The success of this decision will be measured by:
 ## Review Schedule
 
 This decision will be reviewed:
+
 - **3 months**: Initial implementation assessment
-- **6 months**: Performance and compatibility evaluation  
+- **6 months**: Performance and compatibility evaluation
 - **12 months**: Long-term viability assessment
 - **As needed**: If significant browser changes occur
 
@@ -240,6 +263,6 @@ This decision will be reviewed:
 
 ## Revision History
 
-| Date | Author | Changes |
-|------|--------|---------|
+| Date       | Author            | Changes                              |
+| ---------- | ----------------- | ------------------------------------ |
 | 2025-08-11 | Architecture Team | Initial ADR for Manifest V3 adoption |

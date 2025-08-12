@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+
 - Initial project structure
 - Comprehensive MCD documentation
 - Cross-browser compatibility framework
@@ -16,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Content script API
 
 ### Changed
+
 - Updated MCD for internal company use (250-300 users)
 - Replaced WebExtension Polyfill with native browser APIs
 - Updated cross-browser support for Chrome, Edge, and Firefox
@@ -25,9 +27,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Replaced automated CI/CD pipeline with simple ZIP distribution
 
 ### Deprecated
+
 - N/A
 
 ### Removed
+
 - Chrome Web Store and Firefox Add-ons deployment references
 - WebExtension Polyfill dependency (minified code)
 - Automated build pipeline and GitHub Actions workflows
@@ -36,15 +40,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Store compatibility testing requirements
 
 ### Fixed
+
 - N/A
 
 ### Security
+
 - Eliminated minified code to ensure fast Firefox security review
 - Added unminified browser-compat.js for cross-browser compatibility
 
 ## [1.0.0] - 2025-01-XX
 
 ### Added
+
 - Initial release of Settings Extension for internal company use
 - Manifest V3 browser extension framework
 - Cross-browser compatibility (Chrome, Edge, and Firefox)
@@ -67,6 +74,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Internal user support through Slack
 
 ### Technical Features
+
 - Service worker architecture for Manifest V3 compliance
 - Message passing system for component communication
 - Local storage with sync capabilities
@@ -77,6 +85,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Security best practices implementation
 
 ### Development Features
+
 - ESLint and Prettier configuration
 - Simple local development workflow
 - Cross-browser testing for Chrome, Edge, and Firefox
@@ -88,11 +97,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Release Notes Format
 
 ### Version Number Guidelines
+
 - **MAJOR**: Breaking changes that require user action
 - **MINOR**: New features that are backward compatible
 - **PATCH**: Bug fixes and minor improvements
 
 ### Change Categories
+
 - **Added**: New features and enhancements
 - **Changed**: Modifications to existing functionality
 - **Deprecated**: Features that will be removed in future versions
@@ -101,6 +112,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Security**: Security-related changes and fixes
 
 ### Commit Message Format
+
 ```
 type(scope): description
 
@@ -112,6 +124,7 @@ chore(deps): update dependencies
 ```
 
 ### Breaking Changes
+
 Breaking changes will be clearly marked with **BREAKING CHANGE** and include migration instructions.
 
 ---
@@ -119,6 +132,7 @@ Breaking changes will be clearly marked with **BREAKING CHANGE** and include mig
 ## Future Roadmap
 
 ### v1.1.0 (Planned)
+
 - Enhanced UI themes and customization
 - Settings search and filtering
 - Bulk settings operations
@@ -126,6 +140,7 @@ Breaking changes will be clearly marked with **BREAKING CHANGE** and include mig
 - Advanced validation rules
 
 ### v1.2.0 (Planned)
+
 - Cloud synchronization integration
 - Settings templates and presets
 - Plugin system for custom setting types
@@ -133,6 +148,7 @@ Breaking changes will be clearly marked with **BREAKING CHANGE** and include mig
 - Settings backup scheduling
 
 ### v2.0.0 (Planned)
+
 - Complete UI redesign
 - Advanced settings management dashboard
 - Team collaboration features
@@ -144,6 +160,7 @@ Breaking changes will be clearly marked with **BREAKING CHANGE** and include mig
 ## Support and Feedback
 
 For questions, bug reports, or feature requests:
+
 - Use the company Slack channel for immediate support
 - Internal documentation available through Slack
 - Developer support provided by internal team

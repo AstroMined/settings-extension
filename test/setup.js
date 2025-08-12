@@ -4,7 +4,7 @@
  */
 
 // Load browser compatibility layer first
-require('../lib/browser-compat.js');
+require("../lib/browser-compat.js");
 
 // Mock browser APIs for testing
 global.browser = {
@@ -14,55 +14,56 @@ global.browser = {
       set: jest.fn(),
       remove: jest.fn(),
       clear: jest.fn(),
-      getBytesInUse: jest.fn()
+      getBytesInUse: jest.fn(),
     },
     sync: {
       get: jest.fn(),
       set: jest.fn(),
       remove: jest.fn(),
       clear: jest.fn(),
-      getBytesInUse: jest.fn()
+      getBytesInUse: jest.fn(),
     },
     onChanged: {
       addListener: jest.fn(),
-      removeListener: jest.fn()
-    }
+      removeListener: jest.fn(),
+    },
   },
   runtime: {
     sendMessage: jest.fn(),
     onMessage: {
       addListener: jest.fn(),
-      removeListener: jest.fn()
+      removeListener: jest.fn(),
     },
     lastError: null,
-    getURL: jest.fn((path) => `chrome-extension://test-id/${path}`)
-  }
+    getURL: jest.fn((path) => `chrome-extension://test-id/${path}`),
+  },
 };
 
 // Mock chrome APIs for compatibility
 global.chrome = global.browser;
 
-// Ensure browserAPI is available globally  
+// Ensure browserAPI is available globally
 global.browserAPI = global.browser;
 
 // Mock fetch for settings manager
-global.fetch = jest.fn(() => 
+global.fetch = jest.fn(() =>
   Promise.resolve({
     ok: true,
-    json: () => Promise.resolve({
-      "feature_enabled": {
-        "type": "boolean",
-        "value": true,
-        "description": "Enable main feature functionality"
-      },
-      "api_key": {
-        "type": "text",
-        "value": "",
-        "description": "API key for external service",
-        "maxLength": 100
-      }
-    })
-  })
+    json: () =>
+      Promise.resolve({
+        feature_enabled: {
+          type: "boolean",
+          value: true,
+          description: "Enable main feature functionality",
+        },
+        api_key: {
+          type: "text",
+          value: "",
+          description: "API key for external service",
+          maxLength: 100,
+        },
+      }),
+  }),
 );
 
 // Mock performance.now if not available
@@ -71,8 +72,8 @@ if (!global.performance) {
     now: () => Date.now(),
     memory: {
       usedJSHeapSize: 1000000,
-      totalJSHeapSize: 10000000
-    }
+      totalJSHeapSize: 10000000,
+    },
   };
 }
 

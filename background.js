@@ -1,22 +1,107 @@
 // background.js
 // Service worker for settings management
 
-// Import dependencies
-importScripts('lib/browser-compat.js', 'lib/settings-manager.js');
+// Register event listeners at TOP LEVEL (MV3 requirement)
+// These MUST be registered synchronously before any imports or async operations
+
+// Global error handler (registered first)
+self.addEventListener("error", (error) => {
+  console.error("Unhandled error in background script:", error);
+});
+
+self.addEventListener("unhandledrejection", (event) => {
+  console.error("Unhandled promise rejection in background script:", event.reason);
+});
+
+// Core Chrome Extension API listeners (registered before imports)
+console.log("🔧 Registering event listeners...");
+
+try {
+  chrome.runtime.onMessage.addListener(handleMessage);
+  console.log("✅ Message listener registered successfully");
+} catch (error) {
+  console.error("❌ Failed to register message listener:", error);
+}
+
+try {
+  chrome.runtime.onInstalled.addListener(handleInstalled);
+  console.log("✅ Installed listener registered successfully");
+} catch (error) {
+  console.error("❌ Failed to register installed listener:", error);
+}
+
+try {
+  chrome.runtime.onStartup.addListener(handleStartup);
+  console.log("✅ Startup listener registered successfully");  
+} catch (error) {
+  console.error("❌ Failed to register startup listener:", error);
+}
+
+try {
+  chrome.storage.onChanged.addListener(handleStorageChange);
+  console.log("✅ Storage change listener registered successfully");
+} catch (error) {
+  console.error("❌ Failed to register storage change listener:", error);
+}
+
+if (chrome.action && chrome.action.onClicked) {
+  chrome.action.onClicked.addListener(handleActionClick);
+}
+
+// Keep-alive alarm to prevent service worker termination
+chrome.alarms.create("keep-alive", { periodInMinutes: 0.42 }); // 25 seconds
+chrome.alarms.onAlarm.addListener((alarm) => {
+  if (alarm.name === "keep-alive") {
+    // Simple operation to keep service worker alive
+    chrome.runtime.getPlatformInfo(() => {
+      console.debug("Service worker keep-alive ping");
+    });
+  }
+});
+
+// Import dependencies AFTER event listeners are registered
+importScripts("lib/browser-compat.js", "lib/settings-manager.js");
 
 let settingsManager;
 
+// Initialize immediately (no lazy loading)
+initializeSettingsOnStartup();
+
 /**
- * Initialize settings manager
+ * Initialize settings manager on service worker startup
+ * @returns {Promise<void>}
+ */
+async function initializeSettingsOnStartup() {
+  try {
+    console.log("Initializing settings manager on startup...");
+    settingsManager = new SettingsManager();
+    await settingsManager.initialize();
+    console.log("Settings manager initialized successfully on startup");
+  } catch (error) {
+    console.error("Failed to initialize settings manager on startup:", error);
+    // Create a fallback settings manager but don't fail completely
+    try {
+      settingsManager = new SettingsManager();
+      await settingsManager.initializeWithEmbeddedDefaults();
+      console.log("Settings manager initialized with fallback defaults");
+    } catch (fallbackError) {
+      console.error("Even fallback initialization failed:", fallbackError);
+      settingsManager = null;
+    }
+  }
+}
+
+/**
+ * Initialize settings manager (legacy function for compatibility)
  * @returns {Promise<void>}
  */
 async function initializeSettings() {
   try {
     settingsManager = new SettingsManager();
     await settingsManager.initialize();
-    console.log('Settings manager initialized successfully');
+    console.log("Settings manager initialized successfully");
   } catch (error) {
-    console.error('Failed to initialize settings manager:', error);
+    console.error("Failed to initialize settings manager:", error);
     // Create a fallback settings manager
     settingsManager = new SettingsManager();
     await settingsManager.initializeWithEmbeddedDefaults();
@@ -30,63 +115,107 @@ async function initializeSettings() {
  * @param {Function} sendResponse - Response function
  * @returns {boolean} - Whether to keep the message channel open
  */
-async function handleMessage(message, sender, sendResponse) {
-  // Ensure settings manager is initialized
-  if (!settingsManager) {
-    await initializeSettings();
+function handleMessage(message, sender, sendResponse) {
+  console.log("📨 RECEIVED MESSAGE:", {
+    type: message?.type,
+    sender: sender?.tab?.id || 'popup/options',
+    timestamp: new Date().toISOString()
+  });
+
+  // Handle PING immediately (synchronous)
+  if (message.type === "PING") {
+    sendResponse({ pong: true, timestamp: Date.now() });
+    console.log("✅ PING handled synchronously");
+    return false; // Don't keep channel open for sync response
   }
 
+  // Settings manager should be initialized at startup, but handle edge cases
+  if (!settingsManager) {
+    console.warn("Settings manager not available, attempting re-initialization...");
+    
+    // Handle re-initialization asynchronously
+    initializeSettingsOnStartup().then(() => {
+      if (!settingsManager) {
+        sendResponse({
+          error: "Settings manager not available. Service worker may need to be restarted.",
+          fallback: true,
+        });
+        return;
+      }
+      // Process the message after initialization
+      processAsyncMessage(message, sender, sendResponse);
+    }).catch(error => {
+      console.error("Failed to re-initialize settings manager:", error);
+      sendResponse({
+        error: "Settings manager not available. Service worker may need to be restarted.",
+        fallback: true,
+      });
+    });
+    
+    console.log("✅ Message handler returning true for async initialization");
+    return true; // Keep channel open for async response
+  }
+
+  // Process message with initialized settings manager
+  processAsyncMessage(message, sender, sendResponse);
+  console.log("✅ Message handler returning true for async processing");
+  return true; // Keep message channel open for async response
+}
+
+async function processAsyncMessage(message, sender, sendResponse) {
   try {
+    console.log("🔄 Processing async message:", message.type);
+    
     switch (message.type) {
-      case 'GET_SETTING':
+      case "GET_SETTING":
         await handleGetSetting(message, sendResponse);
         break;
-        
-      case 'GET_SETTINGS':
+
+      case "GET_SETTINGS":
         await handleGetSettings(message, sendResponse);
         break;
-        
-      case 'GET_ALL_SETTINGS':
+
+      case "GET_ALL_SETTINGS":
         await handleGetAllSettings(message, sendResponse);
         break;
-        
-      case 'UPDATE_SETTING':
+
+      case "UPDATE_SETTING":
         await handleUpdateSetting(message, sendResponse, sender);
         break;
-        
-      case 'UPDATE_SETTINGS':
+
+      case "UPDATE_SETTINGS":
         await handleUpdateSettings(message, sendResponse, sender);
         break;
-        
-      case 'EXPORT_SETTINGS':
+
+      case "EXPORT_SETTINGS":
         await handleExportSettings(message, sendResponse);
         break;
-        
-      case 'IMPORT_SETTINGS':
+
+      case "IMPORT_SETTINGS":
         await handleImportSettings(message, sendResponse, sender);
         break;
-        
-      case 'RESET_SETTINGS':
+
+      case "RESET_SETTINGS":
         await handleResetSettings(message, sendResponse, sender);
         break;
-        
-      case 'GET_STORAGE_STATS':
+
+      case "GET_STORAGE_STATS":
         await handleGetStorageStats(message, sendResponse);
         break;
-        
-      case 'CHECK_STORAGE_QUOTA':
+
+      case "CHECK_STORAGE_QUOTA":
         await handleCheckStorageQuota(message, sendResponse);
         break;
-        
+
       default:
         sendResponse({ error: `Unknown message type: ${message.type}` });
     }
+    
+    console.log("✅ Async message processed successfully");
   } catch (error) {
-    console.error('Error handling message:', error);
+    console.error("❌ Error processing async message:", error);
     sendResponse({ error: error.message });
   }
-  
-  return true; // Keep message channel open for async response
 }
 
 /**
@@ -109,8 +238,16 @@ async function handleGetSettings(message, sendResponse) {
  * Handle GET_ALL_SETTINGS message
  */
 async function handleGetAllSettings(message, sendResponse) {
-  const allSettings = await settingsManager.getAllSettings();
-  sendResponse({ settings: allSettings });
+  console.log("🔍 Getting all settings...");
+  try {
+    const allSettings = await settingsManager.getAllSettings();
+    console.log("📤 Sending settings response:", Object.keys(allSettings || {}));
+    sendResponse({ settings: allSettings });
+    console.log("✅ Settings response sent successfully");
+  } catch (error) {
+    console.error("❌ Error getting all settings:", error);
+    sendResponse({ error: error.message });
+  }
 }
 
 /**
@@ -119,7 +256,7 @@ async function handleGetAllSettings(message, sendResponse) {
 async function handleUpdateSetting(message, sendResponse, sender) {
   await settingsManager.updateSetting(message.key, message.value);
   sendResponse({ success: true });
-  
+
   // Notify all content scripts of change
   await broadcastSettingsChange({ [message.key]: message.value }, sender);
 }
@@ -130,7 +267,7 @@ async function handleUpdateSetting(message, sendResponse, sender) {
 async function handleUpdateSettings(message, sendResponse, sender) {
   await settingsManager.updateSettings(message.updates);
   sendResponse({ success: true });
-  
+
   // Notify all content scripts of changes
   await broadcastSettingsChange(message.updates, sender);
 }
@@ -149,7 +286,7 @@ async function handleExportSettings(message, sendResponse) {
 async function handleImportSettings(message, sendResponse, sender) {
   await settingsManager.importSettings(message.data);
   sendResponse({ success: true });
-  
+
   // Notify all content scripts of import
   await broadcastSettingsImport(sender);
 }
@@ -160,7 +297,7 @@ async function handleImportSettings(message, sendResponse, sender) {
 async function handleResetSettings(message, sendResponse, sender) {
   await settingsManager.resetToDefaults();
   sendResponse({ success: true });
-  
+
   // Notify all content scripts of reset
   await broadcastSettingsReset(sender);
 }
@@ -188,29 +325,31 @@ async function handleCheckStorageQuota(message, sendResponse) {
  */
 async function broadcastSettingsChange(changes, sender) {
   try {
-    const tabs = await browserAPI.tabs.query({});
-    
+    const tabs = await self.browserAPI.tabs.query({});
+
     const broadcastPromises = tabs.map(async (tab) => {
       // Skip the sender tab to avoid double updates
       if (sender && sender.tab && sender.tab.id === tab.id) {
         return;
       }
-      
+
       try {
-        await browserAPI.tabs.sendMessage(tab.id, {
-          type: 'SETTINGS_CHANGED',
-          changes: changes
+        await self.browserAPI.tabs.sendMessage(tab.id, {
+          type: "SETTINGS_CHANGED",
+          changes: changes,
         });
       } catch (error) {
         // Tab might not have content script injected, ignore
-        console.debug(`Failed to send message to tab ${tab.id}:`, error.message);
+        console.debug(
+          `Failed to send message to tab ${tab.id}:`,
+          error.message,
+        );
       }
     });
-    
+
     await Promise.allSettled(broadcastPromises);
-    
   } catch (error) {
-    console.error('Failed to broadcast settings change:', error);
+    console.error("Failed to broadcast settings change:", error);
   }
 }
 
@@ -221,29 +360,31 @@ async function broadcastSettingsChange(changes, sender) {
 async function broadcastSettingsImport(sender) {
   try {
     const allSettings = await settingsManager.getAllSettings();
-    
-    const tabs = await browserAPI.tabs.query({});
-    
+
+    const tabs = await self.browserAPI.tabs.query({});
+
     const broadcastPromises = tabs.map(async (tab) => {
       // Skip the sender tab
       if (sender && sender.tab && sender.tab.id === tab.id) {
         return;
       }
-      
+
       try {
-        await browserAPI.tabs.sendMessage(tab.id, {
-          type: 'SETTINGS_IMPORTED',
-          settings: allSettings
+        await self.browserAPI.tabs.sendMessage(tab.id, {
+          type: "SETTINGS_IMPORTED",
+          settings: allSettings,
         });
       } catch (error) {
-        console.debug(`Failed to send import message to tab ${tab.id}:`, error.message);
+        console.debug(
+          `Failed to send import message to tab ${tab.id}:`,
+          error.message,
+        );
       }
     });
-    
+
     await Promise.allSettled(broadcastPromises);
-    
   } catch (error) {
-    console.error('Failed to broadcast settings import:', error);
+    console.error("Failed to broadcast settings import:", error);
   }
 }
 
@@ -254,29 +395,31 @@ async function broadcastSettingsImport(sender) {
 async function broadcastSettingsReset(sender) {
   try {
     const allSettings = await settingsManager.getAllSettings();
-    
-    const tabs = await browserAPI.tabs.query({});
-    
+
+    const tabs = await self.browserAPI.tabs.query({});
+
     const broadcastPromises = tabs.map(async (tab) => {
       // Skip the sender tab
       if (sender && sender.tab && sender.tab.id === tab.id) {
         return;
       }
-      
+
       try {
-        await browserAPI.tabs.sendMessage(tab.id, {
-          type: 'SETTINGS_RESET',
-          settings: allSettings
+        await self.browserAPI.tabs.sendMessage(tab.id, {
+          type: "SETTINGS_RESET",
+          settings: allSettings,
         });
       } catch (error) {
-        console.debug(`Failed to send reset message to tab ${tab.id}:`, error.message);
+        console.debug(
+          `Failed to send reset message to tab ${tab.id}:`,
+          error.message,
+        );
       }
     });
-    
+
     await Promise.allSettled(broadcastPromises);
-    
   } catch (error) {
-    console.error('Failed to broadcast settings reset:', error);
+    console.error("Failed to broadcast settings reset:", error);
   }
 }
 
@@ -285,21 +428,21 @@ async function broadcastSettingsReset(sender) {
  */
 function handleActionClick(tab) {
   // Open popup automatically - no action needed as popup is defined in manifest
-  console.log('Browser action clicked for tab:', tab.id);
+  console.log("Browser action clicked for tab:", tab.id);
 }
 
 /**
  * Handle extension installation
  */
 function handleInstalled(details) {
-  console.log('Extension installed:', details.reason);
-  
-  if (details.reason === 'install') {
+  console.log("Extension installed:", details.reason);
+
+  if (details.reason === "install") {
     // Initialize settings on first install
     initializeSettings();
-  } else if (details.reason === 'update') {
+  } else if (details.reason === "update") {
     // Handle extension update
-    console.log('Extension updated from version:', details.previousVersion);
+    console.log("Extension updated from version:", details.previousVersion);
     initializeSettings();
   }
 }
@@ -308,7 +451,7 @@ function handleInstalled(details) {
  * Handle extension startup
  */
 function handleStartup() {
-  console.log('Extension starting up');
+  console.log("Extension starting up");
   initializeSettings();
 }
 
@@ -316,23 +459,23 @@ function handleStartup() {
  * Handle storage changes
  */
 function handleStorageChange(changes, areaName) {
-  console.log('Storage changed:', areaName, changes);
-  
+  console.log("Storage changed:", areaName, changes);
+
   // If settings were changed externally, reinitialize
-  if (areaName === 'local' || areaName === 'sync') {
+  if (areaName === "local" || areaName === "sync") {
     // Debounce reinitializations
     if (handleStorageChange.timeout) {
       clearTimeout(handleStorageChange.timeout);
     }
-    
+
     handleStorageChange.timeout = setTimeout(async () => {
       try {
         if (settingsManager) {
           await settingsManager.initialize();
-          console.log('Settings reloaded due to storage change');
+          console.log("Settings reloaded due to storage change");
         }
       } catch (error) {
-        console.error('Failed to reload settings after storage change:', error);
+        console.error("Failed to reload settings after storage change:", error);
       }
     }, 1000);
   }
@@ -342,42 +485,13 @@ function handleStorageChange(changes, areaName) {
  * Handle unhandled errors
  */
 function handleError(error) {
-  console.error('Unhandled error in background script:', error);
+  console.error("Unhandled error in background script:", error);
 }
-
-// Set up event listeners
-if (browserAPI.runtime && browserAPI.runtime.onMessage) {
-  browserAPI.runtime.onMessage.addListener(handleMessage);
-}
-
-if (browserAPI.action && browserAPI.action.onClicked) {
-  browserAPI.action.onClicked.addListener(handleActionClick);
-}
-
-if (browserAPI.runtime && browserAPI.runtime.onInstalled) {
-  browserAPI.runtime.onInstalled.addListener(handleInstalled);
-}
-
-if (browserAPI.runtime && browserAPI.runtime.onStartup) {
-  browserAPI.runtime.onStartup.addListener(handleStartup);
-}
-
-if (browserAPI.storage && browserAPI.storage.onChanged) {
-  browserAPI.storage.onChanged.addListener(handleStorageChange);
-}
-
-// Global error handler
-self.addEventListener('error', handleError);
-self.addEventListener('unhandledrejection', (event) => {
-  handleError(event.reason);
-});
-
-// Initialize on startup
-initializeSettings();
 
 // Export functions for testing
-if (typeof global !== 'undefined') {
+if (typeof global !== "undefined") {
   global.initializeSettings = initializeSettings;
+  global.initializeSettingsOnStartup = initializeSettingsOnStartup;
   global.handleMessage = handleMessage;
   global.handleInstalled = handleInstalled;
   global.broadcastSettingsChange = broadcastSettingsChange;

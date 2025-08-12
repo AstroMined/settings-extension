@@ -10,11 +10,8 @@
       "strict_min_version": "109.0"
     }
   },
-  
-  "permissions": [
-    "storage",
-    "activeTab"
-  ],
+
+  "permissions": ["storage", "activeTab"],
 
   "background": {
     "page": "background.html"
@@ -23,7 +20,11 @@
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": ["lib/browser-compat.js", "lib/content-settings.js", "content-script.js"]
+      "js": [
+        "lib/browser-compat.js",
+        "lib/content-settings.js",
+        "content-script.js"
+      ]
     }
   ],
 

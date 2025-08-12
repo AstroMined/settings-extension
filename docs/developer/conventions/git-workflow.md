@@ -27,35 +27,41 @@ Repository Structure:
 ### Branch Types
 
 #### Main Branch
+
 - **Purpose**: Production-ready code
 - **Protection**: Always protected, no direct pushes
 - **Merges**: Only from `release/*` or `hotfix/*` branches
 - **Tags**: All releases are tagged here
 
 #### Develop Branch
+
 - **Purpose**: Integration of completed features
 - **Merges**: From `feature/*` and `bugfix/*` branches
 - **Testing**: Continuous integration runs on all commits
 
 #### Feature Branches
+
 - **Naming**: `feature/description-in-kebab-case`
 - **Base**: `develop`
 - **Merge Target**: `develop`
 - **Lifespan**: Until feature is complete and merged
 
 #### Bug Fix Branches
+
 - **Naming**: `bugfix/description-in-kebab-case`
 - **Base**: `develop`
 - **Merge Target**: `develop`
 - **Lifespan**: Until bug is fixed and merged
 
 #### Hotfix Branches
+
 - **Naming**: `hotfix/version-or-description`
 - **Base**: `main`
 - **Merge Target**: Both `main` and `develop`
 - **Purpose**: Critical production fixes
 
 #### Release Branches
+
 - **Naming**: `release/v1.2.3`
 - **Base**: `develop`
 - **Merge Target**: Both `main` and `develop`
@@ -249,6 +255,7 @@ git push origin feature/add-export-functionality
 ### Creating Pull Requests
 
 #### PR Title Format
+
 ```
 <type>[scope]: <description>
 
@@ -262,21 +269,25 @@ docs: update developer setup guide
 
 ```markdown
 ## Description
+
 Brief description of what this PR does.
 
 ## Type of Change
+
 - [ ] Bug fix (non-breaking change which fixes an issue)
 - [ ] New feature (non-breaking change which adds functionality)
 - [ ] Breaking change (fix or feature that would cause existing functionality to not work as expected)
 - [ ] Documentation update
 
 ## Testing
+
 - [ ] Unit tests pass
 - [ ] Integration tests pass
 - [ ] Cross-browser testing completed
 - [ ] Manual testing completed
 
 ## Checklist
+
 - [ ] My code follows the project's coding standards
 - [ ] I have performed a self-review of my code
 - [ ] I have commented my code, particularly hard-to-understand areas
@@ -286,13 +297,16 @@ Brief description of what this PR does.
 - [ ] New and existing unit tests pass locally with my changes
 
 ## Screenshots (if applicable)
+
 Include screenshots of UI changes.
 
 ## Related Issues
+
 Closes #123
 Related to #456
 
 ## Additional Notes
+
 Any additional information reviewers should know.
 ```
 
@@ -497,6 +511,7 @@ git repack -ad
 Configure these in GitHub settings:
 
 **Main Branch:**
+
 - Require pull request reviews
 - Require status checks to pass
 - Require branches to be up to date
@@ -505,6 +520,7 @@ Configure these in GitHub settings:
 - Allow deletions: ❌
 
 **Develop Branch:**
+
 - Require pull request reviews
 - Require status checks to pass
 - Require branches to be up to date
@@ -617,7 +633,7 @@ name: PR Checks
 
 on:
   pull_request:
-    branches: [ main, develop ]
+    branches: [main, develop]
 
 jobs:
   lint-and-test:
@@ -626,21 +642,21 @@ jobs:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '18'
-      
+          node-version: "18"
+
       - name: Install dependencies
         run: npm ci
-      
+
       - name: Lint commit messages
         run: npx commitlint --from ${{ github.event.pull_request.base.sha }} --to HEAD --verbose
-      
+
       - name: Run linting
         run: npm run lint
-      
+
       - name: Run tests
         run: npm test
 ```
@@ -654,6 +670,6 @@ jobs:
 
 ## Revision History
 
-| Date | Author | Changes |
-|------|--------|---------|
+| Date       | Author         | Changes                            |
+| ---------- | -------------- | ---------------------------------- |
 | 2025-08-11 | Developer Team | Initial git workflow documentation |

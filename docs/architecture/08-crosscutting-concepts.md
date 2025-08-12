@@ -17,6 +17,7 @@ This document describes the crosscutting concerns and architectural patterns tha
 The Settings Extension is built around a unified settings model that provides consistency across all components.
 
 #### Setting Structure
+
 ```javascript
 {
   "setting_key": {
@@ -31,7 +32,7 @@ The Settings Extension is built around a unified settings model that provides co
     },
     // Type-specific constraints
     "maxLength": 100,    // for text types
-    "min": 1,            // for number types  
+    "min": 1,            // for number types
     "max": 3600,         // for number types
     "enum": [],          // for enumerated values
     "pattern": "",       // for regex validation
@@ -42,23 +43,24 @@ The Settings Extension is built around a unified settings model that provides co
 
 #### Data Types and Validation Rules
 
-| Type | JavaScript Type | Validation Rules | UI Representation |
-|------|----------------|------------------|-------------------|
-| **boolean** | `boolean` | true/false only | Checkbox/Toggle |
-| **text** | `string` | Length limits, pattern matching | Input field |
-| **longtext** | `string` | Length limits, multi-line | Textarea |
-| **number** | `number` | Range limits, integer/float | Number input |
-| **json** | `object` | Valid JSON structure | Code editor |
+| Type         | JavaScript Type | Validation Rules                | UI Representation |
+| ------------ | --------------- | ------------------------------- | ----------------- |
+| **boolean**  | `boolean`       | true/false only                 | Checkbox/Toggle   |
+| **text**     | `string`        | Length limits, pattern matching | Input field       |
+| **longtext** | `string`        | Length limits, multi-line       | Textarea          |
+| **number**   | `number`        | Range limits, integer/float     | Number input      |
+| **json**     | `object`        | Valid JSON structure            | Code editor       |
 
 #### Setting Categories
+
 ```javascript
 const SETTING_CATEGORIES = {
-  GENERAL: 'general',
-  APPEARANCE: 'appearance', 
-  BEHAVIOR: 'behavior',
-  ADVANCED: 'advanced',
-  SECURITY: 'security',
-  PERFORMANCE: 'performance'
+  GENERAL: "general",
+  APPEARANCE: "appearance",
+  BEHAVIOR: "behavior",
+  ADVANCED: "advanced",
+  SECURITY: "security",
+  PERFORMANCE: "performance",
 };
 ```
 
@@ -67,6 +69,7 @@ const SETTING_CATEGORIES = {
 Configuration management ensures consistent handling of settings across all environments and components.
 
 #### Configuration Hierarchy
+
 ```
 1. Hard-coded defaults (embedded in code)
 2. JSON configuration files (config/defaults.json)
@@ -75,24 +78,21 @@ Configuration management ensures consistent handling of settings across all envi
 ```
 
 #### Configuration Loading Strategy
+
 ```javascript
 class ConfigurationManager {
   async loadConfiguration() {
     // 1. Load hard-coded defaults
     const hardDefaults = this.getHardCodedDefaults();
-    
+
     // 2. Load JSON configuration
     const jsonConfig = await this.loadJSONConfig();
-    
+
     // 3. Load stored settings
     const storedSettings = await this.loadStoredSettings();
-    
+
     // 4. Merge in priority order
-    return this.mergeConfigurations(
-      hardDefaults,
-      jsonConfig, 
-      storedSettings
-    );
+    return this.mergeConfigurations(hardDefaults, jsonConfig, storedSettings);
   }
 }
 ```
@@ -104,6 +104,7 @@ class ConfigurationManager {
 The Settings Extension implements a comprehensive error handling strategy that provides consistent error management across all components.
 
 #### Error Classification
+
 ```javascript
 class SettingsError extends Error {
   constructor(message, code, context = {}) {
@@ -117,19 +118,19 @@ class SettingsError extends Error {
 
 class ValidationError extends SettingsError {
   constructor(message, field, value, constraints) {
-    super(message, 'VALIDATION_ERROR', { field, value, constraints });
+    super(message, "VALIDATION_ERROR", { field, value, constraints });
   }
 }
 
 class StorageError extends SettingsError {
   constructor(message, operation, key) {
-    super(message, 'STORAGE_ERROR', { operation, key });
+    super(message, "STORAGE_ERROR", { operation, key });
   }
 }
 
 class BrowserCompatibilityError extends SettingsError {
   constructor(message, browser, feature) {
-    super(message, 'COMPATIBILITY_ERROR', { browser, feature });
+    super(message, "COMPATIBILITY_ERROR", { browser, feature });
   }
 }
 ```
@@ -137,6 +138,7 @@ class BrowserCompatibilityError extends SettingsError {
 #### Error Handling Patterns
 
 **1. Try-Catch with Specific Handling**
+
 ```javascript
 async function handleSettingsOperation() {
   try {
@@ -154,16 +156,20 @@ async function handleSettingsOperation() {
 ```
 
 **2. Error Recovery with Fallbacks**
+
 ```javascript
 async function getSettingWithFallback(key) {
   try {
     return await this.primaryStorage.get(key);
   } catch (primaryError) {
-    this.logger.warn('Primary storage failed, trying fallback', primaryError);
+    this.logger.warn("Primary storage failed, trying fallback", primaryError);
     try {
       return await this.fallbackStorage.get(key);
     } catch (fallbackError) {
-      this.logger.error('All storage methods failed', { primaryError, fallbackError });
+      this.logger.error("All storage methods failed", {
+        primaryError,
+        fallbackError,
+      });
       return this.getDefaultValue(key);
     }
   }
@@ -171,22 +177,23 @@ async function getSettingWithFallback(key) {
 ```
 
 **3. Circuit Breaker Pattern**
+
 ```javascript
 class CircuitBreaker {
   constructor(threshold = 5, timeout = 60000) {
     this.failureThreshold = threshold;
     this.resetTimeout = timeout;
     this.failureCount = 0;
-    this.state = 'CLOSED'; // CLOSED, OPEN, HALF_OPEN
+    this.state = "CLOSED"; // CLOSED, OPEN, HALF_OPEN
     this.nextAttempt = 0;
   }
 
   async execute(operation) {
-    if (this.state === 'OPEN') {
+    if (this.state === "OPEN") {
       if (Date.now() < this.nextAttempt) {
-        throw new Error('Circuit breaker is OPEN');
+        throw new Error("Circuit breaker is OPEN");
       }
-      this.state = 'HALF_OPEN';
+      this.state = "HALF_OPEN";
     }
 
     try {
@@ -206,13 +213,14 @@ class CircuitBreaker {
 A structured logging framework provides consistent logging across all components.
 
 #### Log Levels and Usage
+
 ```javascript
 const LogLevel = {
-  ERROR: 0,   // System errors, exceptions
-  WARN: 1,    // Warnings, fallbacks used
-  INFO: 2,    // General information, state changes
-  DEBUG: 3,   // Detailed debugging information
-  TRACE: 4    // Very detailed tracing (development only)
+  ERROR: 0, // System errors, exceptions
+  WARN: 1, // Warnings, fallbacks used
+  INFO: 2, // General information, state changes
+  DEBUG: 3, // Detailed debugging information
+  TRACE: 4, // Very detailed tracing (development only)
 };
 
 class Logger {
@@ -223,25 +231,25 @@ class Logger {
 
   error(message, context = {}) {
     if (this.level >= LogLevel.ERROR) {
-      this.log('ERROR', message, context);
+      this.log("ERROR", message, context);
     }
   }
 
   warn(message, context = {}) {
     if (this.level >= LogLevel.WARN) {
-      this.log('WARN', message, context);
+      this.log("WARN", message, context);
     }
   }
 
   info(message, context = {}) {
     if (this.level >= LogLevel.INFO) {
-      this.log('INFO', message, context);
+      this.log("INFO", message, context);
     }
   }
 
   debug(message, context = {}) {
     if (this.level >= LogLevel.DEBUG) {
-      this.log('DEBUG', message, context);
+      this.log("DEBUG", message, context);
     }
   }
 
@@ -251,28 +259,34 @@ class Logger {
       level,
       component: this.component,
       message,
-      context
+      context,
     };
-    
+
     console[level.toLowerCase()](
       `[${logEntry.timestamp}] ${level} ${this.component}: ${message}`,
-      context
+      context,
     );
   }
 }
 ```
 
 #### Contextual Logging
+
 ```javascript
 // Component-specific loggers
-const uiLogger = new Logger('UI', LogLevel.INFO);
-const storageLogger = new Logger('Storage', LogLevel.DEBUG);
-const apiLogger = new Logger('API', LogLevel.INFO);
+const uiLogger = new Logger("UI", LogLevel.INFO);
+const storageLogger = new Logger("Storage", LogLevel.DEBUG);
+const apiLogger = new Logger("API", LogLevel.INFO);
 
 // Usage examples
-uiLogger.info('Popup opened', { trigger: 'user_click' });
-storageLogger.debug('Setting retrieved from cache', { key: 'api_key', hit: true });
-apiLogger.error('Content script communication failed', { error: error.message });
+uiLogger.info("Popup opened", { trigger: "user_click" });
+storageLogger.debug("Setting retrieved from cache", {
+  key: "api_key",
+  hit: true,
+});
+apiLogger.error("Content script communication failed", {
+  error: error.message,
+});
 ```
 
 ## Security Concepts
@@ -282,48 +296,60 @@ apiLogger.error('Content script communication failed', { error: error.message })
 The Settings Extension implements defense-in-depth security principles across all components.
 
 #### Input Validation and Sanitization
+
 ```javascript
 class InputValidator {
   static validateSettingKey(key) {
-    if (typeof key !== 'string') {
-      throw new ValidationError('Setting key must be a string', 'key', key, { type: 'string' });
+    if (typeof key !== "string") {
+      throw new ValidationError("Setting key must be a string", "key", key, {
+        type: "string",
+      });
     }
-    
+
     if (!/^[a-zA-Z][a-zA-Z0-9_]*$/.test(key)) {
-      throw new ValidationError('Invalid setting key format', 'key', key, { pattern: '^[a-zA-Z][a-zA-Z0-9_]*$' });
+      throw new ValidationError("Invalid setting key format", "key", key, {
+        pattern: "^[a-zA-Z][a-zA-Z0-9_]*$",
+      });
     }
-    
+
     if (key.length > 64) {
-      throw new ValidationError('Setting key too long', 'key', key, { maxLength: 64 });
+      throw new ValidationError("Setting key too long", "key", key, {
+        maxLength: 64,
+      });
     }
-    
+
     return key;
   }
 
   static validateSettingValue(value, type, constraints = {}) {
     switch (type) {
-      case 'text':
+      case "text":
         return this.validateText(value, constraints);
-      case 'number':
+      case "number":
         return this.validateNumber(value, constraints);
-      case 'json':
+      case "json":
         return this.validateJSON(value, constraints);
       default:
-        throw new ValidationError('Unknown setting type', 'type', type, { supportedTypes: ['text', 'number', 'json'] });
+        throw new ValidationError("Unknown setting type", "type", type, {
+          supportedTypes: ["text", "number", "json"],
+        });
     }
   }
 
   static sanitizeHTML(input) {
     // Remove potentially dangerous HTML tags and attributes
-    return input.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
-                .replace(/javascript:/gi, '')
-                .replace(/on\w+\s*=/gi, '');
+    return input
+      .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "")
+      .replace(/javascript:/gi, "")
+      .replace(/on\w+\s*=/gi, "");
   }
 }
 ```
 
 #### Content Security Policy (CSP)
+
 The extension enforces strict CSP rules:
+
 ```json
 {
   "content_security_policy": {
@@ -333,11 +359,12 @@ The extension enforces strict CSP rules:
 ```
 
 #### Permission Minimization
+
 ```javascript
 // Only request necessary permissions
 const REQUIRED_PERMISSIONS = [
-  'storage',      // For settings persistence
-  'activeTab'     // For content script injection when needed
+  "storage", // For settings persistence
+  "activeTab", // For content script injection when needed
 ];
 
 // Avoid these broad permissions:
@@ -349,39 +376,41 @@ const REQUIRED_PERMISSIONS = [
 ### 8.6 Data Privacy and Protection
 
 #### Data Classification
+
 ```javascript
 const DataClassification = {
-  PUBLIC: 'public',           // No privacy concerns
-  INTERNAL: 'internal',       // Extension internal data
-  CONFIDENTIAL: 'confidential', // User settings data
-  RESTRICTED: 'restricted'    // Sensitive configuration
+  PUBLIC: "public", // No privacy concerns
+  INTERNAL: "internal", // Extension internal data
+  CONFIDENTIAL: "confidential", // User settings data
+  RESTRICTED: "restricted", // Sensitive configuration
 };
 
 const PRIVACY_RULES = {
   [DataClassification.PUBLIC]: {
     encryption: false,
     logging: true,
-    transmission: true
+    transmission: true,
   },
   [DataClassification.CONFIDENTIAL]: {
     encryption: true,
     logging: false,
-    transmission: false
-  }
+    transmission: false,
+  },
 };
 ```
 
 #### Data Encryption
+
 ```javascript
 class DataProtection {
   static async encryptSensitiveData(data, key) {
-    if (typeof crypto !== 'undefined' && crypto.subtle) {
+    if (typeof crypto !== "undefined" && crypto.subtle) {
       // Use Web Crypto API for encryption
       const encoded = new TextEncoder().encode(JSON.stringify(data));
       const encrypted = await crypto.subtle.encrypt(
-        { name: 'AES-GCM', iv: crypto.getRandomValues(new Uint8Array(12)) },
+        { name: "AES-GCM", iv: crypto.getRandomValues(new Uint8Array(12)) },
         key,
-        encoded
+        encoded,
       );
       return encrypted;
     }
@@ -398,6 +427,7 @@ class DataProtection {
 The Settings Extension implements several performance optimization patterns consistently across components.
 
 #### Lazy Loading Pattern
+
 ```javascript
 class LazyComponent {
   constructor() {
@@ -412,7 +442,7 @@ class LazyComponent {
 
     if (this._loading) {
       // Wait for existing load to complete
-      return new Promise(resolve => {
+      return new Promise((resolve) => {
         const checkLoaded = () => {
           if (this._component) {
             resolve(this._component);
@@ -436,9 +466,11 @@ class LazyComponent {
 ```
 
 #### Caching Strategy
+
 ```javascript
 class CacheManager {
-  constructor(maxSize = 100, ttl = 300000) { // 5 minutes default TTL
+  constructor(maxSize = 100, ttl = 300000) {
+    // 5 minutes default TTL
     this.cache = new Map();
     this.maxSize = maxSize;
     this.ttl = ttl;
@@ -454,7 +486,7 @@ class CacheManager {
     this.cache.set(key, {
       value,
       timestamp: Date.now(),
-      hits: 0
+      hits: 0,
     });
   }
 
@@ -475,6 +507,7 @@ class CacheManager {
 ```
 
 #### Debouncing and Throttling
+
 ```javascript
 class PerformanceUtils {
   static debounce(func, wait, immediate = false) {
@@ -493,11 +526,11 @@ class PerformanceUtils {
 
   static throttle(func, limit) {
     let inThrottle;
-    return function(...args) {
+    return function (...args) {
       if (!inThrottle) {
         func.apply(this, args);
         inThrottle = true;
-        setTimeout(() => inThrottle = false, limit);
+        setTimeout(() => (inThrottle = false), limit);
       }
     };
   }
@@ -511,6 +544,7 @@ const throttledSearch = PerformanceUtils.throttle(performSearch, 100);
 ### 8.8 Memory Management
 
 #### Weak References for Event Listeners
+
 ```javascript
 class EventManager {
   constructor() {
@@ -521,12 +555,12 @@ class EventManager {
     if (!this.listeners.has(target)) {
       this.listeners.set(target, new Map());
     }
-    
+
     const targetListeners = this.listeners.get(target);
     if (!targetListeners.has(event)) {
       targetListeners.set(event, new Set());
     }
-    
+
     targetListeners.get(event).add(callback);
     target.addEventListener(event, callback);
   }
@@ -561,6 +595,7 @@ class EventManager {
 The Settings Extension maintains consistent UI patterns across all interface components.
 
 #### Design System
+
 ```css
 /* CSS Custom Properties for consistent styling */
 :root {
@@ -569,12 +604,12 @@ The Settings Extension maintains consistent UI patterns across all interface com
   --error-color: #ea4335;
   --warning-color: #fbbc04;
   --success-color: #34a853;
-  
+
   --text-primary: #202124;
   --text-secondary: #5f6368;
   --background: #ffffff;
   --surface: #f8f9fa;
-  
+
   --border-radius: 8px;
   --spacing-unit: 8px;
   --animation-duration: 0.2s;
@@ -610,58 +645,60 @@ The Settings Extension maintains consistent UI patterns across all interface com
 ```
 
 #### Component Templates
+
 ```javascript
 class UIComponentTemplate {
   static createFormField(type, label, value, options = {}) {
-    const container = document.createElement('div');
-    container.className = 'settings-field';
-    
-    const labelElement = document.createElement('label');
+    const container = document.createElement("div");
+    container.className = "settings-field";
+
+    const labelElement = document.createElement("label");
     labelElement.textContent = label;
-    labelElement.className = 'settings-label';
-    
+    labelElement.className = "settings-label";
+
     const input = this.createInput(type, value, options);
-    
+
     if (options.description) {
-      const description = document.createElement('div');
+      const description = document.createElement("div");
       description.textContent = options.description;
-      description.className = 'settings-description';
+      description.className = "settings-description";
       container.appendChild(description);
     }
-    
+
     container.appendChild(labelElement);
     container.appendChild(input);
-    
+
     return container;
   }
 
   static createInput(type, value, options) {
     let input;
-    
+
     switch (type) {
-      case 'boolean':
-        input = document.createElement('input');
-        input.type = 'checkbox';
+      case "boolean":
+        input = document.createElement("input");
+        input.type = "checkbox";
         input.checked = value;
         break;
-      case 'longtext':
-        input = document.createElement('textarea');
+      case "longtext":
+        input = document.createElement("textarea");
         input.value = value;
         input.rows = options.rows || 4;
         break;
       default:
-        input = document.createElement('input');
-        input.type = type === 'number' ? 'number' : 'text';
+        input = document.createElement("input");
+        input.type = type === "number" ? "number" : "text";
         input.value = value;
     }
-    
-    input.className = 'settings-input';
+
+    input.className = "settings-input";
     return input;
   }
 }
 ```
 
 #### Accessibility Patterns
+
 ```javascript
 class AccessibilityHelper {
   static addAriaLabels(element, labels) {
@@ -671,9 +708,9 @@ class AccessibilityHelper {
   }
 
   static createScreenReaderText(text) {
-    const span = document.createElement('span');
+    const span = document.createElement("span");
     span.textContent = text;
-    span.className = 'sr-only';
+    span.className = "sr-only";
     span.style.cssText = `
       position: absolute;
       width: 1px;
@@ -688,13 +725,13 @@ class AccessibilityHelper {
   }
 
   static announceToScreenReader(message) {
-    const announcement = document.createElement('div');
-    announcement.setAttribute('aria-live', 'polite');
-    announcement.setAttribute('aria-atomic', 'true');
-    announcement.style.position = 'absolute';
-    announcement.style.left = '-10000px';
+    const announcement = document.createElement("div");
+    announcement.setAttribute("aria-live", "polite");
+    announcement.setAttribute("aria-atomic", "true");
+    announcement.style.position = "absolute";
+    announcement.style.left = "-10000px";
     announcement.textContent = message;
-    
+
     document.body.appendChild(announcement);
     setTimeout(() => document.body.removeChild(announcement), 1000);
   }
@@ -706,9 +743,10 @@ class AccessibilityHelper {
 Although not initially implemented, the extension is designed with internationalization support in mind.
 
 #### i18n Framework Structure
+
 ```javascript
 class I18nManager {
-  constructor(defaultLocale = 'en') {
+  constructor(defaultLocale = "en") {
     this.currentLocale = defaultLocale;
     this.messages = new Map();
   }
@@ -726,19 +764,19 @@ class I18nManager {
   getMessage(key, substitutions = {}) {
     const messages = this.messages.get(this.currentLocale) || {};
     let message = messages[key] || key;
-    
+
     // Handle substitutions
     Object.entries(substitutions).forEach(([placeholder, value]) => {
-      message = message.replace(new RegExp(`\\$${placeholder}\\$`, 'g'), value);
+      message = message.replace(new RegExp(`\\$${placeholder}\\$`, "g"), value);
     });
-    
+
     return message;
   }
 }
 
 // Usage
 const i18n = new I18nManager();
-const welcomeMessage = i18n.getMessage('welcome_user', { username: 'John' });
+const welcomeMessage = i18n.getMessage("welcome_user", { username: "John" });
 ```
 
 ## Testing Patterns
@@ -748,46 +786,48 @@ const welcomeMessage = i18n.getMessage('welcome_user', { username: 'John' });
 Consistent testing patterns ensure reliability across all components.
 
 #### Test Structure
+
 ```javascript
 // Standard test structure
-describe('Component Name', () => {
+describe("Component Name", () => {
   let component;
   let mockDependency;
-  
+
   beforeEach(() => {
     mockDependency = createMockDependency();
     component = new Component(mockDependency);
   });
-  
+
   afterEach(() => {
     component.cleanup();
   });
-  
-  describe('method name', () => {
-    it('should perform expected behavior', async () => {
+
+  describe("method name", () => {
+    it("should perform expected behavior", async () => {
       // Arrange
-      const input = 'test data';
-      const expectedOutput = 'expected result';
-      
+      const input = "test data";
+      const expectedOutput = "expected result";
+
       // Act
       const result = await component.method(input);
-      
+
       // Assert
       expect(result).toBe(expectedOutput);
     });
-    
-    it('should handle error conditions', async () => {
+
+    it("should handle error conditions", async () => {
       // Arrange
-      mockDependency.method.mockRejectedValue(new Error('Test error'));
-      
+      mockDependency.method.mockRejectedValue(new Error("Test error"));
+
       // Act & Assert
-      await expect(component.method('input')).rejects.toThrow('Test error');
+      await expect(component.method("input")).rejects.toThrow("Test error");
     });
   });
 });
 ```
 
 #### Mock Patterns
+
 ```javascript
 // Browser API mocks
 const createBrowserMock = () => ({
@@ -796,15 +836,15 @@ const createBrowserMock = () => ({
       get: jest.fn().mockResolvedValue({}),
       set: jest.fn().mockResolvedValue(),
       remove: jest.fn().mockResolvedValue(),
-      clear: jest.fn().mockResolvedValue()
-    }
+      clear: jest.fn().mockResolvedValue(),
+    },
   },
   runtime: {
     sendMessage: jest.fn().mockResolvedValue({}),
     onMessage: {
-      addListener: jest.fn()
-    }
-  }
+      addListener: jest.fn(),
+    },
+  },
 });
 ```
 
@@ -817,6 +857,6 @@ const createBrowserMock = () => ({
 
 ## Revision History
 
-| Date | Author | Changes |
-|------|--------|---------|
+| Date       | Author            | Changes                                    |
+| ---------- | ----------------- | ------------------------------------------ |
 | 2025-08-11 | Architecture Team | Initial crosscutting concepts and patterns |

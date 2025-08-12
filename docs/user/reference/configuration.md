@@ -14,13 +14,13 @@ Complete reference documentation for all configuration options available in the 
 
 The Settings Extension includes the following configurable settings:
 
-| Setting | Type | Default | Purpose |
-|---------|------|---------|---------|
-| `feature_enabled` | Boolean | `true` | Main feature functionality toggle |
-| `api_key` | Text | `""` | External service authentication |
-| `custom_css` | Long Text | CSS template | Custom styling injection |
-| `refresh_interval` | Number | `60` | Auto-refresh timing in seconds |
-| `advanced_config` | JSON | Object | Complex configuration object |
+| Setting            | Type      | Default      | Purpose                           |
+| ------------------ | --------- | ------------ | --------------------------------- |
+| `feature_enabled`  | Boolean   | `true`       | Main feature functionality toggle |
+| `api_key`          | Text      | `""`         | External service authentication   |
+| `custom_css`       | Long Text | CSS template | Custom styling injection          |
+| `refresh_interval` | Number    | `60`         | Auto-refresh timing in seconds    |
+| `advanced_config`  | JSON      | Object       | Complex configuration object      |
 
 ## Core Settings
 
@@ -29,6 +29,7 @@ The Settings Extension includes the following configurable settings:
 **Purpose**: Controls whether the main extension functionality is active.
 
 **Configuration**:
+
 ```json
 {
   "feature_enabled": {
@@ -40,24 +41,28 @@ The Settings Extension includes the following configurable settings:
 ```
 
 **Values**:
+
 - `true`: Extension features are active and available
 - `false`: Extension features are disabled
 
 **Default**: `true`
 
 **Use Cases**:
+
 - Temporarily disable extension without uninstalling
 - Testing scenarios where extension should be inactive
 - Administrative control over feature availability
 - Debugging issues by isolating extension functionality
 
 **Impact When Disabled**:
+
 - Content scripts may not inject or function
 - API requests may be blocked
 - Custom CSS will not be applied
 - Background processes may be suspended
 
 **Best Practices**:
+
 - Use for testing and debugging scenarios
 - Consider user workflow impact before disabling
 - Provide clear indication when features are disabled
@@ -68,6 +73,7 @@ The Settings Extension includes the following configurable settings:
 **Purpose**: Stores authentication credentials for external API services.
 
 **Configuration**:
+
 ```json
 {
   "api_key": {
@@ -80,6 +86,7 @@ The Settings Extension includes the following configurable settings:
 ```
 
 **Values**:
+
 - Empty string `""`: No API key configured (default)
 - Valid API key: Alphanumeric string up to 100 characters
 - Format varies by service provider
@@ -87,12 +94,14 @@ The Settings Extension includes the following configurable settings:
 **Default**: `""` (empty)
 
 **Validation Rules**:
+
 - Maximum length: 100 characters
 - No specific format validation (depends on service)
 - Empty values are allowed
 - Special characters supported
 
 **Security Considerations**:
+
 - API keys are stored in browser's extension storage
 - Not encrypted at rest (relies on browser security)
 - Should not be shared in exported settings
@@ -101,6 +110,7 @@ The Settings Extension includes the following configurable settings:
 **Configuration Examples**:
 
 **Development Environment**:
+
 ```json
 {
   "api_key": {
@@ -112,10 +122,11 @@ The Settings Extension includes the following configurable settings:
 ```
 
 **Production Environment**:
+
 ```json
 {
   "api_key": {
-    "type": "text", 
+    "type": "text",
     "value": "prod_abcdef1234567890",
     "description": "Production API key"
   }
@@ -123,6 +134,7 @@ The Settings Extension includes the following configurable settings:
 ```
 
 **Best Practices**:
+
 - Use different keys for development, staging, and production
 - Rotate keys regularly according to security policy
 - Remove from exported settings when sharing
@@ -134,6 +146,7 @@ The Settings Extension includes the following configurable settings:
 **Purpose**: Allows injection of custom CSS styles into web pages.
 
 **Configuration**:
+
 ```json
 {
   "custom_css": {
@@ -146,20 +159,23 @@ The Settings Extension includes the following configurable settings:
 ```
 
 **Default Value**:
+
 ```css
 /* Custom CSS styles */
-.example { 
-  color: blue; 
+.example {
+  color: blue;
 }
 ```
 
 **Validation Rules**:
+
 - Maximum length: 50,000 characters
 - No CSS syntax validation (browser handles parsing)
 - Supports multi-line content with proper escaping
 - All UTF-8 characters supported
 
 **CSS Features Supported**:
+
 - Standard CSS selectors and properties
 - Media queries for responsive design
 - CSS animations and transitions
@@ -169,6 +185,7 @@ The Settings Extension includes the following configurable settings:
 **Configuration Examples**:
 
 **Basic Styling**:
+
 ```css
 /* Hide annoying elements */
 .advertisement,
@@ -184,6 +201,7 @@ body {
 ```
 
 **Dark Theme**:
+
 ```css
 /* Dark theme for websites */
 body {
@@ -195,7 +213,8 @@ a {
   color: #4a9eff !important;
 }
 
-input, textarea {
+input,
+textarea {
   background-color: #2d2d2d !important;
   color: #ffffff !important;
   border: 1px solid #555 !important;
@@ -203,6 +222,7 @@ input, textarea {
 ```
 
 **Performance Optimizations**:
+
 ```css
 /* Disable expensive animations */
 * {
@@ -214,6 +234,7 @@ input, textarea {
 ```
 
 **Best Practices**:
+
 - Use `!important` judiciously to override site styles
 - Test CSS on multiple websites for compatibility
 - Keep CSS organized with comments
@@ -225,6 +246,7 @@ input, textarea {
 **Purpose**: Controls the automatic refresh timing for dynamic content updates.
 
 **Configuration**:
+
 ```json
 {
   "refresh_interval": {
@@ -238,11 +260,13 @@ input, textarea {
 ```
 
 **Values**:
+
 - Minimum: `1` second
 - Maximum: `3600` seconds (1 hour)
 - Default: `60` seconds
 
 **Validation Rules**:
+
 - Must be a positive integer
 - Range: 1-3600 seconds
 - No decimal values allowed
@@ -250,16 +274,17 @@ input, textarea {
 
 **Performance Impact**:
 
-| Interval | Impact | Use Case |
-|----------|---------|----------|
-| 1-5 seconds | High CPU/Network | Real-time monitoring |
-| 10-30 seconds | Moderate | Active development |
-| 60-300 seconds | Low | Regular updates |
-| 600+ seconds | Minimal | Periodic checks |
+| Interval       | Impact           | Use Case             |
+| -------------- | ---------------- | -------------------- |
+| 1-5 seconds    | High CPU/Network | Real-time monitoring |
+| 10-30 seconds  | Moderate         | Active development   |
+| 60-300 seconds | Low              | Regular updates      |
+| 600+ seconds   | Minimal          | Periodic checks      |
 
 **Configuration Examples**:
 
 **Real-time Monitoring**:
+
 ```json
 {
   "refresh_interval": {
@@ -271,10 +296,11 @@ input, textarea {
 ```
 
 **Battery Optimization**:
+
 ```json
 {
   "refresh_interval": {
-    "type": "number", 
+    "type": "number",
     "value": 300,
     "description": "Slower refresh to conserve battery"
   }
@@ -282,6 +308,7 @@ input, textarea {
 ```
 
 **Best Practices**:
+
 - Balance functionality needs with performance
 - Use longer intervals on battery-powered devices
 - Consider network usage implications
@@ -293,6 +320,7 @@ input, textarea {
 **Purpose**: Stores complex configuration objects for advanced features and integrations.
 
 **Configuration**:
+
 ```json
 {
   "advanced_config": {
@@ -308,6 +336,7 @@ input, textarea {
 ```
 
 **Default Object Structure**:
+
 ```json
 {
   "endpoint": "https://api.example.com",
@@ -317,6 +346,7 @@ input, textarea {
 ```
 
 **Validation Rules**:
+
 - Must be valid JSON object
 - No circular references allowed
 - Serializable with JSON.stringify()
@@ -325,18 +355,21 @@ input, textarea {
 **Standard Properties**:
 
 #### endpoint
+
 - **Type**: String (URL)
 - **Purpose**: Base URL for API requests
 - **Example**: `"https://api.example.com/v1"`
 - **Validation**: Should be valid HTTP/HTTPS URL
 
 #### timeout
+
 - **Type**: Number (milliseconds)
 - **Purpose**: Request timeout duration
 - **Range**: 1000-60000 ms (1-60 seconds)
 - **Default**: 5000 ms (5 seconds)
 
 #### retries
+
 - **Type**: Number (integer)
 - **Purpose**: Number of retry attempts for failed requests
 - **Range**: 0-10 retries
@@ -345,6 +378,7 @@ input, textarea {
 **Configuration Examples**:
 
 **Development Configuration**:
+
 ```json
 {
   "advanced_config": {
@@ -370,6 +404,7 @@ input, textarea {
 ```
 
 **Production Configuration**:
+
 ```json
 {
   "advanced_config": {
@@ -400,6 +435,7 @@ input, textarea {
 ```
 
 **High-Performance Configuration**:
+
 ```json
 {
   "advanced_config": {
@@ -689,39 +725,39 @@ Before applying any configuration, validate using these rules:
 ```javascript
 function validateConfiguration(config) {
   const errors = [];
-  
+
   // Check required fields
   if (!config.settings) {
     errors.push("Missing 'settings' object");
   }
-  
+
   // Validate each setting
   for (const [key, setting] of Object.entries(config.settings)) {
     // Type validation
     if (!setting.type) {
       errors.push(`Setting '${key}' missing type`);
     }
-    
+
     // Value validation based on type
     switch (setting.type) {
-      case 'boolean':
-        if (typeof setting.value !== 'boolean') {
+      case "boolean":
+        if (typeof setting.value !== "boolean") {
           errors.push(`Setting '${key}' value must be boolean`);
         }
         break;
-        
-      case 'text':
-      case 'longtext':
-        if (typeof setting.value !== 'string') {
+
+      case "text":
+      case "longtext":
+        if (typeof setting.value !== "string") {
           errors.push(`Setting '${key}' value must be string`);
         }
         if (setting.maxLength && setting.value.length > setting.maxLength) {
           errors.push(`Setting '${key}' exceeds maxLength`);
         }
         break;
-        
-      case 'number':
-        if (typeof setting.value !== 'number' || isNaN(setting.value)) {
+
+      case "number":
+        if (typeof setting.value !== "number" || isNaN(setting.value)) {
           errors.push(`Setting '${key}' value must be valid number`);
         }
         if (setting.min !== undefined && setting.value < setting.min) {
@@ -731,9 +767,9 @@ function validateConfiguration(config) {
           errors.push(`Setting '${key}' above maximum value`);
         }
         break;
-        
-      case 'json':
-        if (typeof setting.value !== 'object' || setting.value === null) {
+
+      case "json":
+        if (typeof setting.value !== "object" || setting.value === null) {
           errors.push(`Setting '${key}' value must be valid object`);
         }
         try {
@@ -744,7 +780,7 @@ function validateConfiguration(config) {
         break;
     }
   }
-  
+
   return errors;
 }
 ```
@@ -754,24 +790,28 @@ function validateConfiguration(config) {
 ### Common Configuration Problems
 
 **Settings Not Saving**
+
 - Check that values meet validation requirements
 - Verify JSON syntax is correct for advanced_config
 - Ensure browser has sufficient storage space
 - Check for browser security restrictions
 
 **CSS Not Applied**
+
 - Verify custom_css syntax is valid
 - Check that website doesn't override styles
 - Confirm extension has permission to inject styles
 - Test with `!important` declarations
 
 **API Requests Failing**
+
 - Verify api_key is correct and not expired
 - Check advanced_config endpoint URL is accessible
 - Confirm timeout values are reasonable
 - Test with reduced retry counts
 
 **Performance Issues**
+
 - Increase refresh_interval for better performance
 - Reduce custom_css complexity and size
 - Optimize advanced_config timeout values
@@ -790,6 +830,7 @@ If configuration becomes corrupted:
 ## Best Practices Summary
 
 ### General Guidelines
+
 - Start with default values and customize gradually
 - Test configuration changes in safe environment
 - Keep backups of working configurations
@@ -797,6 +838,7 @@ If configuration becomes corrupted:
 - Validate configuration before applying
 
 ### Security Best Practices
+
 - Never share API keys in configuration exports
 - Use environment-specific API keys
 - Keep sensitive configurations private
@@ -804,6 +846,7 @@ If configuration becomes corrupted:
 - Monitor for unauthorized configuration changes
 
 ### Performance Optimization
+
 - Use appropriate refresh intervals for your use case
 - Keep custom CSS efficient and minimal
 - Set reasonable timeout values
@@ -813,6 +856,7 @@ If configuration becomes corrupted:
 ## Quick Reference
 
 ### Default Values
+
 - `feature_enabled`: `true`
 - `api_key`: `""` (empty)
 - `custom_css`: Basic CSS template
@@ -820,12 +864,14 @@ If configuration becomes corrupted:
 - `advanced_config`: Basic API configuration
 
 ### Validation Limits
+
 - `api_key`: Max 100 characters
 - `custom_css`: Max 50,000 characters
 - `refresh_interval`: 1-3600 seconds
 - `advanced_config`: Valid JSON object
 
 ### Configuration Files
+
 - Export format: JSON with metadata
 - Import compatibility: v1.0+ format
 - Backup recommendation: Before major changes
@@ -840,6 +886,6 @@ If configuration becomes corrupted:
 
 ## Revision History
 
-| Date | Author | Changes |
-|------|--------|---------|
+| Date       | Author             | Changes                         |
+| ---------- | ------------------ | ------------------------------- |
 | 2025-08-11 | Documentation Team | Initial configuration reference |

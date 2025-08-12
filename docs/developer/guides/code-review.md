@@ -15,31 +15,34 @@ This guide establishes comprehensive code review standards and procedures for th
 ### Review Requirements
 
 #### When Reviews Are Required
+
 - All pull requests must be reviewed before merging
 - Bug fixes affecting critical functionality require two reviewers
 - Architecture changes require senior developer approval
 - New features require product owner sign-off
 
 #### Review Assignment
+
 - **Automatic Assignment**: Configure GitHub/GitLab auto-assignment
 - **Self-Assignment**: Developers can request specific reviewers
 - **Escalation**: Complex PRs may require architecture team review
 
 ### Review Timeline
 
-| PR Type | Target Review Time | Maximum Review Time |
-|---------|-------------------|-------------------|
-| Bug Fix (Minor) | 4 hours | 24 hours |
-| Bug Fix (Critical) | 1 hour | 4 hours |
-| Feature (Small) | 8 hours | 48 hours |
-| Feature (Large) | 24 hours | 1 week |
-| Architecture Change | 48 hours | 2 weeks |
+| PR Type             | Target Review Time | Maximum Review Time |
+| ------------------- | ------------------ | ------------------- |
+| Bug Fix (Minor)     | 4 hours            | 24 hours            |
+| Bug Fix (Critical)  | 1 hour             | 4 hours             |
+| Feature (Small)     | 8 hours            | 48 hours            |
+| Feature (Large)     | 24 hours           | 1 week              |
+| Architecture Change | 48 hours           | 2 weeks             |
 
 ## Review Checklist
 
 ### Code Quality
 
 #### Functionality
+
 - [ ] Code does what it's supposed to do according to requirements
 - [ ] Edge cases are properly handled
 - [ ] Error handling is appropriate and informative
@@ -47,6 +50,7 @@ This guide establishes comprehensive code review standards and procedures for th
 - [ ] Performance implications are acceptable
 
 #### Code Style and Standards
+
 - [ ] Code follows project [Coding Standards](../conventions/coding-standards.md)
 - [ ] Consistent naming conventions throughout
 - [ ] Proper indentation and formatting
@@ -54,6 +58,7 @@ This guide establishes comprehensive code review standards and procedures for th
 - [ ] ESLint rules pass without warnings
 
 #### Architecture and Design
+
 - [ ] Code follows established architectural patterns
 - [ ] Proper separation of concerns
 - [ ] Follows DRY (Don't Repeat Yourself) principle
@@ -63,6 +68,7 @@ This guide establishes comprehensive code review standards and procedures for th
 ### Testing Requirements
 
 #### Test Coverage
+
 - [ ] Unit tests cover new/modified functionality
 - [ ] Integration tests for API changes
 - [ ] Cross-browser tests for UI changes
@@ -70,6 +76,7 @@ This guide establishes comprehensive code review standards and procedures for th
 - [ ] Edge cases are tested
 
 #### Test Quality
+
 - [ ] Tests are readable and maintainable
 - [ ] Test names clearly describe what they verify
 - [ ] No flaky or brittle tests
@@ -79,6 +86,7 @@ This guide establishes comprehensive code review standards and procedures for th
 ### Documentation
 
 #### Code Documentation
+
 - [ ] Complex algorithms are documented
 - [ ] Public APIs have JSDoc comments
 - [ ] Configuration changes are documented
@@ -86,6 +94,7 @@ This guide establishes comprehensive code review standards and procedures for th
 - [ ] Architecture decisions are explained
 
 #### User Documentation
+
 - [ ] User-facing changes have documentation updates
 - [ ] API changes update reference documentation
 - [ ] New features have how-to guides
@@ -94,6 +103,7 @@ This guide establishes comprehensive code review standards and procedures for th
 ### Security Review
 
 #### Security Considerations
+
 - [ ] No sensitive data exposed in logs or client-side code
 - [ ] Input validation is implemented where needed
 - [ ] Authentication/authorization changes are secure
@@ -101,6 +111,7 @@ This guide establishes comprehensive code review standards and procedures for th
 - [ ] No introduction of security vulnerabilities
 
 #### Browser Extension Security
+
 - [ ] Manifest permissions are minimal and justified
 - [ ] Content script injection is safe
 - [ ] Message passing is secure and validated
@@ -110,6 +121,7 @@ This guide establishes comprehensive code review standards and procedures for th
 ### Performance Review
 
 #### Performance Impact
+
 - [ ] No obvious performance regressions
 - [ ] Database queries are optimized
 - [ ] Memory usage is reasonable
@@ -117,6 +129,7 @@ This guide establishes comprehensive code review standards and procedures for th
 - [ ] Caching is used appropriately
 
 #### Extension-Specific Performance
+
 - [ ] Background script efficiency
 - [ ] Content script impact on page load
 - [ ] Popup/options page load times
@@ -127,6 +140,7 @@ This guide establishes comprehensive code review standards and procedures for th
 ### Review Approach
 
 #### Code Reading Strategy
+
 1. **High-Level Understanding**
    - Read PR description and linked issues
    - Understand the problem being solved
@@ -145,6 +159,7 @@ This guide establishes comprehensive code review standards and procedures for th
 ### Feedback Guidelines
 
 #### Constructive Feedback
+
 - Be specific about issues and provide examples
 - Suggest improvements rather than just pointing out problems
 - Explain reasoning behind feedback
@@ -152,6 +167,7 @@ This guide establishes comprehensive code review standards and procedures for th
 - Focus on the code, not the person
 
 #### Feedback Categories
+
 Use these prefixes to categorize feedback:
 
 - **Must Fix**: Critical issues that block merge
@@ -163,8 +179,9 @@ Use these prefixes to categorize feedback:
 #### Example Feedback
 
 **Good Feedback:**
+
 ```
-Must Fix: This function doesn't handle the case where `settings` is null. 
+Must Fix: This function doesn't handle the case where `settings` is null.
 Consider adding a null check at the beginning of the function:
 
 if (!settings) {
@@ -173,6 +190,7 @@ if (!settings) {
 ```
 
 **Poor Feedback:**
+
 ```
 This is wrong.
 ```
@@ -180,6 +198,7 @@ This is wrong.
 ### Review Best Practices
 
 #### For Reviewers
+
 - Review code promptly within target timelines
 - Provide actionable feedback with specific suggestions
 - Test critical changes locally when possible
@@ -187,6 +206,7 @@ This is wrong.
 - Acknowledge good practices and improvements
 
 #### For Authors
+
 - Respond to all feedback, even if just to acknowledge
 - Ask for clarification on unclear feedback
 - Make requested changes or explain why you disagree
@@ -198,6 +218,7 @@ This is wrong.
 ### Automated Checks
 
 #### Pre-Review Automation
+
 ```yaml
 # GitHub Actions workflow example
 name: Pre-Review Checks
@@ -210,24 +231,25 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      
+
       - name: Run ESLint
         run: npm run lint
-        
+
       - name: Run Tests
         run: npm test
-        
+
       - name: Check Test Coverage
         run: npm run test:coverage
-        
+
       - name: Validate Extension
         run: npm run validate
-        
+
       - name: Security Scan
         run: npm audit
 ```
 
 #### Review Assistance Tools
+
 - **GitHub PR Templates**: Provide review checklist
 - **Automated Formatting**: Prettier integration
 - **Code Analysis**: ESLint, SonarQube integration
@@ -236,6 +258,7 @@ jobs:
 ### Manual Review Tools
 
 #### Local Review Setup
+
 ```bash
 # Checkout PR for local testing
 git fetch origin pull/123/head:pr-123
@@ -253,6 +276,7 @@ npm run test:performance
 ```
 
 #### Browser Testing Checklist
+
 - [ ] Test in Chrome (latest)
 - [ ] Test in Firefox (latest)
 - [ ] Test in Edge (latest)
@@ -266,6 +290,7 @@ npm run test:performance
 ### New Feature Review
 
 #### Review Focus Areas
+
 1. **Requirements Alignment**
    - Does implementation match requirements?
    - Are acceptance criteria met?
@@ -282,25 +307,30 @@ npm run test:performance
    - Does it follow established UI patterns?
 
 #### Feature Review Template
+
 ```markdown
 ## Feature Review: [Feature Name]
 
 ### Requirements
+
 - [ ] All acceptance criteria met
 - [ ] Feature works as described in requirements
 - [ ] Edge cases handled appropriately
 
 ### Implementation
+
 - [ ] Code follows architectural patterns
 - [ ] Performance is acceptable
 - [ ] Error handling is comprehensive
 
 ### Testing
+
 - [ ] Unit tests cover new functionality
 - [ ] Integration tests verify feature works end-to-end
 - [ ] Cross-browser testing completed
 
 ### Documentation
+
 - [ ] User documentation updated
 - [ ] API documentation updated (if applicable)
 - [ ] Architecture documentation updated (if applicable)
@@ -309,6 +339,7 @@ npm run test:performance
 ### Bug Fix Review
 
 #### Bug Fix Review Focus
+
 1. **Root Cause Analysis**
    - Is the actual root cause addressed?
    - Are there similar issues elsewhere?
@@ -327,6 +358,7 @@ npm run test:performance
 ### Security Review
 
 #### Security Review Process
+
 1. **Threat Assessment**
    - What security threats does this change address?
    - Are there new security risks introduced?
@@ -347,12 +379,14 @@ npm run test:performance
 ### Key Metrics
 
 #### Review Efficiency
+
 - Average time from PR creation to first review
 - Average time from PR creation to merge
 - Number of review cycles per PR
 - Review participation rate
 
 #### Quality Metrics
+
 - Bugs found in review vs. post-merge
 - Test coverage trends
 - Code quality score trends
@@ -361,12 +395,14 @@ npm run test:performance
 ### Continuous Improvement
 
 #### Regular Review Process Assessment
+
 - Monthly review of metrics and trends
 - Quarterly team retrospectives on review process
 - Annual review process optimization
 - Ongoing tool evaluation and improvement
 
 #### Training and Development
+
 - Code review training for new team members
 - Best practices sharing sessions
 - Tool training and updates
@@ -377,6 +413,7 @@ npm run test:performance
 ### Large Pull Requests
 
 #### Handling Large PRs
+
 1. **Request PR Breakdown**
    - Ask author to split into smaller, focused PRs
    - Review architectural approach first
@@ -390,6 +427,7 @@ npm run test:performance
 ### Disagreements
 
 #### Resolving Review Disagreements
+
 1. **Discussion and Clarification**
    - Ask for more context or explanation
    - Provide detailed reasoning for concerns
@@ -408,6 +446,7 @@ npm run test:performance
 ### Time Pressure
 
 #### Urgent Review Situations
+
 1. **Critical Bug Fixes**
    - Focus on core functionality and security
    - Expedited review process
@@ -421,22 +460,25 @@ npm run test:performance
 ## Related Documentation
 
 ### Development Standards
+
 - **[Coding Standards](../conventions/coding-standards.md)** - Code style and quality requirements
 - **[Git Workflow](../conventions/git-workflow.md)** - Branching and commit standards
 - **[API Design Guidelines](../conventions/api-design.md)** - API consistency standards
 
 ### Testing and Quality
+
 - **[Testing Guide](../workflows/testing-guide.md)** - Testing procedures and requirements
 - **[Performance Profiling Guide](performance-profiling.md)** - Performance review criteria
 - **[Debugging Guide](../workflows/debugging-guide.md)** - Debugging best practices
 
 ### Architecture
+
 - **[Architecture Overview](../../architecture/01-introduction-goals.md)** - System design principles
 - **[Quality Requirements](../../architecture/10-quality-requirements.md)** - Quality attributes and targets
 - **[Architecture Decisions](../../architecture/09-architecture-decisions/)** - Technical decision context
 
 ## Revision History
 
-| Date | Author | Changes |
-|------|--------|---------|
+| Date       | Author           | Changes                   |
+| ---------- | ---------------- | ------------------------- |
 | 2025-08-11 | Development Team | Initial code review guide |

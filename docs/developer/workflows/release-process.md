@@ -13,21 +13,25 @@ Complete guide for releasing the Settings Extension, covering version management
 ## Release Types
 
 ### 1. Development Releases
+
 - **Purpose**: Internal testing and validation
 - **Frequency**: Continuous with each commit
 - **Distribution**: Local development environments
 
 ### 2. Beta Releases
+
 - **Purpose**: Community testing and feedback
 - **Frequency**: Weekly or bi-weekly
 - **Distribution**: Beta channels in stores
 
 ### 3. Stable Releases
+
 - **Purpose**: General availability
 - **Frequency**: Monthly or when critical features/fixes are ready
 - **Distribution**: Main channels in both stores
 
 ### 4. Hotfix Releases
+
 - **Purpose**: Critical bug fixes
 - **Frequency**: As needed
 - **Distribution**: Expedited release to main channels
@@ -83,6 +87,7 @@ cat manifest.json | jq '.permissions'
 ### Semantic Versioning
 
 We follow [Semantic Versioning](https://semver.org/):
+
 - **MAJOR**: Breaking changes
 - **MINOR**: New features (backward compatible)
 - **PATCH**: Bug fixes (backward compatible)
@@ -105,11 +110,11 @@ npm version major    # 1.0.0 -> 2.0.0
 
 ```javascript
 // scripts/sync-versions.js
-const fs = require('fs');
-const path = require('path');
+const fs = require("fs");
+const path = require("path");
 
-const packageJson = require('../package.json');
-const manifestPath = path.join(__dirname, '../manifest.json');
+const packageJson = require("../package.json");
+const manifestPath = path.join(__dirname, "../manifest.json");
 const manifest = require(manifestPath);
 
 // Update manifest version to match package.json
@@ -152,6 +157,7 @@ npm run serve
 ### Build Artifacts
 
 The build process creates:
+
 - `dist/` - Built extension files
 - `web-ext-artifacts/` - Packaged extension files
   - `settings-extension-chrome.zip` - Chrome package
@@ -200,6 +206,7 @@ echo "All tests passed ✅"
 ### Manual Testing Checklist
 
 #### Core Functionality
+
 - [ ] Extension loads in both browsers
 - [ ] Popup opens and displays correctly
 - [ ] Options page accessible and functional
@@ -209,6 +216,7 @@ echo "All tests passed ✅"
 - [ ] Background script operates correctly
 
 #### Cross-Browser Testing
+
 - [ ] Chrome stable
 - [ ] Chrome beta (if available)
 - [ ] Firefox stable
@@ -216,6 +224,7 @@ echo "All tests passed ✅"
 - [ ] Edge (Chromium)
 
 #### Performance Testing
+
 - [ ] Extension loads within 500ms
 - [ ] Settings operations complete within 100ms
 - [ ] Memory usage remains under 10MB
@@ -262,11 +271,13 @@ web-ext lint --source-dir=dist --verbose
 ### Chrome Web Store
 
 #### First-Time Setup
+
 1. Create [Chrome Web Store Developer](https://chrome.google.com/webstore/devconsole/) account
 2. Pay one-time registration fee ($5 USD)
 3. Set up developer profile and privacy policy
 
 #### Upload Process
+
 1. Navigate to Chrome Web Store Developer Dashboard
 2. Click "New Item" → Upload package
 3. Upload `settings-extension-chrome.zip`
@@ -278,6 +289,7 @@ web-ext lint --source-dir=dist --verbose
    - Language: English (and others if localized)
 
 #### Store Listing Assets
+
 ```bash
 # Required images (create in assets/ directory)
 assets/
@@ -289,6 +301,7 @@ assets/
 ```
 
 #### Review Process
+
 - **Automated review**: Usually within 24 hours
 - **Manual review**: May take 3-7 days for new extensions
 - **Status tracking**: Available in developer dashboard
@@ -296,11 +309,13 @@ assets/
 ### Firefox Add-ons
 
 #### First-Time Setup
+
 1. Create [Firefox Add-ons](https://addons.mozilla.org/developers/) account
 2. Complete developer profile
 3. Review Mozilla policies
 
 #### Upload Process
+
 1. Navigate to Firefox Add-ons Developer Hub
 2. Click "Submit a New Add-on"
 3. Upload `settings-extension-firefox.xpi`
@@ -309,6 +324,7 @@ assets/
    - **Unlisted**: Private distribution with signed package
 
 #### Add-on Listing Details
+
 - Name: "Settings Extension"
 - Summary: Brief description (250 characters max)
 - Description: Detailed markdown description
@@ -316,6 +332,7 @@ assets/
 - Tags: settings, configuration, productivity
 
 #### Review Process
+
 - **Automated review**: Usually within minutes for listed add-ons
 - **Human review**: Required for certain permissions or flagged content
 - **Approval time**: Typically 1-3 days
@@ -402,15 +419,18 @@ curl -s "https://chrome.google.com/webstore/detail/[EXTENSION_ID]" | grep -o "Av
 ### Release Communication
 
 1. **Internal team notification**
+
    ```markdown
    🚀 Settings Extension v1.2.0 released!
-   
+
    **Changes:**
+
    - New feature: Dark mode support
    - Bug fix: Storage sync issues
    - Performance: 20% faster loading
-   
+
    **Links:**
+
    - Chrome: https://chrome.google.com/webstore/detail/[ID]
    - Firefox: https://addons.mozilla.org/firefox/addon/[ID]
    ```
@@ -428,6 +448,7 @@ curl -s "https://chrome.google.com/webstore/detail/[EXTENSION_ID]" | grep -o "Av
 ### Release Metrics
 
 Track these metrics post-release:
+
 - Installation/adoption rate
 - User reviews and ratings
 - Crash reports and errors
@@ -439,6 +460,7 @@ Track these metrics post-release:
 ### Identifying Issues
 
 Monitor for:
+
 - Increased error reports
 - Negative user reviews
 - Performance degradation
@@ -447,12 +469,14 @@ Monitor for:
 ### Emergency Rollback
 
 #### Chrome Web Store
+
 1. Navigate to Developer Dashboard
 2. Select extension → "Package" tab
 3. Click "Rollback to previous version"
 4. Confirm rollback
 
 #### Firefox Add-ons
+
 1. Navigate to Developer Hub
 2. Select add-on → "Manage Status and Versions"
 3. Disable current version
@@ -483,16 +507,19 @@ git merge hotfix/v1.2.1
 ## Release Schedule
 
 ### Regular Schedule
+
 - **Beta releases**: Every Friday (if changes available)
 - **Stable releases**: First Monday of each month
 - **Hotfixes**: As needed (within 24 hours of critical issue)
 
 ### Release Windows
+
 - **Best time**: Tuesday-Thursday, 10 AM - 2 PM PST
 - **Avoid**: Fridays, weekends, holidays
 - **Store considerations**: Chrome processes faster than Firefox
 
 ### Seasonal Considerations
+
 - **Holiday slowdowns**: Expect delayed reviews in December/January
 - **Store policies**: Both stores may have policy updates that affect releases
 
@@ -501,6 +528,7 @@ git merge hotfix/v1.2.1
 ### Common Issues
 
 1. **Package rejected**
+
    ```bash
    # Check validation errors
    npm run validate
@@ -508,6 +536,7 @@ git merge hotfix/v1.2.1
    ```
 
 2. **Version conflicts**
+
    ```bash
    # Ensure version consistency
    node scripts/sync-versions.js
@@ -515,13 +544,11 @@ git merge hotfix/v1.2.1
    ```
 
 3. **Permission issues**
+
    ```json
    // Verify manifest.json permissions
    {
-     "permissions": [
-       "storage",
-       "activeTab"
-     ]
+     "permissions": ["storage", "activeTab"]
    }
    ```
 
@@ -568,6 +595,7 @@ node -e "console.log(JSON.stringify(require('./manifest.json').permissions, null
 ### Store Security Requirements
 
 Both stores require:
+
 - No malicious code
 - Minimal permissions
 - Clear privacy policy
@@ -582,6 +610,6 @@ Both stores require:
 
 ## Revision History
 
-| Date | Author | Changes |
-|------|--------|---------|
+| Date       | Author         | Changes                       |
+| ---------- | -------------- | ----------------------------- |
 | 2025-08-11 | Developer Team | Initial release process guide |

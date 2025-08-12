@@ -13,6 +13,7 @@ This section contains practical developer-focused documentation for the Settings
 ## Quick Start
 
 New to the project? Start here:
+
 1. [Local Setup](workflows/local-setup.md) - Get your development environment running
 2. [Architecture Overview](../architecture/README.md) - Understand the system design
 3. [Testing Guide](workflows/testing-guide.md) - Learn how to run tests
@@ -21,14 +22,18 @@ New to the project? Start here:
 ## Documentation Categories
 
 ### Workflows
+
 Step-by-step processes for common development tasks:
+
 - **[Local Setup](workflows/local-setup.md)** - Complete development environment setup
-- **[Testing Guide](workflows/testing-guide.md)** - How to write and run tests  
+- **[Testing Guide](workflows/testing-guide.md)** - How to write and run tests
 - **[Debugging Guide](workflows/debugging-guide.md)** - Debugging techniques and tools
 - **[Release Process](workflows/release-process.md)** - Release and deployment procedures
 
 ### Guides
+
 Specific guidance for development scenarios:
+
 - **[Extension Development](guides/extension-development.md)** - Browser extension development tips
 - **[Cross-Browser Testing](guides/cross-browser-testing.md)** - Testing across different browsers
 - **[Performance Profiling](guides/performance-profiling.md)** - Performance analysis guide
@@ -37,7 +42,9 @@ Specific guidance for development scenarios:
 - **[Code Review](guides/code-review.md)** - Code review process and checklist
 
 ### Conventions
+
 Team standards and best practices:
+
 - **[Coding Standards](conventions/coding-standards.md)** - Code style and best practices
 - **[Git Workflow](conventions/git-workflow.md)** - Git branching and commit conventions
 - **[Documentation Guide](conventions/documentation-guide.md)** - How to write documentation
@@ -92,6 +99,7 @@ settings-extension/
 ## Getting Help
 
 ### Architecture & Design Questions
+
 - **[Architecture Overview](../architecture/01-introduction-goals.md)** - System goals and requirements
 - **[Building Blocks View](../architecture/05-building-blocks.md)** - Component structure for development
 - **[Architecture Decisions](../architecture/09-architecture-decisions/)** - Technical decision rationale
@@ -99,18 +107,21 @@ settings-extension/
 - **[Full Architecture Hub](../architecture/README.md)** - Complete architectural documentation
 
 ### User Experience & Integration
+
 - **[User Workflows](../user/how-to/)** - Understanding user tasks for better development
 - **[Settings Types Reference](../user/reference/settings-types.md)** - Complete API reference for integration
 - **[Security Considerations](../user/explanation/security.md)** - User-facing security implications
 - **[User Documentation Hub](../user/README.md)** - Complete end-user perspective
 
 ### Development Support
+
 - **[Bug Reporting Guide](guides/bug-reporting.md)** - Report issues effectively
 - **[Troubleshooting Guide](guides/troubleshooting.md)** - Common development problems
 - **[Cross-Browser Testing](guides/cross-browser-testing.md)** - Browser compatibility guidance
 - **[Contributing Guidelines](../CONTRIBUTING.md)** - How to contribute code and documentation
 
 ### Documentation & Standards
+
 - **[Documentation Hub](../README.md)** - Main documentation navigation
 - **[Documentation Standards](../.documentation-standards.md)** - How our docs are organized
 - **[API Design Conventions](conventions/api-design.md)** - API consistency standards
@@ -118,6 +129,6 @@ settings-extension/
 
 ## Revision History
 
-| Date | Author | Changes |
-|------|--------|---------|
+| Date       | Author         | Changes                                   |
+| ---------- | -------------- | ----------------------------------------- |
 | 2025-08-11 | Developer Team | Initial developer documentation structure |

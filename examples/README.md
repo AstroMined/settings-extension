@@ -9,7 +9,7 @@ This directory contains comprehensive examples demonstrating how to use the Sett
 ### Quick Integration Steps
 
 1. **Copy files**: `lib/` folder and `config/defaults.json` to your extension
-2. **Update manifest**: Add permissions and content script includes  
+2. **Update manifest**: Add permissions and content script includes
 3. **Integrate background**: Use [background-integration.js](background-integration.js)
 4. **Use in content**: Use [minimal-integration.js](minimal-integration.js)
 5. **Optional UI**: Use [popup-integration.js](popup-integration.js)
@@ -21,7 +21,9 @@ Your extension now has complete settings management with real-time sync, validat
 ### 🎯 Drop-In Integration Examples
 
 ### 📋 `INTEGRATION.md`
+
 **Complete Integration Guide** - Step-by-step guide to add settings management to any extension:
+
 - 5-minute quick start
 - Files to copy and manifest changes
 - Complete integration process
@@ -30,7 +32,9 @@ Your extension now has complete settings management with real-time sync, validat
 **Best for:** Complete integration from scratch.
 
 ### ⚡ `minimal-integration.js`
+
 **Quick Start Example** - Complete working example in <50 lines:
+
 - Essential operations with error handling
 - Real-time change listeners
 - Promise-based patterns
@@ -39,7 +43,9 @@ Your extension now has complete settings management with real-time sync, validat
 **Best for:** Getting started quickly with minimal code.
 
 ### 🔧 `background-integration.js`
+
 **Background Script Integration** - Complete background script setup:
+
 - Settings manager initialization
 - Message handling for all API operations
 - Real-time broadcast to content scripts
@@ -48,7 +54,9 @@ Your extension now has complete settings management with real-time sync, validat
 **Best for:** Integrating settings in your background script.
 
 ### 🎨 `popup-integration.js`
+
 **Popup UI Integration** - Simple settings UI for popups:
+
 - Getting and updating settings
 - Real-time UI updates and validation
 - Export/import/reset functionality
@@ -59,6 +67,7 @@ Your extension now has complete settings management with real-time sync, validat
 ### 🔍 Advanced Usage Examples
 
 ### 📚 `content-script-example.js`
+
 **Comprehensive Example** - A full-featured content script that demonstrates all API capabilities including:
 
 - ✅ Loading settings (single, multiple, and all)
@@ -74,6 +83,7 @@ Your extension now has complete settings management with real-time sync, validat
 **Best for:** Understanding the complete integration patterns and advanced features.
 
 ### 🚀 `simple-usage-example.js`
+
 **Quick Reference** - Focused examples of common operations:
 
 - Basic CRUD operations
@@ -94,15 +104,15 @@ Your extension now has complete settings management with real-time sync, validat
 const settings = new ContentScriptSettings();
 
 // Get a setting
-const featureSetting = await settings.getSetting('feature_enabled');
-console.log('Feature enabled:', featureSetting.value);
+const featureSetting = await settings.getSetting("feature_enabled");
+console.log("Feature enabled:", featureSetting.value);
 
 // Update a setting
-await settings.updateSetting('feature_enabled', true);
+await settings.updateSetting("feature_enabled", true);
 
 // Listen for changes
 settings.addChangeListener((event, data) => {
-  console.log('Settings changed:', data);
+  console.log("Settings changed:", data);
 });
 ```
 
@@ -110,17 +120,21 @@ settings.addChangeListener((event, data) => {
 
 ```javascript
 // ✅ Good: Batch operations
-const settings = await settings.getSettings(['setting1', 'setting2', 'setting3']);
+const settings = await settings.getSettings([
+  "setting1",
+  "setting2",
+  "setting3",
+]);
 
 // ✅ Good: Use caching for frequent access
-if (settings.isCached('feature_enabled')) {
-  const value = settings.getCachedSetting('feature_enabled').value;
+if (settings.isCached("feature_enabled")) {
+  const value = settings.getCachedSetting("feature_enabled").value;
 }
 
 // ✅ Good: Batch updates
 await settings.updateSettings({
-  'setting1': 'value1',
-  'setting2': 'value2'
+  setting1: "value1",
+  setting2: "value2",
 });
 
 // ❌ Avoid: Individual calls in loops
@@ -134,18 +148,18 @@ for (const key of keys) {
 ```javascript
 async function safeOperation() {
   try {
-    const result = await settings.getSetting('some_setting');
+    const result = await settings.getSetting("some_setting");
     return result?.value;
   } catch (error) {
-    if (error.message.includes('timeout')) {
+    if (error.message.includes("timeout")) {
       // Handle timeout
       return null;
-    } else if (error.message.includes('not found')) {
+    } else if (error.message.includes("not found")) {
       // Handle missing setting
       return defaultValue;
     } else {
       // Handle other errors
-      console.error('Settings error:', error);
+      console.error("Settings error:", error);
       return null;
     }
   }
@@ -158,31 +172,31 @@ async function safeOperation() {
 
 #### Methods
 
-| Method | Description | Performance |
-|--------|-------------|-------------|
-| `getSetting(key)` | Get single setting | Cached after first load |
-| `getSettings(keys)` | Get multiple settings | Most efficient for multiple |
-| `getAllSettings()` | Get all settings | Use sparingly |
-| `updateSetting(key, value)` | Update single setting | Instant cache update |
-| `updateSettings(updates)` | Update multiple settings | Most efficient for multiple |
-| `addChangeListener(callback)` | Listen for changes | Real-time updates |
-| `removeChangeListener(callback)` | Remove listener | - |
-| `getCachedSetting(key)` | Get cached setting | Fastest access |
-| `getCachedSettings()` | Get all cached settings | Synchronous access |
-| `clearCache()` | Clear cached settings | Force reload |
-| `exportSettings()` | Export settings to JSON | Promise-based |
-| `importSettings(data)` | Import settings from JSON | Promise-based |
-| `resetSettings()` | Reset to defaults | Promise-based |
-| `getStorageStats()` | Get storage statistics | Promise-based |
-| `checkStorageQuota()` | Check storage quota | Promise-based |
+| Method                           | Description               | Performance                 |
+| -------------------------------- | ------------------------- | --------------------------- |
+| `getSetting(key)`                | Get single setting        | Cached after first load     |
+| `getSettings(keys)`              | Get multiple settings     | Most efficient for multiple |
+| `getAllSettings()`               | Get all settings          | Use sparingly               |
+| `updateSetting(key, value)`      | Update single setting     | Instant cache update        |
+| `updateSettings(updates)`        | Update multiple settings  | Most efficient for multiple |
+| `addChangeListener(callback)`    | Listen for changes        | Real-time updates           |
+| `removeChangeListener(callback)` | Remove listener           | -                           |
+| `getCachedSetting(key)`          | Get cached setting        | Fastest access              |
+| `getCachedSettings()`            | Get all cached settings   | Synchronous access          |
+| `clearCache()`                   | Clear cached settings     | Force reload                |
+| `exportSettings()`               | Export settings to JSON   | Promise-based               |
+| `importSettings(data)`           | Import settings from JSON | Promise-based               |
+| `resetSettings()`                | Reset to defaults         | Promise-based               |
+| `getStorageStats()`              | Get storage statistics    | Promise-based               |
+| `checkStorageQuota()`            | Check storage quota       | Promise-based               |
 
 #### Events
 
-| Event | Description | Data |
-|-------|-------------|------|
-| `changed` | Settings updated | `{ key: value, ... }` |
+| Event      | Description       | Data                    |
+| ---------- | ----------------- | ----------------------- |
+| `changed`  | Settings updated  | `{ key: value, ... }`   |
 | `imported` | Settings imported | `{ key: setting, ... }` |
-| `reset` | Settings reset | `{ key: setting, ... }` |
+| `reset`    | Settings reset    | `{ key: setting, ... }` |
 
 ## Common Patterns
 
@@ -190,12 +204,12 @@ async function safeOperation() {
 
 ```javascript
 async function setupFeatureToggle() {
-  const enabled = await settings.getSetting('feature_enabled');
-  
+  const enabled = await settings.getSetting("feature_enabled");
+
   if (enabled?.value) {
     enableFeature();
   }
-  
+
   settings.addChangeListener((event, data) => {
     if (data.feature_enabled !== undefined) {
       data.feature_enabled ? enableFeature() : disableFeature();
@@ -209,17 +223,17 @@ async function setupFeatureToggle() {
 ```javascript
 async function loadConfiguration() {
   const config = await settings.getSettings([
-    'api_endpoint',
-    'timeout',
-    'retries',
-    'api_key'
+    "api_endpoint",
+    "timeout",
+    "retries",
+    "api_key",
   ]);
-  
+
   return {
-    endpoint: config.api_endpoint?.value || 'https://api.example.com',
+    endpoint: config.api_endpoint?.value || "https://api.example.com",
     timeout: config.timeout?.value || 5000,
     retries: config.retries?.value || 3,
-    apiKey: config.api_key?.value || ''
+    apiKey: config.api_key?.value || "",
   };
 }
 ```
@@ -228,14 +242,14 @@ async function loadConfiguration() {
 
 ```javascript
 async function injectCustomCSS() {
-  const css = await settings.getSetting('custom_css');
-  
+  const css = await settings.getSetting("custom_css");
+
   if (css?.value) {
-    const style = document.createElement('style');
+    const style = document.createElement("style");
     style.textContent = css.value;
     document.head.appendChild(style);
   }
-  
+
   settings.addChangeListener((event, data) => {
     if (data.custom_css !== undefined) {
       updateCSS(data.custom_css);
@@ -258,18 +272,18 @@ async function injectCustomCSS() {
 ```javascript
 // Test basic functionality
 async function testBasicOperations() {
-  console.log('Testing basic operations...');
-  
+  console.log("Testing basic operations...");
+
   // Test get
-  const setting = await settings.getSetting('feature_enabled');
-  console.assert(setting !== null, 'Should get setting');
-  
+  const setting = await settings.getSetting("feature_enabled");
+  console.assert(setting !== null, "Should get setting");
+
   // Test update
-  await settings.updateSetting('feature_enabled', !setting.value);
-  const updated = await settings.getSetting('feature_enabled');
-  console.assert(updated.value !== setting.value, 'Should update setting');
-  
-  console.log('✅ Basic operations test passed');
+  await settings.updateSetting("feature_enabled", !setting.value);
+  const updated = await settings.getSetting("feature_enabled");
+  console.assert(updated.value !== setting.value, "Should update setting");
+
+  console.log("✅ Basic operations test passed");
 }
 ```
 
@@ -296,13 +310,14 @@ async function testBasicOperations() {
 
 ```javascript
 // Get debug information
-console.log('Cache stats:', settings.getCacheStats());
-console.log('Browser environment:', browserAPI.environment);
+console.log("Cache stats:", settings.getCacheStats());
+console.log("Browser environment:", browserAPI.environment);
 ```
 
 ## Support
 
 For issues or questions:
+
 1. Check the browser console for error messages
 2. Verify the extension is properly loaded
 3. Test with the simple examples first

@@ -157,6 +157,8 @@ Thumbs.db
 /coverage/
 .jest/
 .nyc_output/
+test-results/
+test-user-data*/
 
 # Webpack
 .webpack/

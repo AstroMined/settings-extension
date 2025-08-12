@@ -14,12 +14,12 @@ Complete reference for all file formats used by the Settings Extension, includin
 
 The Settings Extension uses JSON-based file formats for all data interchange:
 
-| Format Type | Extension | Purpose | Version |
-|-------------|-----------|---------|---------|
-| Settings Export | `.json` | Complete settings backup/restore | 1.0 |
-| Selective Export | `.json` | Partial settings export | 1.0 |
-| Configuration Template | `.json` | Reusable settings template | 1.0 |
-| Profile Export | `.json` | Named settings profile | 1.0 |
+| Format Type            | Extension | Purpose                          | Version |
+| ---------------------- | --------- | -------------------------------- | ------- |
+| Settings Export        | `.json`   | Complete settings backup/restore | 1.0     |
+| Selective Export       | `.json`   | Partial settings export          | 1.0     |
+| Configuration Template | `.json`   | Reusable settings template       | 1.0     |
+| Profile Export         | `.json`   | Named settings profile           | 1.0     |
 
 ## Standard Export Format
 
@@ -35,7 +35,7 @@ All Settings Extension export files follow this structure:
     "setting_name": {
       "type": "setting_type",
       "value": "setting_value",
-      "description": "Setting description",
+      "description": "Setting description"
       // type-specific properties
     }
   }
@@ -44,11 +44,11 @@ All Settings Extension export files follow this structure:
 
 ### Required Fields
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `version` | String | Yes | Format version identifier |
-| `timestamp` | String | Yes | Export creation time (ISO 8601) |
-| `settings` | Object | Yes | Container for all settings |
+| Field       | Type   | Required | Description                     |
+| ----------- | ------ | -------- | ------------------------------- |
+| `version`   | String | Yes      | Format version identifier       |
+| `timestamp` | String | Yes      | Export creation time (ISO 8601) |
+| `settings`  | Object | Yes      | Container for all settings      |
 
 ### Optional Metadata
 
@@ -131,11 +131,13 @@ A complete export contains all extension settings:
 ### File Naming Convention
 
 Complete exports use this naming pattern:
+
 ```
 settings-extension-backup-YYYY-MM-DD-HH-MM-SS.json
 ```
 
 Example:
+
 ```
 settings-extension-backup-2025-08-11-10-30-00.json
 ```
@@ -179,12 +181,12 @@ Selective exports contain only specified settings:
 
 ### Selective Export Metadata
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `export_type` | String | Always "selective" |
+| Field                | Type   | Description                     |
+| -------------------- | ------ | ------------------------------- |
+| `export_type`        | String | Always "selective"              |
 | `selection_criteria` | String | Reason for selection (optional) |
-| `included_settings` | Array | List of included setting keys |
-| `excluded_settings` | Array | List of excluded setting keys |
+| `included_settings`  | Array  | List of included setting keys   |
+| `excluded_settings`  | Array  | List of excluded setting keys   |
 
 ## Profile Export Format
 
@@ -239,14 +241,14 @@ Profile exports include profile-specific metadata:
 
 ### Profile Metadata Fields
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `profile_name` | String | Yes | Unique profile identifier |
-| `profile_description` | String | No | Human-readable profile purpose |
-| `profile_version` | String | No | Profile version (semantic versioning) |
-| `created_by` | String | No | Profile creator identification |
-| `last_modified` | String | No | Last modification timestamp |
-| `usage_instructions` | String | No | Instructions for using this profile |
+| Field                 | Type   | Required | Description                           |
+| --------------------- | ------ | -------- | ------------------------------------- |
+| `profile_name`        | String | Yes      | Unique profile identifier             |
+| `profile_description` | String | No       | Human-readable profile purpose        |
+| `profile_version`     | String | No       | Profile version (semantic versioning) |
+| `created_by`          | String | No       | Profile creator identification        |
+| `last_modified`       | String | No       | Last modification timestamp           |
+| `usage_instructions`  | String | No       | Instructions for using this profile   |
 
 ## Template Format
 
@@ -316,6 +318,7 @@ Templates provide reusable configuration patterns:
 ### Template Processing
 
 Templates use mustache-style placeholders:
+
 - `{{PLACEHOLDER_NAME}}` for simple replacements
 - Placeholders documented in `placeholders` section
 - Processing replaces placeholders with actual values
@@ -447,24 +450,42 @@ Templates use mustache-style placeholders:
 
 ### Typical File Sizes
 
-| Content Type | Size Range | Example |
-|--------------|------------|---------|
-| Minimal configuration | 500B - 2KB | Basic settings only |
-| Standard configuration | 2KB - 10KB | All settings with moderate CSS |
-| Large CSS configuration | 10KB - 100KB | Extensive custom CSS |
-| Complex JSON configuration | 5KB - 50KB | Large advanced_config objects |
+| Content Type               | Size Range   | Example                        |
+| -------------------------- | ------------ | ------------------------------ |
+| Minimal configuration      | 500B - 2KB   | Basic settings only            |
+| Standard configuration     | 2KB - 10KB   | All settings with moderate CSS |
+| Large CSS configuration    | 10KB - 100KB | Extensive custom CSS           |
+| Complex JSON configuration | 5KB - 50KB   | Large advanced_config objects  |
 
 ### Size Optimization
 
 **Reduce File Size**:
+
 - Remove unnecessary metadata
 - Minify CSS in custom_css settings
 - Compress JSON objects
 - Remove comments and extra whitespace
 
 **Example Minimized Export**:
+
 ```json
-{"version":"1.0","timestamp":"2025-08-11T10:30:00.123Z","settings":{"feature_enabled":{"type":"boolean","value":true,"description":"Enable main feature functionality"},"api_key":{"type":"text","value":"","description":"API key for external service","maxLength":100}}}
+{
+  "version": "1.0",
+  "timestamp": "2025-08-11T10:30:00.123Z",
+  "settings": {
+    "feature_enabled": {
+      "type": "boolean",
+      "value": true,
+      "description": "Enable main feature functionality"
+    },
+    "api_key": {
+      "type": "text",
+      "value": "",
+      "description": "API key for external service",
+      "maxLength": 100
+    }
+  }
+}
 ```
 
 ## Character Encoding and Special Characters
@@ -472,6 +493,7 @@ Templates use mustache-style placeholders:
 ### UTF-8 Support
 
 All files use UTF-8 encoding and support:
+
 - International characters
 - Emojis and symbols
 - Mathematical notation
@@ -493,34 +515,36 @@ Special characters require proper escaping in JSON:
 
 ### Common Escaping Rules
 
-| Character | JSON Escaped | Usage |
-|-----------|--------------|-------|
-| `"` | `\"` | Within strings |
-| `\` | `\\` | Backslash |
-| `/` | `\/` | Forward slash (optional) |
-| Newline | `\n` | Line breaks |
-| Tab | `\t` | Indentation |
-| Return | `\r` | Carriage return |
+| Character | JSON Escaped | Usage                    |
+| --------- | ------------ | ------------------------ |
+| `"`       | `\"`         | Within strings           |
+| `\`       | `\\`         | Backslash                |
+| `/`       | `\/`         | Forward slash (optional) |
+| Newline   | `\n`         | Line breaks              |
+| Tab       | `\t`         | Indentation              |
+| Return    | `\r`         | Carriage return          |
 
 ## Compatibility and Migration
 
 ### Version Compatibility
 
-| File Version | Extension Version | Compatibility |
-|--------------|-------------------|---------------|
-| 1.0 | 1.0.x | Full |
-| 1.0 | Future versions | Backward compatible |
+| File Version | Extension Version | Compatibility       |
+| ------------ | ----------------- | ------------------- |
+| 1.0          | 1.0.x             | Full                |
+| 1.0          | Future versions   | Backward compatible |
 
 ### Migration Considerations
 
 When updating file formats:
 
 **Backward Compatibility**:
+
 - New optional fields don't break old parsers
 - Required fields remain consistent
 - Type definitions remain stable
 
 **Forward Compatibility**:
+
 - Ignore unknown fields
 - Validate known fields only
 - Provide meaningful error messages
@@ -530,25 +554,25 @@ When updating file formats:
 ```javascript
 function migrateFileFormat(fileContent) {
   const data = JSON.parse(fileContent);
-  
+
   // Check version
   if (!data.version) {
     // Assume version 0.9, migrate to 1.0
     data.version = "1.0";
     data.timestamp = new Date().toISOString();
   }
-  
+
   // Migrate settings structure if needed
   if (data.version === "1.0") {
     // Already current format
     return data;
   }
-  
+
   // Handle future versions
   if (parseFloat(data.version) > 1.0) {
     console.warn("File format newer than supported version");
   }
-  
+
   return data;
 }
 ```
@@ -563,29 +587,28 @@ function migrateFileFormat(fileContent) {
 function validateSettingsFile(fileContent) {
   try {
     const data = JSON.parse(fileContent);
-    
+
     // Check required fields
     if (!data.version) throw new Error("Missing version field");
     if (!data.timestamp) throw new Error("Missing timestamp field");
     if (!data.settings) throw new Error("Missing settings object");
-    
+
     // Validate version format
     if (!/^[0-9]+\.[0-9]+$/.test(data.version)) {
       throw new Error("Invalid version format");
     }
-    
+
     // Validate timestamp
     if (isNaN(Date.parse(data.timestamp))) {
       throw new Error("Invalid timestamp format");
     }
-    
+
     // Validate settings
     for (const [key, setting] of Object.entries(data.settings)) {
       validateSetting(key, setting);
     }
-    
+
     return { valid: true, data: data };
-    
   } catch (error) {
     return { valid: false, error: error.message };
   }
@@ -593,32 +616,34 @@ function validateSettingsFile(fileContent) {
 
 function validateSetting(key, setting) {
   if (!setting.type) throw new Error(`Setting '${key}' missing type`);
-  if (!setting.hasOwnProperty('value')) throw new Error(`Setting '${key}' missing value`);
-  if (!setting.description) throw new Error(`Setting '${key}' missing description`);
-  
+  if (!setting.hasOwnProperty("value"))
+    throw new Error(`Setting '${key}' missing value`);
+  if (!setting.description)
+    throw new Error(`Setting '${key}' missing description`);
+
   // Type-specific validation
   switch (setting.type) {
-    case 'boolean':
-      if (typeof setting.value !== 'boolean') {
+    case "boolean":
+      if (typeof setting.value !== "boolean") {
         throw new Error(`Setting '${key}' value must be boolean`);
       }
       break;
-    case 'text':
-    case 'longtext':
-      if (typeof setting.value !== 'string') {
+    case "text":
+    case "longtext":
+      if (typeof setting.value !== "string") {
         throw new Error(`Setting '${key}' value must be string`);
       }
       if (setting.maxLength && setting.value.length > setting.maxLength) {
         throw new Error(`Setting '${key}' exceeds maxLength`);
       }
       break;
-    case 'number':
-      if (typeof setting.value !== 'number' || isNaN(setting.value)) {
+    case "number":
+      if (typeof setting.value !== "number" || isNaN(setting.value)) {
         throw new Error(`Setting '${key}' value must be valid number`);
       }
       break;
-    case 'json':
-      if (typeof setting.value !== 'object' || setting.value === null) {
+    case "json":
+      if (typeof setting.value !== "object" || setting.value === null) {
         throw new Error(`Setting '${key}' value must be object`);
       }
       break;
@@ -636,25 +661,25 @@ function checkFileIntegrity(fileContent) {
     json_valid: false,
     size_reasonable: false,
     required_fields: false,
-    settings_valid: false
+    settings_valid: false,
   };
-  
+
   try {
     // Parse JSON
     const data = JSON.parse(fileContent);
     checks.json_valid = true;
-    
+
     // Check file size (should be under 10MB)
     const fileSize = new Blob([fileContent]).size;
     checks.size_reasonable = fileSize < 10 * 1024 * 1024;
-    
+
     // Check required fields
-    checks.required_fields = 
-      data.version && 
-      data.timestamp && 
+    checks.required_fields =
+      data.version &&
+      data.timestamp &&
       data.settings &&
-      typeof data.settings === 'object';
-    
+      typeof data.settings === "object";
+
     // Validate settings
     if (checks.required_fields) {
       let validSettings = 0;
@@ -668,11 +693,10 @@ function checkFileIntegrity(fileContent) {
       }
       checks.settings_valid = validSettings > 0;
     }
-    
   } catch (error) {
     // JSON parsing failed
   }
-  
+
   return checks;
 }
 ```
@@ -682,6 +706,7 @@ function checkFileIntegrity(fileContent) {
 ### Common File Errors
 
 **Syntax Errors**:
+
 ```json
 // Invalid JSON - missing quotes
 {
@@ -697,6 +722,7 @@ function checkFileIntegrity(fileContent) {
 ```
 
 **Structure Errors**:
+
 ```json
 // Invalid - missing required fields
 {
@@ -712,6 +738,7 @@ function checkFileIntegrity(fileContent) {
 ```
 
 **Type Errors**:
+
 ```json
 // Invalid - wrong type for boolean
 {
@@ -724,7 +751,7 @@ function checkFileIntegrity(fileContent) {
 // Valid - correct boolean type
 {
   "feature_enabled": {
-    "type": "boolean", 
+    "type": "boolean",
     "value": true
   }
 }
@@ -740,6 +767,7 @@ function checkFileIntegrity(fileContent) {
 ## Best Practices
 
 ### File Creation
+
 - Always use UTF-8 encoding
 - Include proper timestamps
 - Validate before saving
@@ -747,6 +775,7 @@ function checkFileIntegrity(fileContent) {
 - Add metadata for context
 
 ### File Sharing
+
 - Remove sensitive information (API keys)
 - Include usage instructions
 - Document any placeholders
@@ -754,6 +783,7 @@ function checkFileIntegrity(fileContent) {
 - Test imports before sharing
 
 ### File Storage
+
 - Keep backups in multiple locations
 - Use version control for important configurations
 - Organize files in logical folder structures
@@ -763,19 +793,23 @@ function checkFileIntegrity(fileContent) {
 ## Quick Reference
 
 ### File Extensions
+
 - `.json` - All Settings Extension files use JSON format
 
 ### Required Fields
+
 - `version` - Format version string
 - `timestamp` - ISO 8601 datetime
 - `settings` - Settings object container
 
 ### Validation Tools
+
 - JSON validators (jsonlint.com, jq command line)
 - Schema validation (ajv library)
 - Custom validation functions (provided above)
 
 ### Size Limits
+
 - Practical limit: ~10MB per file
 - Recommended: Under 1MB for performance
 - Browser storage may impose additional limits
@@ -789,6 +823,6 @@ function checkFileIntegrity(fileContent) {
 
 ## Revision History
 
-| Date | Author | Changes |
-|------|--------|---------|
+| Date       | Author             | Changes                        |
+| ---------- | ------------------ | ------------------------------ |
 | 2025-08-11 | Documentation Team | Initial file formats reference |

@@ -38,28 +38,36 @@ The arc42 architecture documentation is organized into 11 main sections:
 ## Reading Guide
 
 ### For New Team Members
+
 Start with:
+
 1. [Introduction and Goals](01-introduction-goals.md) - Understand the project purpose
 2. [System Scope and Context](03-context.md) - Learn about system boundaries
 3. [Building Block View](05-building-blocks.md) - Understand the components
 4. [Architecture Decisions](09-architecture-decisions/) - Learn key decisions
 
 ### For Developers
+
 Focus on:
+
 1. [Building Block View](05-building-blocks.md) - Component structure
 2. [Runtime View](06-runtime-view.md) - How components interact
 3. [Crosscutting Concepts](08-crosscutting-concepts.md) - Common patterns
 4. [Architecture Decisions](09-architecture-decisions/) - Technical rationale
 
 ### For Architects and Technical Leaders
+
 Review:
+
 1. [Solution Strategy](04-solution-strategy.md) - High-level approach
 2. [Architecture Constraints](02-constraints.md) - Design limitations
 3. [Quality Requirements](10-quality-requirements.md) - Quality attributes
 4. [Risks and Technical Debt](11-risks-technical-debt.md) - Risk assessment
 
 ### For Operations and DevOps
+
 Examine:
+
 1. [Deployment View](07-deployment.md) - Infrastructure requirements
 2. [Quality Requirements](10-quality-requirements.md) - Performance targets
 3. [Risks and Technical Debt](11-risks-technical-debt.md) - Operational risks
@@ -67,7 +75,7 @@ Examine:
 ## Document Conventions
 
 - **Bold text**: Important concepts or terms
-- *Italic text*: Emphasis or variable names
+- _Italic text_: Emphasis or variable names
 - `Code blocks`: File names, code snippets, or commands
 - > Blockquotes: Important notes or warnings
 
@@ -76,12 +84,14 @@ Examine:
 This architecture documentation complements other project documentation:
 
 ### Connected User Documentation
+
 - **[User Documentation Hub](../user/README.md)** - Complete end-user guide navigation
 - **[Core Concepts](../user/explanation/concepts.md)** - User perspective of architectural concepts
 - **[Security & Privacy](../user/explanation/security.md)** - User view of security architecture
 - **[Settings Types](../user/reference/settings-types.md)** - User-facing data model from architecture
 
-### Connected Developer Documentation  
+### Connected Developer Documentation
+
 - **[Developer Documentation Hub](../developer/README.md)** - Developer workflow navigation
 - **[Local Setup Guide](../developer/workflows/local-setup.md)** - Implementing the architecture locally
 - **[Extension Development](../developer/guides/extension-development.md)** - Using architectural components
@@ -89,6 +99,7 @@ This architecture documentation complements other project documentation:
 - **[Coding Standards](../developer/conventions/coding-standards.md)** - Implementing architectural patterns
 
 ### Project Context
+
 - **[Documentation Hub](../README.md)** - Main documentation navigation
 - **[Project Overview](../../README.md)** - Project introduction and quick start
 - **[Contributing Guidelines](../CONTRIBUTING.md)** - How to contribute to all documentation
@@ -102,6 +113,7 @@ This documentation is maintained alongside the codebase:
 - **Ownership**: Architecture team and senior developers
 
 For questions about this documentation or to propose changes, please:
+
 1. Review the [documentation standards](../.documentation-standards.md)
 2. Open an issue in the project repository
 3. Follow the contribution guidelines
@@ -114,6 +126,6 @@ For questions about this documentation or to propose changes, please:
 
 ## Revision History
 
-| Date | Author | Changes |
-|------|--------|---------|
+| Date       | Author            | Changes                                          |
+| ---------- | ----------------- | ------------------------------------------------ |
 | 2025-08-11 | Architecture Team | Initial comprehensive architecture documentation |

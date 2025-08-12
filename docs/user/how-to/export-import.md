@@ -74,16 +74,19 @@ This comprehensive guide covers all aspects of exporting and importing Settings 
 #### Advanced Export Features
 
 **Enhanced File Naming**
+
 - More descriptive default names
 - Includes extension version
 - Better timestamp formatting
 
 **Export Validation**
+
 - Pre-export settings check
 - File integrity verification
 - Success confirmation dialog
 
 **Export Metadata**
+
 - Extended file information
 - Export source tracking
 - User context information
@@ -99,21 +102,25 @@ This comprehensive guide covers all aspects of exporting and importing Settings 
    - Navigate to Console tab
 
 2. **Execute Export Command**
+
    ```javascript
    // Export settings programmatically
-   chrome.runtime.sendMessage({
-     action: 'exportSettings'
-   }, response => {
-     if (response.success) {
-       const dataStr = JSON.stringify(response.settings, null, 2);
-       const dataBlob = new Blob([dataStr], {type: 'application/json'});
-       const url = URL.createObjectURL(dataBlob);
-       const link = document.createElement('a');
-       link.href = url;
-       link.download = `settings-programmatic-${Date.now()}.json`;
-       link.click();
-     }
-   });
+   chrome.runtime.sendMessage(
+     {
+       action: "exportSettings",
+     },
+     (response) => {
+       if (response.success) {
+         const dataStr = JSON.stringify(response.settings, null, 2);
+         const dataBlob = new Blob([dataStr], { type: "application/json" });
+         const url = URL.createObjectURL(dataBlob);
+         const link = document.createElement("a");
+         link.href = url;
+         link.download = `settings-programmatic-${Date.now()}.json`;
+         link.click();
+       }
+     },
+   );
    ```
 
 3. **Automated Export Scripts**
@@ -201,14 +208,15 @@ This comprehensive guide covers all aspects of exporting and importing Settings 
    - Get direct download URL
 
 2. **Use URL Import** (if supported)
+
    ```javascript
    // Import from URL using developer tools
-   fetch('https://example.com/settings.json')
-     .then(response => response.json())
-     .then(settings => {
+   fetch("https://example.com/settings.json")
+     .then((response) => response.json())
+     .then((settings) => {
        chrome.runtime.sendMessage({
-         action: 'importSettings',
-         settings: settings
+         action: "importSettings",
+         settings: settings,
        });
      });
    ```
@@ -228,7 +236,7 @@ Create consistent file naming:
 ```
 Naming Templates:
 - Project exports: [project]-settings-[version]-[date].json
-- User exports: [username]-settings-[environment]-[date].json  
+- User exports: [username]-settings-[environment]-[date].json
 - Team exports: team-[teamname]-settings-[version].json
 
 Examples:
@@ -262,20 +270,22 @@ Add documentation to export files:
 Before importing, validate files:
 
 1. **JSON Syntax Check**
+
    ```bash
    # Using command line (macOS/Linux)
    cat settings.json | python -m json.tool
-   
+
    # Using online validator
    # Paste content into jsonlint.com
    ```
 
 2. **Settings Structure Validation**
+
    ```javascript
    // Check required fields exist
    function validateSettingsFile(settingsData) {
-     const required = ['version', 'timestamp', 'settings'];
-     return required.every(field => settingsData.hasOwnProperty(field));
+     const required = ["version", "timestamp", "settings"];
+     return required.every((field) => settingsData.hasOwnProperty(field));
    }
    ```
 
@@ -313,9 +323,10 @@ Before importing, validate files:
    - Open file in text editor
 
 2. **Remove Unwanted Settings**
+
    ```json
    {
-     "version": "1.0", 
+     "version": "1.0",
      "timestamp": "2025-08-11T10:30:00.123Z",
      "settings": {
        "feature_enabled": {
@@ -340,23 +351,23 @@ Create scripts for common selective exports:
 ```javascript
 // Export only boolean settings
 function exportBooleanSettings() {
-  chrome.runtime.sendMessage({action: 'getAllSettings'}, (response) => {
+  chrome.runtime.sendMessage({ action: "getAllSettings" }, (response) => {
     const booleanSettings = {};
     for (const [key, setting] of Object.entries(response.settings)) {
-      if (setting.type === 'boolean') {
+      if (setting.type === "boolean") {
         booleanSettings[key] = setting;
       }
     }
-    
+
     const exportData = {
       version: "1.0",
       timestamp: new Date().toISOString(),
       settings: booleanSettings,
-      export_type: "selective_boolean"
+      export_type: "selective_boolean",
     };
-    
+
     // Download selective export
-    downloadJSON(exportData, 'settings-boolean-only.json');
+    downloadJSON(exportData, "settings-boolean-only.json");
   });
 }
 ```
@@ -395,10 +406,10 @@ Understanding how imports merge:
 ```javascript
 // Export configuration by setting type
 const settingTypeExports = {
-  security: ['api_key', 'authentication_token'],
-  appearance: ['custom_css', 'theme_settings'], 
-  performance: ['refresh_interval', 'timeout_values'],
-  features: ['feature_enabled', 'debug_mode']
+  security: ["api_key", "authentication_token"],
+  appearance: ["custom_css", "theme_settings"],
+  performance: ["refresh_interval", "timeout_values"],
+  features: ["feature_enabled", "debug_mode"],
 };
 
 function exportByCategory(category) {
@@ -412,15 +423,15 @@ function exportByCategory(category) {
 // Export environment-specific settings
 const environmentSettings = {
   development: {
-    api_endpoint: 'https://dev-api.example.com',
+    api_endpoint: "https://dev-api.example.com",
     debug_mode: true,
-    logging_level: 'verbose'
+    logging_level: "verbose",
   },
   production: {
-    api_endpoint: 'https://api.example.com', 
+    api_endpoint: "https://api.example.com",
     debug_mode: false,
-    logging_level: 'error'
-  }
+    logging_level: "error",
+  },
 };
 ```
 
@@ -431,27 +442,29 @@ const environmentSettings = {
 #### Export Multiple Configurations
 
 1. **Prepare Export List**
+
    ```javascript
    const exportConfigurations = [
-     { name: 'development', description: 'Dev environment settings' },
-     { name: 'staging', description: 'Staging environment settings' },
-     { name: 'production', description: 'Production environment settings' }
+     { name: "development", description: "Dev environment settings" },
+     { name: "staging", description: "Staging environment settings" },
+     { name: "production", description: "Production environment settings" },
    ];
    ```
 
 2. **Batch Export Script**
+
    ```javascript
    async function batchExport(configurations) {
      for (const config of configurations) {
        // Set up configuration
        await applyConfiguration(config);
-       
+
        // Export current state
        const exportData = await exportCurrentSettings();
-       
+
        // Save with configuration name
        downloadJSON(exportData, `settings-${config.name}.json`);
-       
+
        // Wait between exports
        await delay(1000);
      }
@@ -468,24 +481,28 @@ const environmentSettings = {
    - Plan rollback strategy
 
 2. **Sequential Import Process**
+
    ```javascript
    async function batchImport(fileList) {
      const results = [];
-     
+
      for (const filename of fileList) {
        try {
          const settings = await loadSettingsFile(filename);
          await importSettings(settings);
-         results.push({ file: filename, status: 'success' });
-         
+         results.push({ file: filename, status: "success" });
+
          // Verify import success
          await validateImport(settings);
-         
        } catch (error) {
-         results.push({ file: filename, status: 'failed', error: error.message });
+         results.push({
+           file: filename,
+           status: "failed",
+           error: error.message,
+         });
        }
      }
-     
+
      return results;
    }
    ```
@@ -501,41 +518,43 @@ const environmentSettings = {
 #### Scheduled Export/Import
 
 1. **Daily Export Automation**
+
    ```bash
    #!/bin/bash
    # daily-settings-backup.sh
-   
+
    BACKUP_DIR="$HOME/settings-backups"
    DATE=$(date +%Y-%m-%d)
-   
+
    # Create backup directory
    mkdir -p "$BACKUP_DIR/$DATE"
-   
+
    # Export settings (browser automation required)
    # ... export logic
-   
+
    # Cleanup old backups (keep 30 days)
    find "$BACKUP_DIR" -type d -mtime +30 -delete
    ```
 
 2. **Configuration Synchronization**
+
    ```python
    # sync-team-settings.py
    import json
    import requests
    from datetime import datetime
-   
+
    def sync_team_settings():
        # Download latest team settings
        response = requests.get('https://company.com/team-settings.json')
        team_settings = response.json()
-       
+
        # Import to browser extension
        import_to_extension(team_settings)
-       
+
        # Log sync activity
        log_sync_activity(team_settings)
-   
+
    if __name__ == "__main__":
        sync_team_settings()
    ```
@@ -547,27 +566,29 @@ const environmentSettings = {
 #### Settings File Optimization
 
 1. **Minimize File Size**
+
    ```javascript
    // Remove unnecessary fields for distribution
    function minimizeSettingsFile(settingsData) {
      const minimized = {
        version: settingsData.version,
-       settings: {}
+       settings: {},
      };
-     
+
      for (const [key, setting] of Object.entries(settingsData.settings)) {
        minimized.settings[key] = {
          type: setting.type,
-         value: setting.value
+         value: setting.value,
          // Remove description and other metadata
        };
      }
-     
+
      return minimized;
    }
    ```
 
 2. **Add Documentation**
+
    ```javascript
    // Add comprehensive documentation to export
    function documentSettingsFile(settingsData) {
@@ -576,18 +597,19 @@ const environmentSettings = {
        _documentation: {
          created_by: "Settings Extension v1.0",
          export_date: new Date().toISOString(),
-         usage_instructions: "Import using Settings Extension Import/Export tab",
+         usage_instructions:
+           "Import using Settings Extension Import/Export tab",
          compatibility: "Settings Extension v1.0+",
-         environment: process.env.NODE_ENV || "development"
-       }
+         environment: process.env.NODE_ENV || "development",
+       },
      };
-     
+
      // Add per-setting documentation
      for (const [key, setting] of Object.entries(documented.settings)) {
        setting._usage_notes = getSettingUsageNotes(key);
        setting._default_value = getSettingDefault(key);
      }
-     
+
      return documented;
    }
    ```
@@ -597,6 +619,7 @@ const environmentSettings = {
 #### Converting Between Versions
 
 1. **Version 1.0 to 2.0 Migration**
+
    ```javascript
    function migrateV1toV2(v1Settings) {
      const v2Settings = {
@@ -605,34 +628,35 @@ const environmentSettings = {
        settings: {},
        metadata: {
          migrated_from: "1.0",
-         migration_date: new Date().toISOString()
-       }
+         migration_date: new Date().toISOString(),
+       },
      };
-     
+
      // Migrate each setting
      for (const [key, setting] of Object.entries(v1Settings.settings)) {
        v2Settings.settings[key] = migrateSettingV1toV2(setting);
      }
-     
+
      return v2Settings;
    }
    ```
 
 2. **Cross-Platform Compatibility**
+
    ```javascript
    // Ensure settings work across different browsers
    function ensureCrossBrowserCompatibility(settings) {
      const compatible = { ...settings };
-     
+
      // Remove browser-specific settings
      delete compatible.settings.chrome_specific_setting;
      delete compatible.settings.firefox_specific_setting;
-     
+
      // Convert browser-specific values to universal equivalents
      if (compatible.settings.storage_preference) {
-       compatible.settings.storage_preference.value = 'local'; // Universal fallback
+       compatible.settings.storage_preference.value = "local"; // Universal fallback
      }
-     
+
      return compatible;
    }
    ```
@@ -642,18 +666,21 @@ const environmentSettings = {
 ### Common Export Problems
 
 **Export Button Not Working**
+
 - Refresh extension popup
 - Check browser download permissions
 - Try advanced export from options page
 - Clear browser cache and cookies
 
 **Export File is Empty or Corrupted**
+
 - Check if settings loaded properly
 - Try refreshing extension
 - Restart browser
 - Check available disk space
 
 **Download Fails Silently**
+
 - Check browser's download settings
 - Look in different download locations
 - Check antivirus software
@@ -662,18 +689,21 @@ const environmentSettings = {
 ### Common Import Problems
 
 **Import File Not Recognized**
+
 - Verify file has .json extension
 - Check JSON syntax is valid
 - Confirm file isn't corrupted
 - Try renaming file
 
 **Settings Don't Change After Import**
+
 - Refresh extension after import
 - Check if browser restart is needed
 - Verify import file contains expected settings
 - Try importing different known-good file
 
 **Partial Import Success**
+
 - Some settings imported, others failed
 - Check import file for syntax errors
 - Verify setting types are correct
@@ -682,18 +712,21 @@ const environmentSettings = {
 ### Advanced Troubleshooting
 
 **Version Compatibility Issues**
+
 1. Check export file version vs current extension version
 2. Use migration tools if available
 3. Manually update file format
 4. Contact support for major version changes
 
 **Data Validation Failures**
+
 1. Check setting values against validation rules
 2. Verify required fields are present
 3. Fix type mismatches (string vs number)
 4. Remove invalid setting entries
 
 **Performance Issues with Large Files**
+
 1. Break large imports into smaller chunks
 2. Remove unnecessary metadata
 3. Import during low-activity periods
@@ -702,6 +735,7 @@ const environmentSettings = {
 ## Best Practices Summary
 
 ### Export Best Practices
+
 - Export before making changes
 - Use descriptive file names
 - Include documentation/comments
@@ -709,6 +743,7 @@ const environmentSettings = {
 - Store in multiple locations
 
 ### Import Best Practices
+
 - Always backup before importing
 - Validate files before importing
 - Test imports in safe environment
@@ -716,6 +751,7 @@ const environmentSettings = {
 - Keep original files for rollback
 
 ### File Management
+
 - Organize files in logical folder structure
 - Use consistent naming conventions
 - Version your configuration files
@@ -725,16 +761,19 @@ const environmentSettings = {
 ## Quick Reference
 
 ### Export Methods
+
 - **Quick**: Extension popup → Export button
 - **Advanced**: Options page → Import/Export → Export Settings
 - **Programmatic**: Browser console with JavaScript
 
 ### Import Methods
+
 - **Standard**: Options page → Import/Export → Import Settings
 - **Drag-drop**: Drag .json file to import area
 - **URL**: Import from web-accessible settings file
 
 ### File Operations
+
 - **Validation**: Check JSON syntax and structure
 - **Selective**: Export/import only specific settings
 - **Batch**: Handle multiple files automatically
@@ -749,6 +788,6 @@ const environmentSettings = {
 
 ## Revision History
 
-| Date | Author | Changes |
-|------|--------|---------|
+| Date       | Author             | Changes                                   |
+| ---------- | ------------------ | ----------------------------------------- |
 | 2025-08-11 | Documentation Team | Initial export/import comprehensive guide |

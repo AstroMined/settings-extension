@@ -143,6 +143,7 @@ This guide provides step-by-step instructions for backing up and restoring your 
 2. **Verify JSON Format**
    - Right-click backup file → "Open with" → Text Editor
    - Check for proper JSON structure:
+
    ```json
    {
      "version": "1.0",
@@ -185,6 +186,7 @@ This guide provides step-by-step instructions for backing up and restoring your 
    - Example: `settings-v1.0-backup-2025-08-11.json`
 
 2. **Folder Organization**
+
    ```
    Settings Backups/
    ├── Daily/
@@ -244,18 +246,21 @@ This guide provides step-by-step instructions for backing up and restoring your 
 ### Backup Issues
 
 **Export Button Doesn't Work**
+
 - Refresh the extension popup
 - Try from advanced settings page
 - Check browser's download permissions
 - Clear browser cache and cookies
 
 **Download Fails**
+
 - Check available disk space
 - Try different download location
 - Disable download blocking extensions
 - Check antivirus software isn't blocking
 
 **File Size is Wrong**
+
 - Very small files (< 100 bytes): Export failed
 - Very large files (> 1 MB): Possible corruption
 - Try exporting again after refreshing
@@ -263,24 +268,28 @@ This guide provides step-by-step instructions for backing up and restoring your 
 ### Restore Issues
 
 **Import Button Greyed Out**
+
 - Ensure file is .json format
 - Check file isn't corrupted
 - Try renaming file with .json extension
 - Verify file permissions allow reading
 
 **Import Fails with Error**
+
 - Check JSON syntax is valid
 - Verify file wasn't edited incorrectly
 - Try importing a known-good backup
 - Check for special characters in file path
 
 **Settings Don't Change After Import**
+
 - Refresh extension popup after import
 - Check if extension requires restart
 - Verify you imported the correct file
 - Compare imported settings with expected values
 
 **Partial Import Success**
+
 - Some settings imported, others didn't
 - Check backup file for missing settings
 - Try importing a different backup
@@ -289,6 +298,7 @@ This guide provides step-by-step instructions for backing up and restoring your 
 ### Recovery Scenarios
 
 **Complete Settings Loss**
+
 1. Reset extension to defaults
 2. Import most recent backup
 3. Test basic functionality
@@ -296,6 +306,7 @@ This guide provides step-by-step instructions for backing up and restoring your 
 5. Re-configure any missing settings
 
 **Corrupted Settings**
+
 1. Export current settings as reference
 2. Reset extension completely
 3. Import known-good backup
@@ -303,6 +314,7 @@ This guide provides step-by-step instructions for backing up and restoring your 
 5. Manually fix any remaining problems
 
 **Version Conflicts**
+
 1. Check backup file version vs. current extension
 2. Try importing to same extension version
 3. Update extension if backup is newer
@@ -313,16 +325,19 @@ This guide provides step-by-step instructions for backing up and restoring your 
 ### When to Backup
 
 **Daily Backups**
+
 - If you modify settings frequently
 - During active development periods
 - When testing new configurations
 
 **Weekly Backups**
+
 - For stable configurations
 - Regular maintenance schedule
 - Before weekend downtime
 
 **Event-Driven Backups**
+
 - Before any major changes
 - Prior to browser/extension updates
 - When sharing configurations
@@ -331,18 +346,21 @@ This guide provides step-by-step instructions for backing up and restoring your 
 ### Backup Management
 
 **Storage Organization**
+
 - Use consistent naming conventions
 - Organize in dated folders
 - Keep local and cloud copies
 - Document backup purposes
 
 **File Maintenance**
+
 - Regular cleanup of old backups
 - Test restore process periodically
 - Keep multiple backup generations
 - Verify backups after creation
 
 **Security Considerations**
+
 - Protect files containing sensitive data
 - Use secure cloud storage
 - Consider encryption for sensitive configs
@@ -351,16 +369,19 @@ This guide provides step-by-step instructions for backing up and restoring your 
 ## Quick Reference
 
 ### Backup Commands
+
 - **Quick backup**: Click extension icon → Export
 - **Advanced backup**: Open settings → Import/Export → Export Settings
 - **Verification**: Open .json file in text editor
 
-### Restore Commands  
+### Restore Commands
+
 - **Standard restore**: Advanced settings → Import/Export → Import Settings
 - **Emergency restore**: Reset extension → Import backup
 - **Verification**: Check settings match expectations
 
 ### File Locations
+
 - **Downloads**: Default backup location
 - **Organization**: Create dedicated backup folders
 - **Cloud sync**: Use cloud storage for automatic sync
@@ -374,6 +395,6 @@ This guide provides step-by-step instructions for backing up and restoring your 
 
 ## Revision History
 
-| Date | Author | Changes |
-|------|--------|---------|
+| Date       | Author             | Changes                          |
+| ---------- | ------------------ | -------------------------------- |
 | 2025-08-11 | Documentation Team | Initial backup and restore guide |

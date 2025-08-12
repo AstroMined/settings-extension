@@ -30,19 +30,19 @@ graph TB
         SF --> WE[web-ext serve]
         WE --> TB[Test in Browser]
     end
-    
+
     subgraph "Production Packaging"
         SF --> WEP[web-ext build]
         WEP --> CZ[Chrome .zip]
         WEP --> FX[Firefox .xpi]
     end
-    
+
     subgraph "Quality Assurance"
         SF --> Jest[Jest Testing]
         SF --> ESLint[ESLint Checking]
         SF --> Prettier[Prettier Formatting]
     end
-    
+
     subgraph "Available (Not Used)"
         Webpack[Webpack Config] -.-> |Available but not in build| SF
     end
@@ -53,6 +53,7 @@ graph TB
 ### Local Development Process
 
 #### 1. Direct File Development
+
 ```bash
 # No build step required - edit files directly
 code popup/popup.js
@@ -61,11 +62,12 @@ code lib/settings-manager.js
 ```
 
 #### 2. Browser Testing
+
 ```bash
 # Serve extension for Chrome testing
 npm run serve
 
-# Or serve for Firefox testing  
+# Or serve for Firefox testing
 npm run serve:firefox
 
 # Or use web-ext directly
@@ -73,6 +75,7 @@ web-ext run --browser-console
 ```
 
 #### 3. Watch Mode Development
+
 ```bash
 # Run development server with auto-reload
 npm run dev
@@ -87,7 +90,7 @@ npm run dev
 ```
 settings-extension/
 ├── background.js          # Direct source - no transpilation
-├── content-script.js      # Direct source - no transpilation  
+├── content-script.js      # Direct source - no transpilation
 ├── popup/
 │   ├── popup.html        # Direct serving
 │   ├── popup.css         # Direct serving
@@ -125,6 +128,7 @@ The development environment uses `web-ext` for browser integration:
 ### Packaging Process
 
 #### Chrome/Edge Packaging
+
 ```bash
 # Package for Chrome Web Store
 npm run package:chrome
@@ -132,7 +136,8 @@ npm run package:chrome
 # This runs: web-ext build --artifacts-dir web-ext-artifacts --filename settings-extension-chrome.zip
 ```
 
-#### Firefox Packaging  
+#### Firefox Packaging
+
 ```bash
 # Package for Firefox AMO
 npm run package:firefox
@@ -141,6 +146,7 @@ npm run package:firefox
 ```
 
 #### Universal Packaging
+
 ```bash
 # Package for all browsers
 npm run package
@@ -171,10 +177,11 @@ The packaging uses `web-ext` with configuration:
 ### Output Artifacts
 
 Packaging creates these files:
+
 ```
 web-ext-artifacts/
 ├── settings-extension-chrome.zip    # Chrome Web Store format
-├── settings-extension-firefox.xpi   # Firefox AMO format  
+├── settings-extension-firefox.xpi   # Firefox AMO format
 └── settings_extension-1.0.0.zip     # Generic format
 ```
 
@@ -195,27 +202,28 @@ A `webpack.config.js` exists for potential future use:
 
 ```javascript
 // webpack.config.js (available for future integration)
-const path = require('path');
+const path = require("path");
 
 module.exports = {
   entry: {
-    background: './background.js',
-    'content-script': './content-script.js',
-    popup: './popup/popup.js',
-    options: './options/options.js'
+    background: "./background.js",
+    "content-script": "./content-script.js",
+    popup: "./popup/popup.js",
+    options: "./options/options.js",
   },
   output: {
-    path: path.resolve(__dirname, 'dist'),
-    filename: '[name].js'
+    path: path.resolve(__dirname, "dist"),
+    filename: "[name].js",
   },
-  mode: process.env.NODE_ENV === 'production' ? 'production' : 'development',
-  devtool: 'source-map'
+  mode: process.env.NODE_ENV === "production" ? "production" : "development",
+  devtool: "source-map",
 };
 ```
 
 ### When Webpack Might Be Activated
 
 Future scenarios where Webpack could be beneficial:
+
 - **Advanced TypeScript Integration**: If migrating from vanilla JavaScript
 - **Code Splitting**: For larger codebase with dynamic imports
 - **Asset Processing**: If adding complex CSS preprocessing or image optimization
@@ -276,7 +284,7 @@ jobs:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
         with:
-          node-version: '18'
+          node-version: "18"
       - run: npm ci
       - run: npm run lint
       - run: npm test
@@ -287,21 +295,21 @@ jobs:
 
 ### Development Performance
 
-| Operation | Time | Notes |
-|-----------|------|-------|
-| **File Edit → Browser Reload** | < 1s | No build step required |
-| **Extension Reload** | < 2s | web-ext handles reload automatically |
-| **Test Execution** | < 10s | Jest runs directly on source files |
-| **Lint Check** | < 5s | ESLint processes source files |
+| Operation                      | Time  | Notes                                |
+| ------------------------------ | ----- | ------------------------------------ |
+| **File Edit → Browser Reload** | < 1s  | No build step required               |
+| **Extension Reload**           | < 2s  | web-ext handles reload automatically |
+| **Test Execution**             | < 10s | Jest runs directly on source files   |
+| **Lint Check**                 | < 5s  | ESLint processes source files        |
 
 ### Build Performance
 
-| Operation | Time | Output Size |
-|-----------|------|-------------|
-| **Chrome Package** | < 10s | ~50KB |
-| **Firefox Package** | < 10s | ~50KB |
-| **Full Package** | < 15s | ~100KB total |
-| **Validation** | < 5s | web-ext lint |
+| Operation           | Time  | Output Size  |
+| ------------------- | ----- | ------------ |
+| **Chrome Package**  | < 10s | ~50KB        |
+| **Firefox Package** | < 10s | ~50KB        |
+| **Full Package**    | < 15s | ~100KB total |
+| **Validation**      | < 5s  | web-ext lint |
 
 ## Deployment Strategy
 
@@ -338,15 +346,16 @@ npm run package
 ### Dependency Management
 
 Key build dependencies:
+
 ```json
 {
   "devDependencies": {
-    "web-ext": "^7.8.0",        // Core packaging and serving
-    "concurrently": "^8.2.0",   // Parallel script execution
-    "webpack": "^5.88.0",       // Available for future use
-    "jest": "^29.6.0",          // Testing framework
-    "eslint": "^8.45.0",        // Code linting
-    "prettier": "^3.0.0"        // Code formatting
+    "web-ext": "^7.8.0", // Core packaging and serving
+    "concurrently": "^8.2.0", // Parallel script execution
+    "webpack": "^5.88.0", // Available for future use
+    "jest": "^29.6.0", // Testing framework
+    "eslint": "^8.45.0", // Code linting
+    "prettier": "^3.0.0" // Code formatting
   }
 }
 ```
@@ -361,6 +370,7 @@ Key build dependencies:
 ### Troubleshooting Common Issues
 
 #### Extension Won't Load
+
 ```bash
 # Check manifest validation
 web-ext lint
@@ -370,6 +380,7 @@ ls -la manifest.json
 ```
 
 #### Packaging Failures
+
 ```bash
 # Clean artifacts and retry
 rm -rf web-ext-artifacts
@@ -380,6 +391,7 @@ web-ext build --verbose
 ```
 
 #### Development Server Issues
+
 ```bash
 # Kill existing processes
 pkill -f web-ext
@@ -392,43 +404,47 @@ npm run dev
 
 ### Current Approach vs Traditional Webpack Build
 
-| Aspect | Direct Serving | Webpack Build |
-|--------|---------------|---------------|
-| **Development Speed** | Instant | 2-10s build time |
-| **Debugging** | Direct source | Source maps required |
-| **Bundle Size** | ~50KB | ~30-40KB (minified) |
-| **Browser Compatibility** | Native | May need polyfills |
-| **Maintenance** | Low | Medium-High |
-| **Team Learning Curve** | None | Moderate |
+| Aspect                    | Direct Serving | Webpack Build        |
+| ------------------------- | -------------- | -------------------- |
+| **Development Speed**     | Instant        | 2-10s build time     |
+| **Debugging**             | Direct source  | Source maps required |
+| **Bundle Size**           | ~50KB          | ~30-40KB (minified)  |
+| **Browser Compatibility** | Native         | May need polyfills   |
+| **Maintenance**           | Low            | Medium-High          |
+| **Team Learning Curve**   | None           | Moderate             |
 
 ### Current Approach vs Framework Solutions
 
-| Aspect | Direct Serving | Plasmo/WXT |
-|--------|---------------|------------|
-| **Setup Complexity** | Minimal | High |
-| **Feature Richness** | Basic | Advanced |
-| **Vendor Lock-in** | None | Framework-dependent |
-| **Customization** | Full control | Framework limitations |
-| **TypeScript Support** | Manual | Built-in |
+| Aspect                 | Direct Serving | Plasmo/WXT            |
+| ---------------------- | -------------- | --------------------- |
+| **Setup Complexity**   | Minimal        | High                  |
+| **Feature Richness**   | Basic          | Advanced              |
+| **Vendor Lock-in**     | None           | Framework-dependent   |
+| **Customization**      | Full control   | Framework limitations |
+| **TypeScript Support** | Manual         | Built-in              |
 
 ## Future Evolution Path
 
 ### Phase 1: Current State (Implemented)
+
 - Direct file serving for development
 - web-ext for packaging and browser integration
 - Basic quality assurance integration
 
 ### Phase 2: Enhanced Development (Planned)
+
 - File watching with automatic browser reload
 - Enhanced development server with proxy capabilities
 - Improved error reporting and debugging tools
 
 ### Phase 3: Advanced Build Features (Future)
+
 - Optional Webpack integration for complex scenarios
 - TypeScript support with minimal build complexity
 - Advanced asset optimization when needed
 
 ### Phase 4: Enterprise Features (Long-term)
+
 - Automated deployment pipelines
 - Multiple environment configurations
 - Advanced packaging options for enterprise distribution
@@ -472,6 +488,6 @@ npm run dev
 
 ## Revision History
 
-| Date | Author | Changes |
-|------|--------|---------|
+| Date       | Author           | Changes                            |
+| ---------- | ---------------- | ---------------------------------- |
 | 2025-08-11 | Development Team | Initial build system documentation |

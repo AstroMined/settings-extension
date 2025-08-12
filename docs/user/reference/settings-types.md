@@ -14,13 +14,13 @@ Complete reference documentation for all setting types supported by the Settings
 
 The Settings Extension supports five core setting types:
 
-| Type | Description | Use Case | Value Examples |
-|------|-------------|----------|----------------|
-| `boolean` | True/false toggle | Feature flags, on/off switches | `true`, `false` |
-| `text` | Short text input | API keys, URLs, names | `"api.example.com"` |
-| `longtext` | Multi-line text | CSS, scripts, large content | `"/* CSS */\n.class {}"` |
-| `number` | Numeric input | Intervals, counts, limits | `60`, `3.14`, `-5` |
-| `json` | Complex objects | Advanced configurations | `{"key": "value"}` |
+| Type       | Description       | Use Case                       | Value Examples           |
+| ---------- | ----------------- | ------------------------------ | ------------------------ |
+| `boolean`  | True/false toggle | Feature flags, on/off switches | `true`, `false`          |
+| `text`     | Short text input  | API keys, URLs, names          | `"api.example.com"`      |
+| `longtext` | Multi-line text   | CSS, scripts, large content    | `"/* CSS */\n.class {}"` |
+| `number`   | Numeric input     | Intervals, counts, limits      | `60`, `3.14`, `-5`       |
+| `json`     | Complex objects   | Advanced configurations        | `{"key": "value"}`       |
 
 ## Boolean Settings
 
@@ -42,11 +42,11 @@ Boolean settings represent simple true/false values, displayed as toggle switche
 
 ### Properties
 
-| Property | Required | Type | Description |
-|----------|----------|------|-------------|
-| `type` | Yes | `string` | Must be `"boolean"` |
-| `value` | Yes | `boolean` | `true` or `false` |
-| `description` | Yes | `string` | User-friendly description |
+| Property      | Required | Type      | Description               |
+| ------------- | -------- | --------- | ------------------------- |
+| `type`        | Yes      | `string`  | Must be `"boolean"`       |
+| `value`       | Yes      | `boolean` | `true` or `false`         |
+| `description` | Yes      | `string`  | User-friendly description |
 
 ### Validation Rules
 
@@ -57,6 +57,7 @@ Boolean settings represent simple true/false values, displayed as toggle switche
 ### Examples
 
 #### Feature Toggle
+
 ```json
 {
   "feature_enabled": {
@@ -68,6 +69,7 @@ Boolean settings represent simple true/false values, displayed as toggle switche
 ```
 
 #### Debug Mode
+
 ```json
 {
   "debug_mode": {
@@ -79,6 +81,7 @@ Boolean settings represent simple true/false values, displayed as toggle switche
 ```
 
 #### Auto-sync
+
 ```json
 {
   "auto_sync_enabled": {
@@ -92,15 +95,18 @@ Boolean settings represent simple true/false values, displayed as toggle switche
 ### Best Practices
 
 **Naming Conventions**
+
 - Use descriptive names ending in `_enabled`, `_mode`, or `_active`
 - Examples: `feature_enabled`, `debug_mode`, `sync_active`
 
 **Default Values**
+
 - Choose safe defaults (usually `false` for new features)
 - Consider impact of `true` vs `false` on user experience
 - Document the default behavior clearly
 
 **Descriptions**
+
 - Explain what happens when enabled/disabled
 - Use action-oriented language
 - Be specific about the impact
@@ -126,12 +132,12 @@ Text settings store short strings of text, typically under 100-500 characters. U
 
 ### Properties
 
-| Property | Required | Type | Description |
-|----------|----------|------|-------------|
-| `type` | Yes | `string` | Must be `"text"` |
-| `value` | Yes | `string` | Text content |
-| `description` | Yes | `string` | User-friendly description |
-| `maxLength` | No | `number` | Maximum character limit |
+| Property      | Required | Type     | Description               |
+| ------------- | -------- | -------- | ------------------------- |
+| `type`        | Yes      | `string` | Must be `"text"`          |
+| `value`       | Yes      | `string` | Text content              |
+| `description` | Yes      | `string` | User-friendly description |
+| `maxLength`   | No       | `number` | Maximum character limit   |
 
 ### Validation Rules
 
@@ -143,6 +149,7 @@ Text settings store short strings of text, typically under 100-500 characters. U
 ### Examples
 
 #### API Key
+
 ```json
 {
   "api_key": {
@@ -155,6 +162,7 @@ Text settings store short strings of text, typically under 100-500 characters. U
 ```
 
 #### Server URL
+
 ```json
 {
   "server_url": {
@@ -167,6 +175,7 @@ Text settings store short strings of text, typically under 100-500 characters. U
 ```
 
 #### User Identifier
+
 ```json
 {
   "user_id": {
@@ -181,16 +190,19 @@ Text settings store short strings of text, typically under 100-500 characters. U
 ### Best Practices
 
 **Security Considerations**
+
 - Never store passwords or sensitive tokens in text settings
 - Consider if the setting value should be hidden in the UI
 - Document security requirements for API keys
 
 **Validation**
+
 - Always set appropriate `maxLength` values
 - Consider if empty values should be allowed
 - Validate format (URLs, emails) when appropriate
 
 **User Experience**
+
 - Provide clear examples in descriptions
 - Use placeholder text to guide input
 - Show character count for limited fields
@@ -216,12 +228,12 @@ Long text settings store multi-line text content such as CSS, HTML, JavaScript, 
 
 ### Properties
 
-| Property | Required | Type | Description |
-|----------|----------|------|-------------|
-| `type` | Yes | `string` | Must be `"longtext"` |
-| `value` | Yes | `string` | Multi-line text content |
-| `description` | Yes | `string` | User-friendly description |
-| `maxLength` | No | `number` | Maximum character limit |
+| Property      | Required | Type     | Description               |
+| ------------- | -------- | -------- | ------------------------- |
+| `type`        | Yes      | `string` | Must be `"longtext"`      |
+| `value`       | Yes      | `string` | Multi-line text content   |
+| `description` | Yes      | `string` | User-friendly description |
+| `maxLength`   | No       | `number` | Maximum character limit   |
 
 ### Validation Rules
 
@@ -234,6 +246,7 @@ Long text settings store multi-line text content such as CSS, HTML, JavaScript, 
 ### Examples
 
 #### Custom CSS
+
 ```json
 {
   "custom_css": {
@@ -246,6 +259,7 @@ Long text settings store multi-line text content such as CSS, HTML, JavaScript, 
 ```
 
 #### JavaScript Code
+
 ```json
 {
   "custom_script": {
@@ -258,6 +272,7 @@ Long text settings store multi-line text content such as CSS, HTML, JavaScript, 
 ```
 
 #### Configuration Template
+
 ```json
 {
   "config_template": {
@@ -272,16 +287,19 @@ Long text settings store multi-line text content such as CSS, HTML, JavaScript, 
 ### Best Practices
 
 **Content Organization**
+
 - Use clear indentation and formatting
 - Include comments to explain complex sections
 - Break long content into logical sections
 
 **Performance Considerations**
+
 - Set reasonable `maxLength` limits (typically 10,000-100,000 characters)
 - Consider impact of large text blocks on storage and sync
 - Monitor memory usage for very large content
 
 **Editing Experience**
+
 - Provide syntax highlighting when possible
 - Support common keyboard shortcuts (Tab for indentation)
 - Consider providing templates or examples
@@ -308,13 +326,13 @@ Number settings store numeric values including integers, floating-point numbers,
 
 ### Properties
 
-| Property | Required | Type | Description |
-|----------|----------|------|-------------|
-| `type` | Yes | `string` | Must be `"number"` |
-| `value` | Yes | `number` | Numeric value |
-| `description` | Yes | `string` | User-friendly description |
-| `min` | No | `number` | Minimum allowed value |
-| `max` | No | `number` | Maximum allowed value |
+| Property      | Required | Type     | Description               |
+| ------------- | -------- | -------- | ------------------------- |
+| `type`        | Yes      | `string` | Must be `"number"`        |
+| `value`       | Yes      | `number` | Numeric value             |
+| `description` | Yes      | `string` | User-friendly description |
+| `min`         | No       | `number` | Minimum allowed value     |
+| `max`         | No       | `number` | Maximum allowed value     |
 
 ### Validation Rules
 
@@ -326,6 +344,7 @@ Number settings store numeric values including integers, floating-point numbers,
 ### Examples
 
 #### Timeout Setting
+
 ```json
 {
   "request_timeout": {
@@ -339,6 +358,7 @@ Number settings store numeric values including integers, floating-point numbers,
 ```
 
 #### Refresh Interval
+
 ```json
 {
   "refresh_interval": {
@@ -352,6 +372,7 @@ Number settings store numeric values including integers, floating-point numbers,
 ```
 
 #### Percentage Value
+
 ```json
 {
   "opacity_level": {
@@ -365,6 +386,7 @@ Number settings store numeric values including integers, floating-point numbers,
 ```
 
 #### Counter Setting
+
 ```json
 {
   "max_retries": {
@@ -380,16 +402,19 @@ Number settings store numeric values including integers, floating-point numbers,
 ### Best Practices
 
 **Range Definition**
+
 - Always set appropriate `min` and `max` values
 - Consider real-world usage constraints
 - Document units clearly (seconds, milliseconds, pixels, etc.)
 
 **Default Values**
+
 - Choose safe, commonly used defaults
 - Consider performance implications
 - Test default values thoroughly
 
 **User Interface**
+
 - Show units in the description or interface
 - Provide step increments for common values
 - Consider using sliders for ranges
@@ -420,11 +445,11 @@ JSON settings store complex objects, arrays, and nested data structures. Used fo
 
 ### Properties
 
-| Property | Required | Type | Description |
-|----------|----------|------|-------------|
-| `type` | Yes | `string` | Must be `"json"` |
-| `value` | Yes | `object` | JSON object/array/primitive |
-| `description` | Yes | `string` | User-friendly description |
+| Property      | Required | Type     | Description                 |
+| ------------- | -------- | -------- | --------------------------- |
+| `type`        | Yes      | `string` | Must be `"json"`            |
+| `value`       | Yes      | `object` | JSON object/array/primitive |
+| `description` | Yes      | `string` | User-friendly description   |
 
 ### Validation Rules
 
@@ -436,6 +461,7 @@ JSON settings store complex objects, arrays, and nested data structures. Used fo
 ### Examples
 
 #### API Configuration
+
 ```json
 {
   "api_config": {
@@ -459,6 +485,7 @@ JSON settings store complex objects, arrays, and nested data structures. Used fo
 ```
 
 #### Feature Flags
+
 ```json
 {
   "feature_flags": {
@@ -476,6 +503,7 @@ JSON settings store complex objects, arrays, and nested data structures. Used fo
 ```
 
 #### Array Configuration
+
 ```json
 {
   "allowed_domains": {
@@ -492,6 +520,7 @@ JSON settings store complex objects, arrays, and nested data structures. Used fo
 ```
 
 #### Nested Configuration
+
 ```json
 {
   "theme_config": {
@@ -524,18 +553,21 @@ JSON settings store complex objects, arrays, and nested data structures. Used fo
 ### Best Practices
 
 **Structure Design**
+
 - Use consistent naming conventions for object keys
 - Group related properties together
 - Keep nesting levels reasonable (avoid deep nesting)
 - Use arrays for lists and collections
 
 **Validation and Safety**
+
 - Validate JSON structure before saving
 - Provide schema documentation for complex objects
 - Handle invalid JSON gracefully
 - Consider default fallback values
 
 **Documentation**
+
 - Document expected object structure
 - Provide examples of valid configurations
 - Explain the purpose of each property
@@ -548,6 +580,7 @@ JSON settings store complex objects, arrays, and nested data structures. Used fo
 All settings support these optional metadata properties:
 
 #### Internal Metadata
+
 ```json
 {
   "setting_name": {
@@ -563,6 +596,7 @@ All settings support these optional metadata properties:
 ```
 
 #### Validation Metadata
+
 ```json
 {
   "setting_name": {
@@ -583,10 +617,11 @@ All settings support these optional metadata properties:
 ```
 
 #### UI Metadata
+
 ```json
 {
   "setting_name": {
-    "type": "text", 
+    "type": "text",
     "value": "api.example.com",
     "description": "API endpoint URL",
     "_ui": {
@@ -602,10 +637,11 @@ All settings support these optional metadata properties:
 ### Reserved Property Names
 
 Avoid these reserved names for custom properties:
+
 - `type` - Setting type identifier
 - `value` - Setting value
 - `description` - User description
-- `min`, `max` - Number constraints  
+- `min`, `max` - Number constraints
 - `maxLength` - String length constraint
 - Properties starting with `_` - Internal use
 
@@ -614,6 +650,7 @@ Avoid these reserved names for custom properties:
 ### Common Validation Errors
 
 **Boolean Type Errors**
+
 ```
 Error: "Feature enabled must be a boolean"
 Cause: Value is not true/false
@@ -621,13 +658,15 @@ Fix: Use boolean true or false, not strings or numbers
 ```
 
 **Text Length Errors**
+
 ```
-Error: "API key exceeds maximum length of 100"  
+Error: "API key exceeds maximum length of 100"
 Cause: Text string is too long
 Fix: Shorten text or increase maxLength limit
 ```
 
 **Number Range Errors**
+
 ```
 Error: "Refresh interval must be at least 1"
 Cause: Number is below minimum value
@@ -635,6 +674,7 @@ Fix: Use value within specified min/max range
 ```
 
 **JSON Format Errors**
+
 ```
 Error: "Advanced config contains circular references"
 Cause: Object references itself
@@ -644,12 +684,14 @@ Fix: Remove circular references from JSON object
 ### Validation Best Practices
 
 **Error Messages**
+
 - Include setting description in error messages
 - Explain what values are valid
 - Provide examples of correct values
 - Reference documentation when helpful
 
 **Error Handling**
+
 - Validate before saving settings
 - Provide immediate feedback to users
 - Allow correction without losing other changes
@@ -662,12 +704,14 @@ Fix: Remove circular references from JSON object
 When changing setting types, consider compatibility:
 
 **Safe Changes** (Usually compatible)
+
 - Adding optional metadata properties
 - Increasing maxLength limits
 - Expanding min/max ranges for numbers
 - Adding new optional properties to JSON objects
 
 **Breaking Changes** (Require migration)
+
 - Changing from one type to another
 - Reducing maxLength, min, or max constraints
 - Removing required properties from JSON objects
@@ -676,6 +720,7 @@ When changing setting types, consider compatibility:
 ### Migration Strategies
 
 #### Type Conversion
+
 ```javascript
 // Example: Converting text to number
 function migrateTextToNumber(oldValue, newConstraints) {
@@ -688,6 +733,7 @@ function migrateTextToNumber(oldValue, newConstraints) {
 ```
 
 #### JSON Structure Migration
+
 ```javascript
 // Example: Migrating JSON object structure
 function migrateApiConfig(oldConfig) {
@@ -695,7 +741,7 @@ function migrateApiConfig(oldConfig) {
     endpoint: oldConfig.url || oldConfig.endpoint,
     timeout: oldConfig.timeout || 5000,
     retries: oldConfig.retry_count || 3,
-    headers: oldConfig.headers || {}
+    headers: oldConfig.headers || {},
   };
 }
 ```
@@ -704,17 +750,18 @@ function migrateApiConfig(oldConfig) {
 
 ### Setting Type Summary
 
-| Type | Value Type | Constraints | Best For |
-|------|------------|-------------|----------|
-| `boolean` | `boolean` | None | Feature toggles, on/off switches |
-| `text` | `string` | `maxLength` | Short text, URLs, identifiers |
-| `longtext` | `string` | `maxLength` | CSS, scripts, large content |
-| `number` | `number` | `min`, `max` | Counts, intervals, measurements |
-| `json` | `object/array` | Valid JSON | Complex configurations, objects |
+| Type       | Value Type     | Constraints  | Best For                         |
+| ---------- | -------------- | ------------ | -------------------------------- |
+| `boolean`  | `boolean`      | None         | Feature toggles, on/off switches |
+| `text`     | `string`       | `maxLength`  | Short text, URLs, identifiers    |
+| `longtext` | `string`       | `maxLength`  | CSS, scripts, large content      |
+| `number`   | `number`       | `min`, `max` | Counts, intervals, measurements  |
+| `json`     | `object/array` | Valid JSON   | Complex configurations, objects  |
 
 ### Validation Checklist
 
 **Before Adding New Settings:**
+
 - [ ] Choose appropriate setting type
 - [ ] Set reasonable constraints (min/max/maxLength)
 - [ ] Write clear, descriptive descriptions
@@ -723,6 +770,7 @@ function migrateApiConfig(oldConfig) {
 - [ ] Document expected formats/examples
 
 **Before Changing Existing Settings:**
+
 - [ ] Assess compatibility impact
 - [ ] Plan migration strategy if needed
 - [ ] Test with existing user data
@@ -742,7 +790,7 @@ function migrateApiConfig(oldConfig) {
       "description": "Enable experimental features"
     },
     "api_endpoint": {
-      "type": "text", 
+      "type": "text",
       "value": "https://api.example.com/v1",
       "description": "Base URL for API requests",
       "maxLength": 200
@@ -756,7 +804,7 @@ function migrateApiConfig(oldConfig) {
     "polling_interval": {
       "type": "number",
       "value": 30,
-      "description": "Data polling interval in seconds", 
+      "description": "Data polling interval in seconds",
       "min": 5,
       "max": 300
     },
@@ -785,6 +833,6 @@ function migrateApiConfig(oldConfig) {
 
 ## Revision History
 
-| Date | Author | Changes |
-|------|--------|---------|
+| Date       | Author             | Changes                          |
+| ---------- | ------------------ | -------------------------------- |
 | 2025-08-11 | Documentation Team | Initial settings types reference |

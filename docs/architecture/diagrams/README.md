@@ -7,7 +7,7 @@ This directory contains visual representations of the Settings Extension archite
 ## Scope
 
 - **Applies to**: System architecture visualization
-- **Last Updated**: 2025-08-11  
+- **Last Updated**: 2025-08-11
 - **Status**: Approved
 
 ## Diagram Types
@@ -17,7 +17,7 @@ This directory contains visual representations of the Settings Extension archite
 We use the C4 model for hierarchical architecture visualization:
 
 - **Level 1: System Context** - How the extension fits in the browser ecosystem
-- **Level 2: Container** - Major components and their relationships  
+- **Level 2: Container** - Major components and their relationships
 - **Level 3: Component** - Detailed component breakdown
 - **Level 4: Code** - Implementation details (as needed)
 
@@ -42,20 +42,24 @@ Extension deployment and runtime environment:
 ## Available Diagrams
 
 ### System Overview
+
 - **[system-context.md](system-context.md)** - C4 Level 1: Extension in browser ecosystem
 - **[container-overview.md](container-overview.md)** - C4 Level 2: Major components and boundaries
 
-### Component Architecture  
+### Component Architecture
+
 - **[component-interactions.md](component-interactions.md)** - C4 Level 3: Detailed component view
 - **[settings-flow.md](settings-flow.md)** - Settings operation sequence diagrams
 - **[message-passing.md](message-passing.md)** - Inter-component communication flows
 
 ### Runtime Views
+
 - **[user-workflows.md](user-workflows.md)** - User interaction sequences
 - **[error-handling.md](error-handling.md)** - Error scenario handling
 - **[browser-compatibility.md](browser-compatibility.md)** - Cross-browser operation flows
 
 ### Technical Details
+
 - **[storage-architecture.md](storage-architecture.md)** - Storage system design
 - **[api-integration.md](api-integration.md)** - Browser API integration patterns
 
@@ -64,12 +68,14 @@ Extension deployment and runtime environment:
 ### Notation and Style
 
 **C4 Model Colors:**
+
 - System Context: Blue (#1168bd)
-- Containers: Light Blue (#438dd5)  
+- Containers: Light Blue (#438dd5)
 - Components: Medium Blue (#85bbf0)
 - External Systems: Gray (#999999)
 
 **Sequence Diagram Elements:**
+
 - Actors: Human figures
 - Systems: Rectangles
 - Messages: Arrows with labels
@@ -78,6 +84,7 @@ Extension deployment and runtime environment:
 ### Diagram Format
 
 All diagrams are provided in:
+
 - **Markdown**: Text-based diagrams using Mermaid syntax
 - **Source Format**: Editable format for updates
 - **Export Format**: PNG/SVG for presentations (when needed)
@@ -101,6 +108,7 @@ All diagrams are provided in:
 ### Update Triggers
 
 Diagrams should be updated when:
+
 - New components are added or removed
 - Component relationships change
 - User workflows are modified
@@ -110,7 +118,7 @@ Diagrams should be updated when:
 ### Review Process
 
 1. **Architecture Changes**: Review diagrams during ADR process
-2. **Implementation Changes**: Update diagrams with significant code changes  
+2. **Implementation Changes**: Update diagrams with significant code changes
 3. **Documentation Reviews**: Validate diagram accuracy during quarterly reviews
 4. **User Feedback**: Update based on understanding issues
 
@@ -138,6 +146,7 @@ graph TB
 ### External Tools
 
 When Mermaid limitations require alternative tools:
+
 - **Draw.io**: For complex diagrams requiring custom layouts
 - **PlantUML**: For detailed UML diagrams
 - **Lucidchart**: For presentation-quality diagrams
@@ -169,21 +178,21 @@ Export as PNG/SVG and commit both source and rendered versions.
 
 ## Cross-Reference Guide
 
-| Diagram | Related Architecture Documentation | Purpose |
-|---------|-----------------------------------|---------|
-| [system-context.md](system-context.md) | [System Context](../03-context.md) | Show extension in browser ecosystem |
-| [container-overview.md](container-overview.md) | [Building Blocks](../05-building-blocks.md) | Visualize major components |
-| [component-interactions.md](component-interactions.md) | [Building Blocks](../05-building-blocks.md) | Detail component relationships |
-| [settings-flow.md](settings-flow.md) | [Runtime View](../06-runtime-view.md) | Show settings operation flows |
-| [message-passing.md](message-passing.md) | [Runtime View](../06-runtime-view.md) | Illustrate inter-component communication |
-| [user-workflows.md](user-workflows.md) | [User Documentation](../../user/) | Map user interactions to system flows |
+| Diagram                                                | Related Architecture Documentation          | Purpose                                  |
+| ------------------------------------------------------ | ------------------------------------------- | ---------------------------------------- |
+| [system-context.md](system-context.md)                 | [System Context](../03-context.md)          | Show extension in browser ecosystem      |
+| [container-overview.md](container-overview.md)         | [Building Blocks](../05-building-blocks.md) | Visualize major components               |
+| [component-interactions.md](component-interactions.md) | [Building Blocks](../05-building-blocks.md) | Detail component relationships           |
+| [settings-flow.md](settings-flow.md)                   | [Runtime View](../06-runtime-view.md)       | Show settings operation flows            |
+| [message-passing.md](message-passing.md)               | [Runtime View](../06-runtime-view.md)       | Illustrate inter-component communication |
+| [user-workflows.md](user-workflows.md)                 | [User Documentation](../../user/)           | Map user interactions to system flows    |
 
 ## Quality Standards
 
 ### Diagram Quality Checklist
 
 - [ ] **Clarity**: Purpose and content immediately clear
-- [ ] **Accuracy**: Reflects current implementation state  
+- [ ] **Accuracy**: Reflects current implementation state
 - [ ] **Completeness**: Shows all relevant components/relationships
 - [ ] **Consistency**: Uses standard notation and naming
 - [ ] **Current**: Updated with recent changes
@@ -193,7 +202,7 @@ Export as PNG/SVG and commit both source and rendered versions.
 ### Accessibility Requirements
 
 - Include alt-text for all diagrams
-- Provide text descriptions for complex diagrams  
+- Provide text descriptions for complex diagrams
 - Use high contrast colors for readability
 - Include diagram legends when using custom notation
 - Structure text descriptions logically for screen readers
@@ -211,6 +220,6 @@ This diagram collection was created to address the need for visual architecture 
 
 ## Revision History
 
-| Date | Author | Changes |
-|------|--------|---------|
+| Date       | Author            | Changes                                  |
+| ---------- | ----------------- | ---------------------------------------- |
 | 2025-08-11 | Architecture Team | Initial diagrams directory and standards |

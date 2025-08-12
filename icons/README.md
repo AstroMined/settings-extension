@@ -5,11 +5,13 @@ This directory contains the icons for the Settings Extension in both SVG and PNG
 ## Files
 
 ### SVG Files (Source)
+
 - `icon16.svg` - 16x16 settings/gear icon
-- `icon48.svg` - 48x48 settings/gear icon  
+- `icon48.svg` - 48x48 settings/gear icon
 - `icon128.svg` - 128x128 settings/gear icon
 
 ### PNG Files (Generated)
+
 - `icon16.png` - 16x16 PNG for browser extension manifest
 - `icon48.png` - 48x48 PNG for browser extension manifest
 - `icon128.png` - 128x128 PNG for browser extension manifest
@@ -30,7 +32,7 @@ These icons are referenced in the browser extension manifest:
 {
   "icons": {
     "16": "icons/icon16.png",
-    "48": "icons/icon48.png", 
+    "48": "icons/icon48.png",
     "128": "icons/icon128.png"
   },
   "action": {

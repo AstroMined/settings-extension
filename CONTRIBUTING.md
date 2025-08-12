@@ -52,17 +52,20 @@ We welcome pull requests! Please follow these guidelines:
 ### Getting Started
 
 1. Fork and clone the repository:
+
    ```bash
    git clone https://github.com/yourusername/settings-extension.git
    cd settings-extension
    ```
 
 2. Install dependencies:
+
    ```bash
    npm install
    ```
 
 3. Start the development environment:
+
    ```bash
    npm run dev
    ```
@@ -94,9 +97,10 @@ We welcome pull requests! Please follow these guidelines:
 - Keep commits focused and atomic
 - Reference issue numbers in commits when applicable
 - Use conventional commit format:
+
   ```
   type(scope): description
-  
+
   Examples:
   feat(api): add settings export functionality
   fix(ui): resolve popup positioning issue
@@ -253,16 +257,19 @@ Thank you for helping make Settings Extension better! 🚀
 ### Common Issues
 
 **Extension won't load:**
+
 - Check manifest.json syntax
 - Verify file permissions
 - Review browser console for errors
 
 **Tests failing:**
+
 - Run `npm install` to ensure dependencies are current
 - Check for syntax errors in test files
 - Verify test environment setup
 
 **Build issues:**
+
 - Clear `node_modules` and reinstall dependencies
 - Check Node.js version compatibility
 - Review build script configuration

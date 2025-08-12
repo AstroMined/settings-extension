@@ -57,13 +57,13 @@ The Settings Extension consists of five major subsystems that work together to p
 
 ### 5.2 Top-Level Components
 
-| Component | Responsibility | Key Interfaces |
-|-----------|---------------|----------------|
-| **User Interface Subsystem** | Provide user interaction capabilities | HTML forms, event handlers, DOM manipulation |
-| **Content Script Subsystem** | Expose settings API to web pages | JavaScript API, message passing |
-| **Service Worker Subsystem** | Coordinate system operations | Message handling, storage orchestration |
-| **Core Library Subsystem** | Implement business logic | Settings management, validation, storage |
-| **External Interface Subsystem** | Abstract external dependencies | Browser APIs, file system, configuration |
+| Component                        | Responsibility                        | Key Interfaces                               |
+| -------------------------------- | ------------------------------------- | -------------------------------------------- |
+| **User Interface Subsystem**     | Provide user interaction capabilities | HTML forms, event handlers, DOM manipulation |
+| **Content Script Subsystem**     | Expose settings API to web pages      | JavaScript API, message passing              |
+| **Service Worker Subsystem**     | Coordinate system operations          | Message handling, storage orchestration      |
+| **Core Library Subsystem**       | Implement business logic              | Settings management, validation, storage     |
+| **External Interface Subsystem** | Abstract external dependencies        | Browser APIs, file system, configuration     |
 
 ## Level 2: Subsystem Decomposition
 
@@ -113,6 +113,7 @@ The User Interface Subsystem provides all user-facing components for settings ma
 #### Component Details
 
 **Popup UI Component**
+
 - **File**: `popup/popup.js`, `popup/popup.html`, `popup/popup.css`
 - **Responsibility**: Provide quick access to common settings
 - **Key Methods**:
@@ -122,6 +123,7 @@ The User Interface Subsystem provides all user-facing components for settings ma
   - `handleFormSubmit()`: Process user input
 
 **Options Page Component**
+
 - **File**: `options/options.js`, `options/options.html`, `options/options.css`
 - **Responsibility**: Provide comprehensive settings management
 - **Key Methods**:
@@ -174,6 +176,7 @@ The Content Script Subsystem provides programmatic access to settings from web p
 #### Component Details
 
 **ContentScriptSettings (Main API)**
+
 - **File**: `lib/content-settings.js`
 - **Responsibility**: Primary API for content script settings access
 - **Interface**:
@@ -190,6 +193,7 @@ The Content Script Subsystem provides programmatic access to settings from web p
   ```
 
 **Browser Compatibility Layer**
+
 - **File**: `lib/browser-compat.js`
 - **Responsibility**: Custom cross-browser compatibility layer replacing WebExtension Polyfill
 - **Key Functions**:
@@ -245,6 +249,7 @@ The Service Worker Subsystem coordinates all system operations and manages the e
 #### Component Details
 
 **Background Script (Main Coordinator)**
+
 - **File**: `background.js`
 - **Responsibility**: Central message handling and system coordination
 - **Key Functions**:
@@ -299,6 +304,7 @@ The Core Library Subsystem implements the core business logic and data managemen
 #### Component Details
 
 **SettingsManager (Core Engine)**
+
 - **File**: `lib/settings-manager.js`
 - **Responsibility**: Core settings management and business logic
 - **Interface**:
@@ -315,7 +321,8 @@ The Core Library Subsystem implements the core business logic and data managemen
   ```
 
 **Browser Compatibility Layer (Storage Integration)**
-- **File**: `lib/browser-compat.js`  
+
+- **File**: `lib/browser-compat.js`
 - **Responsibility**: Direct storage operations through custom browser compatibility layer
 - **Storage Interface**:
   ```javascript
@@ -555,54 +562,60 @@ class ContentScriptSettings {
 
 #### 5.8.2 Layer Dependencies
 
-| Layer | Dependencies | Abstraction Level |
-|-------|-------------|-------------------|
-| **Presentation** | Business Logic Layer | High |
-| **Business Logic** | Data Access Layer | Medium |
-| **Data Access** | External Interface Layer | Low |
-| **External Interface** | Browser APIs, File System | Lowest |
+| Layer                  | Dependencies              | Abstraction Level |
+| ---------------------- | ------------------------- | ----------------- |
+| **Presentation**       | Business Logic Layer      | High              |
+| **Business Logic**     | Data Access Layer         | Medium            |
+| **Data Access**        | External Interface Layer  | Low               |
+| **External Interface** | Browser APIs, File System | Lowest            |
 
 ### 5.9 Component Size and Complexity Metrics
 
-| Component | File Size (Est.) | Complexity | Test Coverage Target |
-|-----------|------------------|------------|---------------------|
-| **SettingsManager** | ~500 lines | High | 90% |
-| **ContentScriptSettings** | ~200 lines | Medium | 85% |
-| **StorageAdapter** | ~300 lines | Medium | 90% |
-| **BrowserCompat** | ~150 lines | Low | 85% |
-| **Popup UI** | ~300 lines | Medium | 75% |
-| **Options Page** | ~600 lines | High | 75% |
-| **Background Script** | ~400 lines | Medium | 85% |
-| **Validation Engine** | ~250 lines | Medium | 95% |
+| Component                 | File Size (Est.) | Complexity | Test Coverage Target |
+| ------------------------- | ---------------- | ---------- | -------------------- |
+| **SettingsManager**       | ~500 lines       | High       | 90%                  |
+| **ContentScriptSettings** | ~200 lines       | Medium     | 85%                  |
+| **StorageAdapter**        | ~300 lines       | Medium     | 90%                  |
+| **BrowserCompat**         | ~150 lines       | Low        | 85%                  |
+| **Popup UI**              | ~300 lines       | Medium     | 75%                  |
+| **Options Page**          | ~600 lines       | High       | 75%                  |
+| **Background Script**     | ~400 lines       | Medium     | 85%                  |
+| **Validation Engine**     | ~250 lines       | Medium     | 95%                  |
 
 ## Related Documentation
 
 ### Implementation Guides
+
 These components are implemented using guidance from:
+
 - **[Extension Development Guide](../../developer/guides/extension-development.md)** - Practical implementation of these building blocks
 - **[Local Setup Guide](../../developer/workflows/local-setup.md)** - Development environment for working with these components
 - **[Testing Guide](../../developer/workflows/testing-guide.md)** - Testing procedures for each component
 - **[Debugging Guide](../../developer/workflows/debugging-guide.md)** - Debugging techniques for component interactions
 
 ### User-Facing Implementation
+
 These building blocks create the user experience described in:
+
 - **[Settings Types Reference](../../user/reference/settings-types.md)** - User-facing API implemented by these components
 - **[Core Concepts](../../user/explanation/concepts.md)** - User mental models these components support
 - **[Getting Started Guide](../../user/tutorials/getting-started.md)** - User workflows enabled by this architecture
 
 ### Architecture Context
+
 - **[System Goals](01-introduction-goals.md)** - Requirements these components fulfill
 - **[Architecture Decisions](09-architecture-decisions/)** - Key decisions shaping this component structure
 - **[Runtime View](06-runtime-view.md)** - How these components interact at runtime
 - **[Quality Requirements](10-quality-requirements.md)** - Performance and reliability targets for components
 
 ### External Architecture References
+
 - **[Chrome Extension Architecture](https://developer.chrome.com/docs/extensions/mv3/architecture-overview/)** - Browser extension architectural patterns
 - **[Component-Based Architecture](https://www.componentdriven.org/)** - General component architecture principles
 - **[Layered Architecture Pattern](https://www.oreilly.com/library/view/software-architecture-patterns/9781491971437/ch01.html)** - Layered architecture design
 
 ## Revision History
 
-| Date | Author | Changes |
-|------|--------|---------|
+| Date       | Author            | Changes                                      |
+| ---------- | ----------------- | -------------------------------------------- |
 | 2025-08-11 | Architecture Team | Initial building blocks and component design |

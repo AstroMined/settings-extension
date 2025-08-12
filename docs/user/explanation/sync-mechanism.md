@@ -28,12 +28,14 @@ The Settings Extension supports several synchronization approaches:
 ### Why Synchronization Matters
 
 **Productivity Benefits**:
+
 - Work seamlessly across multiple devices
 - Maintain consistent configuration everywhere
 - Reduce setup time on new devices
 - Share configurations with team members
 
 **Reliability Benefits**:
+
 - Backup configurations automatically
 - Recover from device failures
 - Maintain configuration history
@@ -58,6 +60,7 @@ Extension Settings ────────────────────�
 ```
 
 **Process Flow**:
+
 1. User signs into Chrome with Google account
 2. Extension data is uploaded to Google's servers
 3. Other devices signed in with same account download changes
@@ -76,6 +79,7 @@ Extension Settings ────────────────────�
 ```
 
 **Process Flow**:
+
 1. User creates and signs into Firefox account
 2. Extension installation syncs across devices
 3. Extension settings may or may not sync (depends on extension design)
@@ -86,16 +90,19 @@ Extension Settings ────────────────────�
 #### Chrome/Edge Limitations
 
 **Storage Quotas**:
+
 - Sync storage limited to ~8KB per extension
 - Large CSS or JSON settings may exceed quota
 - Quota exceeded errors prevent synchronization
 
 **Sync Delays**:
+
 - Changes may take minutes to sync
 - Network issues can delay synchronization
 - No immediate feedback when sync fails
 
 **Account Requirements**:
+
 - Must be signed into Google/Microsoft account
 - Sync disabled if signed out
 - Corporate accounts may have sync restrictions
@@ -103,11 +110,13 @@ Extension Settings ────────────────────�
 #### Firefox Limitations
 
 **Extension Data Sync**:
+
 - Extension installation syncs reliably
 - Extension settings sync is inconsistent
 - Manual export/import often required
 
 **Account Management**:
+
 - Requires Firefox account creation
 - Less mature sync infrastructure than Chrome
 - More complex setup process
@@ -192,18 +201,21 @@ Device A                    Device B
 #### Manual Sync Advantages
 
 **Full Control**:
+
 - You control when sync happens
 - You control what gets synced
 - You can inspect sync data before applying
 - No dependency on browser sync services
 
 **Cross-Browser Compatibility**:
+
 - Works between Chrome, Edge, and Firefox
 - No account requirements
 - Same process across all browsers
 - Consistent behavior everywhere
 
 **Selective Sync**:
+
 - Choose which settings to sync
 - Remove sensitive data before sharing
 - Create different sync profiles for different purposes
@@ -212,12 +224,14 @@ Device A                    Device B
 #### Manual Sync Disadvantages
 
 **Manual Process**:
+
 - Requires deliberate action
 - Easy to forget to sync
 - No automatic updates
 - Time-consuming for frequent changes
 
 **No Real-Time Sync**:
+
 - Changes aren't immediately available elsewhere
 - Must remember to export after changes
 - Risk of working with outdated settings
@@ -228,6 +242,7 @@ Device A                    Device B
 #### Establishing Sync Routines
 
 **Daily Sync Routine**:
+
 ```
 Morning:  Import latest settings on work device
 Evening:  Export settings after day's work
@@ -235,6 +250,7 @@ Weekend:  Sync settings across personal devices
 ```
 
 **Project-Based Sync**:
+
 ```
 Project Start:  Export baseline configuration
 Milestone:      Export updated configuration
@@ -242,6 +258,7 @@ Project End:    Archive final configuration
 ```
 
 **Team Sync Schedule**:
+
 ```
 Weekly:     Team lead exports standard configuration
 Monthly:    Full team configuration review
@@ -252,17 +269,20 @@ Quarterly:  Configuration audit and cleanup
 
 **Bookmark-Based Quick Sync**:
 Create browser bookmarks for quick export/import access:
+
 ```
 Export Bookmark: javascript:window.open(chrome.runtime.getURL('options/options.html#export'))
 Import Bookmark: javascript:window.open(chrome.runtime.getURL('options/options.html#import'))
 ```
 
 **Cloud Storage Integration**:
+
 - Save exports directly to cloud storage
 - Use cloud sync to distribute files
 - Set up folder monitoring for automatic pickup
 
 **Scripted Sync** (Advanced):
+
 - Use browser automation tools
 - Create scripts for bulk export/import
 - Schedule automated sync operations
@@ -304,11 +324,13 @@ Device E ──── Export ──── │  OneDrive, etc) │ ──── I
 #### Semi-Automated Cloud Sync
 
 **Scheduled Exports**:
+
 - Use task scheduler/cron jobs
 - Automatically export settings to cloud folder
 - Cloud service handles distribution
 
 **Notification-Based Import**:
+
 - Monitor cloud folder for changes
 - Notify user when new settings available
 - Provide quick import option
@@ -316,18 +338,21 @@ Device E ──── Export ──── │  OneDrive, etc) │ ──── I
 ### Cloud Sync Advantages
 
 **Always Available**:
+
 - Settings accessible from anywhere with internet
 - No dependency on specific devices
 - Survives device failures
 - Easy to share with team members
 
 **Version History**:
+
 - Cloud services often maintain file versions
 - Easy to rollback to previous settings
 - Track changes over time
 - Compare different configuration versions
 
 **Multi-Device Support**:
+
 - Works across unlimited devices
 - No browser-specific limitations
 - Cross-platform compatibility
@@ -338,16 +363,19 @@ Device E ──── Export ──── │  OneDrive, etc) │ ──── I
 #### Data Protection
 
 **Encryption in Transit**:
+
 - Cloud services use HTTPS for transfers
 - Data encrypted during upload/download
 - Protection against network interception
 
 **Encryption at Rest**:
+
 - Major cloud providers encrypt stored data
 - Additional client-side encryption possible
 - Key management handled by provider
 
 **Access Controls**:
+
 - Use strong passwords for cloud accounts
 - Enable two-factor authentication
 - Regular access audits
@@ -356,17 +384,19 @@ Device E ──── Export ──── │  OneDrive, etc) │ ──── I
 #### Sensitive Data Handling
 
 **Remove Sensitive Information**:
+
 ```json
 // Before cloud sync - remove sensitive data
 {
   "api_key": "REMOVED_FOR_SECURITY",
-  "personal_token": "REMOVED_FOR_SECURITY", 
+  "personal_token": "REMOVED_FOR_SECURITY",
   "custom_css": "/* Safe to share */",
   "refresh_interval": 60
 }
 ```
 
 **Use Environment Variables**:
+
 - Replace sensitive values with placeholders
 - Document required manual setup
 - Provide secure value sharing methods
@@ -391,18 +421,21 @@ Member C Device ──── Import ──── │  Team Chat)     │ ──�
 #### Centralized Team Sync
 
 **Process**:
+
 1. **Designate Configuration Owner**: Team lead or senior developer
 2. **Establish Master Configuration**: Authoritative version of team settings
 3. **Regular Distribution**: Scheduled distribution to team members
 4. **Change Management**: Formal process for configuration updates
 
 **Advantages**:
+
 - Single source of truth
 - Consistent configuration across team
 - Controlled change process
 - Clear ownership and responsibility
 
 **Disadvantages**:
+
 - Bottleneck through configuration owner
 - Less flexibility for individual customization
 - Delayed updates to team members
@@ -411,18 +444,21 @@ Member C Device ──── Import ──── │  Team Chat)     │ ──�
 #### Distributed Team Sync
 
 **Process**:
+
 1. **Shared Repository**: Common location for configuration files
 2. **Individual Contributions**: Team members can propose changes
 3. **Peer Review**: Changes reviewed before adoption
 4. **Automated Distribution**: Updates pushed to all team members
 
 **Advantages**:
+
 - Collaborative configuration development
 - Faster updates and improvements
 - Shared ownership and responsibility
 - Better adaptation to team needs
 
 **Disadvantages**:
+
 - More complex coordination
 - Risk of configuration conflicts
 - Requires more mature team processes
@@ -433,6 +469,7 @@ Member C Device ──── Import ──── │  Team Chat)     │ ──�
 #### Using Version Control
 
 **Git-Based Team Sync**:
+
 ```bash
 # Team configuration repository structure
 team-settings/
@@ -449,6 +486,7 @@ team-settings/
 ```
 
 **Workflow**:
+
 1. Team members clone settings repository
 2. Import appropriate profile for current work
 3. Contribute improvements via pull requests
@@ -458,6 +496,7 @@ team-settings/
 #### Using Shared Storage
 
 **Team Drive Setup**:
+
 ```
 Team Settings Folder/
 ├── Current/
@@ -474,6 +513,7 @@ Team Settings Folder/
 ```
 
 **Process**:
+
 1. Team maintains shared folder in cloud storage
 2. Members download configurations as needed
 3. Updates posted to shared folder with notifications
@@ -484,6 +524,7 @@ Team Settings Folder/
 #### Change Management Process
 
 **Configuration Change Request**:
+
 1. **Proposal**: Team member identifies need for configuration change
 2. **Documentation**: Change documented with rationale and impact analysis
 3. **Review**: Team reviews proposed change
@@ -495,21 +536,25 @@ Team Settings Folder/
 #### Configuration Standards
 
 **Team Configuration Policy**:
+
 ```markdown
 # Team Settings Policy
 
 ## Required Settings (must be consistent across team):
+
 - API endpoints for shared services
 - Company branding and styling standards
 - Performance and timeout configurations
 - Security and authentication settings
 
 ## Recommended Settings (should be consistent):
+
 - Development tool configurations
 - Keyboard shortcuts and UI preferences
 - Common debugging and logging settings
 
 ## Personal Settings (individual choice):
+
 - Personal API keys and tokens
 - Individual productivity customizations
 - Device-specific optimizations
@@ -532,16 +577,19 @@ Device B: refresh_interval = 120
 #### Last-Write-Wins
 
 **How it Works**:
+
 - Most recent change takes precedence
 - Timestamp comparison determines winner
 - Automatic resolution without user intervention
 
 **Advantages**:
+
 - Simple and automatic
 - No user intervention required
 - Consistent behavior
 
 **Disadvantages**:
+
 - May lose important changes
 - No consideration of change importance
 - Can create unexpected behavior
@@ -549,17 +597,20 @@ Device B: refresh_interval = 120
 #### Manual Resolution
 
 **How it Works**:
+
 1. Conflict detected during sync
 2. User presented with conflicting values
 3. User chooses which value to keep
 4. Resolution applied and synced
 
 **Advantages**:
+
 - User control over important decisions
 - Prevents accidental data loss
 - Considers context and importance
 
 **Disadvantages**:
+
 - Requires user intervention
 - Can interrupt workflow
 - May be complex for multiple conflicts
@@ -567,11 +618,13 @@ Device B: refresh_interval = 120
 #### Smart Merging
 
 **How it Works**:
+
 - System analyzes conflicting changes
 - Applies rules based on setting importance
 - Attempts automatic resolution with fallback to manual
 
 **Example Rules**:
+
 - Security settings: prefer more restrictive values
 - Performance settings: prefer values within safe ranges
 - Personal preferences: prefer local device values
@@ -582,16 +635,19 @@ Device B: refresh_interval = 120
 #### Preventive Strategies
 
 **Single Source of Truth**:
+
 - Designate authoritative configuration source
 - All changes go through central location
 - Regular distribution to team members
 
 **Change Coordination**:
+
 - Communicate configuration changes to team
 - Schedule configuration updates
 - Use locking mechanisms for critical changes
 
 **Configuration Segmentation**:
+
 - Separate personal and team settings
 - Use different sync mechanisms for different setting types
 - Minimize shared configuration surface area
@@ -603,16 +659,19 @@ Device B: refresh_interval = 120
 #### Sync Speed Factors
 
 **Network Speed**:
+
 - Faster connections enable quicker sync
 - Mobile/cellular connections may be slower
 - Network reliability affects sync consistency
 
 **File Size**:
+
 - Larger settings files take longer to sync
 - Complex JSON objects increase sync time
 - Large CSS content impacts performance
 
 **Sync Frequency**:
+
 - More frequent sync increases network usage
 - Less frequent sync risks conflicts and data loss
 - Optimal frequency depends on usage patterns
@@ -620,16 +679,19 @@ Device B: refresh_interval = 120
 #### Optimization Strategies
 
 **Minimize Sync Data**:
+
 - Remove unnecessary metadata
 - Compress large text content
 - Use selective sync for large configurations
 
 **Batch Changes**:
+
 - Group related changes together
 - Avoid frequent small updates
 - Use transaction-like operations
 
 **Cache Effectively**:
+
 - Cache frequently accessed settings locally
 - Use checksums to detect changes
 - Implement incremental sync where possible
@@ -639,12 +701,14 @@ Device B: refresh_interval = 120
 #### Monitoring Sync Health
 
 **Success Metrics**:
+
 - Sync completion rate
 - Average sync time
 - Conflict frequency
 - Error rates
 
 **Health Indicators**:
+
 - Regular successful syncs
 - Low conflict rates
 - Consistent configuration across devices
@@ -653,12 +717,14 @@ Device B: refresh_interval = 120
 #### Troubleshooting Sync Issues
 
 **Common Problems**:
+
 - Network connectivity issues
 - Storage quota exceeded
 - Authentication failures
 - Configuration corruption
 
 **Diagnostic Steps**:
+
 1. Check network connectivity
 2. Verify authentication status
 3. Test with minimal configuration
@@ -671,16 +737,19 @@ Device B: refresh_interval = 120
 ### Emerging Technologies
 
 **Real-Time Sync**:
+
 - WebSocket-based continuous synchronization
 - Immediate propagation of changes
 - Live collaboration features
 
 **Intelligent Conflict Resolution**:
+
 - AI-powered merge strategies
 - Context-aware conflict resolution
 - Learning user preferences
 
 **Enhanced Security**:
+
 - End-to-end encryption for sync data
 - Zero-knowledge sync architectures
 - Advanced access controls
@@ -688,16 +757,19 @@ Device B: refresh_interval = 120
 ### Evolution of Sync Patterns
 
 **Collaborative Editing**:
+
 - Multiple users editing same configuration
 - Real-time change visibility
 - Collaborative conflict resolution
 
 **Smart Defaults**:
+
 - Machine learning from usage patterns
 - Adaptive configuration suggestions
 - Predictive sync optimization
 
 **Integration Ecosystem**:
+
 - Integration with development tools
 - Configuration as code workflows
 - Automated testing and validation
@@ -707,6 +779,7 @@ Device B: refresh_interval = 120
 ### Sync Strategy Selection
 
 **Choose Based on Needs**:
+
 - **Individual Use**: Browser native sync or manual sync
 - **Small Team**: Manual sync with shared storage
 - **Large Team**: Centralized configuration management
@@ -715,12 +788,14 @@ Device B: refresh_interval = 120
 ### Sync Hygiene
 
 **Regular Maintenance**:
+
 - Export settings regularly
 - Clean up old configurations
 - Monitor sync health
 - Update team members on changes
 
 **Security Practices**:
+
 - Remove sensitive data from shared configurations
 - Use secure channels for sensitive information
 - Regular access audits
@@ -729,6 +804,7 @@ Device B: refresh_interval = 120
 ### Troubleshooting Approach
 
 **Systematic Diagnosis**:
+
 1. Identify sync method being used
 2. Check basic connectivity and authentication
 3. Test with minimal configuration
@@ -763,6 +839,6 @@ Device B: refresh_interval = 120
 
 ## Revision History
 
-| Date | Author | Changes |
-|------|--------|---------|
+| Date       | Author             | Changes                            |
+| ---------- | ------------------ | ---------------------------------- |
 | 2025-08-11 | Documentation Team | Initial sync mechanism explanation |

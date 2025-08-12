@@ -1,6 +1,7 @@
 # ADR-XXX: [Title]
 
 ## Status
+
 [Proposed/Accepted/Deprecated/Superseded by ADR-YYY] - YYYY-MM-DD
 
 ## Context
@@ -10,22 +11,26 @@
 ### Key Considerations
 
 **Technical Factors:**
+
 - [List technical constraints, requirements, or trade-offs]
 - [Include performance, scalability, maintainability considerations]
 - [Note any technology limitations or capabilities]
 
 **Business Factors:**
+
 - [Business requirements or constraints]
 - [Timeline considerations]
 - [Resource availability]
 - [Strategic alignment]
 
 **Team Factors:**
+
 - [Team expertise and capacity]
 - [Learning curve considerations]
 - [Maintenance burden]
 
 **User/Stakeholder Factors:**
+
 - [User experience implications]
 - [Stakeholder requirements]
 - [Accessibility or usability concerns]
@@ -57,24 +62,29 @@
 ### Positive Consequences
 
 ✅ **[Benefit 1]**
+
 - [Detailed explanation of the benefit]
 - [Specific examples or metrics where applicable]
 
 ✅ **[Benefit 2]**
+
 - [Detailed explanation]
 
 ### Negative Consequences
 
 ❌ **[Drawback 1]**
+
 - [Detailed explanation of the drawback]
 - [Impact assessment]
 
 ❌ **[Drawback 2]**
+
 - [Detailed explanation]
 
 ### Neutral Consequences
 
 ➖ **[Neutral Impact 1]**
+
 - [Changes that are neither clearly positive nor negative]
 
 ### Mitigation Strategies
@@ -82,10 +92,12 @@
 [For each negative consequence, describe how it will be addressed or mitigated.]
 
 **For [Drawback 1]:**
+
 - [Specific mitigation approach]
 - [Monitoring or review process]
 
 **For [Drawback 2]:**
+
 - [Specific mitigation approach]
 
 ## Implementation Details
@@ -113,13 +125,17 @@
 [List the alternative options that were evaluated and why they were not chosen.]
 
 ### Alternative 1: [Name]
+
 **Rejected** because:
+
 - [Reason 1]
 - [Reason 2]
 - [Reason 3]
 
 ### Alternative 2: [Name]
+
 **Considered** but not chosen because:
+
 - [Reason 1]
 - [Reason 2]
 
@@ -138,6 +154,7 @@ The success of this decision will be measured by:
 [When and under what conditions should this decision be reviewed or reconsidered?]
 
 This decision will be reviewed:
+
 - **[Timeframe]**: [Review criteria]
 - **[Trigger condition]**: [Specific circumstances that would trigger review]
 - **As needed**: [Any other review conditions]
@@ -159,7 +176,7 @@ This decision will be reviewed:
 
 ## Revision History
 
-| Date | Author | Changes |
-|------|--------|---------|
-| YYYY-MM-DD | [Author Name] | Initial ADR |
+| Date       | Author        | Changes                  |
+| ---------- | ------------- | ------------------------ |
+| YYYY-MM-DD | [Author Name] | Initial ADR              |
 | YYYY-MM-DD | [Author Name] | [Description of changes] |

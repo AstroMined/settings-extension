@@ -1,9 +1,9 @@
 /**
  * Example Content Script - Comprehensive API Usage
- * 
+ *
  * This example demonstrates all features of the ContentScriptSettings API
  * including real-world usage patterns, error handling, and performance optimization.
- * 
+ *
  * Usage: Include this in your content script to see how to use the settings API
  */
 
@@ -21,25 +21,24 @@ class ExampleContentScript {
    */
   async init() {
     try {
-      console.log('🚀 Starting Example Content Script');
-      
+      console.log("🚀 Starting Example Content Script");
+
       // Load initial settings
       await this.loadInitialSettings();
-      
+
       // Setup change listeners
       this.setupChangeListeners();
-      
+
       // Apply settings to page
       await this.applySettings();
-      
+
       // Setup keyboard shortcuts
       this.setupKeyboardShortcuts();
-      
-      console.log('✅ Example Content Script initialized successfully');
-      
+
+      console.log("✅ Example Content Script initialized successfully");
     } catch (error) {
-      console.error('❌ Failed to initialize content script:', error);
-      this.showErrorNotification('Failed to initialize settings');
+      console.error("❌ Failed to initialize content script:", error);
+      this.showErrorNotification("Failed to initialize settings");
     }
   }
 
@@ -50,30 +49,32 @@ class ExampleContentScript {
     try {
       // Performance tip: Load frequently used settings in batch
       const commonSettings = await this.settings.getSettings([
-        'feature_enabled',
-        'refresh_interval',
-        'api_key',
-        'advanced_config'
+        "feature_enabled",
+        "refresh_interval",
+        "api_key",
+        "advanced_config",
       ]);
-      
-      console.log('📊 Common settings loaded:', commonSettings);
-      
+
+      console.log("📊 Common settings loaded:", commonSettings);
+
       // Cache values for quick access
       this.featureEnabled = commonSettings.feature_enabled?.value || false;
       this.refreshInterval = commonSettings.refresh_interval?.value || 60;
-      this.apiKey = commonSettings.api_key?.value || '';
+      this.apiKey = commonSettings.api_key?.value || "";
       this.apiConfig = commonSettings.advanced_config?.value || {};
-      
+
       // Example: Load specific setting individually
-      const customCSS = await this.settings.getSetting('custom_css');
-      console.log('🎨 Custom CSS loaded:', customCSS?.value?.substring(0, 100) + '...');
-      
+      const customCSS = await this.settings.getSetting("custom_css");
+      console.log(
+        "🎨 Custom CSS loaded:",
+        customCSS?.value?.substring(0, 100) + "...",
+      );
+
       // Example: Load all settings (use sparingly for performance)
       const allSettings = await this.settings.getAllSettings();
-      console.log('📋 Total settings loaded:', Object.keys(allSettings).length);
-      
+      console.log("📋 Total settings loaded:", Object.keys(allSettings).length);
     } catch (error) {
-      console.error('❌ Error loading initial settings:', error);
+      console.error("❌ Error loading initial settings:", error);
       throw error;
     }
   }
@@ -85,24 +86,24 @@ class ExampleContentScript {
     // Main change listener for all settings
     this.settings.addChangeListener((event, data) => {
       console.log(`🔄 Settings ${event}:`, data);
-      
+
       // Handle different event types
       switch (event) {
-        case 'changed':
+        case "changed":
           this.handleSettingsChanged(data);
           break;
-        case 'imported':
+        case "imported":
           this.handleSettingsImported(data);
           break;
-        case 'reset':
+        case "reset":
           this.handleSettingsReset(data);
           break;
         default:
-          console.log('Unknown settings event:', event);
+          console.log("Unknown settings event:", event);
       }
     });
-    
-    console.log('👂 Change listeners set up');
+
+    console.log("👂 Change listeners set up");
   }
 
   /**
@@ -111,30 +112,30 @@ class ExampleContentScript {
   handleSettingsChanged(changes) {
     for (const [key, value] of Object.entries(changes)) {
       switch (key) {
-        case 'feature_enabled':
+        case "feature_enabled":
           this.featureEnabled = value;
           this.toggleFeature(value);
           break;
-          
-        case 'refresh_interval':
+
+        case "refresh_interval":
           this.refreshInterval = value;
           this.setupRefreshInterval(value);
           break;
-          
-        case 'custom_css':
+
+        case "custom_css":
           this.updateCustomCSS(value);
           break;
-          
-        case 'api_key':
+
+        case "api_key":
           this.apiKey = value;
           this.updateAPIConfiguration();
           break;
-          
-        case 'advanced_config':
+
+        case "advanced_config":
           this.apiConfig = value;
           this.updateAPIConfiguration();
           break;
-          
+
         default:
           console.log(`🔧 Setting ${key} changed to:`, value);
       }
@@ -145,9 +146,9 @@ class ExampleContentScript {
    * Handle settings import
    */
   handleSettingsImported(settings) {
-    console.log('📥 Settings imported, reloading...');
-    this.showSuccessNotification('Settings imported successfully');
-    
+    console.log("📥 Settings imported, reloading...");
+    this.showSuccessNotification("Settings imported successfully");
+
     // Reload all settings
     this.loadInitialSettings().then(() => {
       this.applySettings();
@@ -158,9 +159,9 @@ class ExampleContentScript {
    * Handle settings reset
    */
   handleSettingsReset(settings) {
-    console.log('🔄 Settings reset to defaults');
-    this.showInfoNotification('Settings reset to defaults');
-    
+    console.log("🔄 Settings reset to defaults");
+    this.showInfoNotification("Settings reset to defaults");
+
     // Reload all settings
     this.loadInitialSettings().then(() => {
       this.applySettings();
@@ -174,27 +175,26 @@ class ExampleContentScript {
     try {
       // Apply feature toggle
       this.toggleFeature(this.featureEnabled);
-      
+
       // Apply custom CSS
-      if (this.settings.isCached('custom_css')) {
-        const customCSS = this.settings.getCachedSetting('custom_css');
+      if (this.settings.isCached("custom_css")) {
+        const customCSS = this.settings.getCachedSetting("custom_css");
         this.updateCustomCSS(customCSS?.value);
       }
-      
+
       // Setup refresh interval
       this.setupRefreshInterval(this.refreshInterval);
-      
+
       // Configure API
       this.updateAPIConfiguration();
-      
+
       // Apply any visual indicators
       this.updatePageIndicators();
-      
-      console.log('✅ All settings applied to page');
-      
+
+      console.log("✅ All settings applied to page");
     } catch (error) {
-      console.error('❌ Error applying settings:', error);
-      this.showErrorNotification('Failed to apply some settings');
+      console.error("❌ Error applying settings:", error);
+      this.showErrorNotification("Failed to apply some settings");
     }
   }
 
@@ -202,16 +202,16 @@ class ExampleContentScript {
    * Toggle main feature on/off
    */
   toggleFeature(enabled) {
-    console.log(`🎯 Feature ${enabled ? 'enabled' : 'disabled'}`);
-    
+    console.log(`🎯 Feature ${enabled ? "enabled" : "disabled"}`);
+
     if (enabled) {
-      document.body.classList.add('extension-enabled');
+      document.body.classList.add("extension-enabled");
       this.setupFeatureListeners();
-      this.showSuccessNotification('Feature enabled');
+      this.showSuccessNotification("Feature enabled");
     } else {
-      document.body.classList.remove('extension-enabled');
+      document.body.classList.remove("extension-enabled");
       this.removeFeatureListeners();
-      this.showInfoNotification('Feature disabled');
+      this.showInfoNotification("Feature disabled");
     }
   }
 
@@ -220,18 +220,18 @@ class ExampleContentScript {
    */
   updateCustomCSS(css) {
     // Remove existing custom styles
-    const existingStyles = document.getElementById('extension-custom-styles');
+    const existingStyles = document.getElementById("extension-custom-styles");
     if (existingStyles) {
       existingStyles.remove();
     }
-    
+
     // Add new custom styles
     if (css && css.trim()) {
-      const style = document.createElement('style');
-      style.id = 'extension-custom-styles';
+      const style = document.createElement("style");
+      style.id = "extension-custom-styles";
       style.textContent = css;
       document.head.appendChild(style);
-      console.log('🎨 Custom CSS updated');
+      console.log("🎨 Custom CSS updated");
     }
   }
 
@@ -243,13 +243,13 @@ class ExampleContentScript {
     if (this.refreshIntervalId) {
       clearInterval(this.refreshIntervalId);
     }
-    
+
     // Setup new interval
     if (seconds > 0) {
       this.refreshIntervalId = setInterval(() => {
         this.refreshContent();
       }, seconds * 1000);
-      
+
       console.log(`⏱️ Refresh interval set to ${seconds} seconds`);
     }
   }
@@ -259,13 +259,13 @@ class ExampleContentScript {
    */
   updateAPIConfiguration() {
     this.apiConfig = {
-      endpoint: this.apiConfig?.endpoint || 'https://api.example.com',
+      endpoint: this.apiConfig?.endpoint || "https://api.example.com",
       timeout: this.apiConfig?.timeout || 5000,
       retries: this.apiConfig?.retries || 3,
-      apiKey: this.apiKey
+      apiKey: this.apiKey,
     };
-    
-    console.log('🔧 API configuration updated:', this.apiConfig);
+
+    console.log("🔧 API configuration updated:", this.apiConfig);
   }
 
   /**
@@ -275,33 +275,35 @@ class ExampleContentScript {
     if (!this.featureEnabled || !this.apiConfig?.endpoint) {
       return;
     }
-    
+
     try {
-      console.log('🔄 Refreshing content...');
-      
+      console.log("🔄 Refreshing content...");
+
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), this.apiConfig.timeout);
-      
+      const timeoutId = setTimeout(
+        () => controller.abort(),
+        this.apiConfig.timeout,
+      );
+
       const response = await fetch(this.apiConfig.endpoint, {
         signal: controller.signal,
         headers: {
-          'Authorization': this.apiKey ? `Bearer ${this.apiKey}` : undefined,
-          'Content-Type': 'application/json'
-        }
+          Authorization: this.apiKey ? `Bearer ${this.apiKey}` : undefined,
+          "Content-Type": "application/json",
+        },
       });
-      
+
       clearTimeout(timeoutId);
-      
+
       if (response.ok) {
         const data = await response.json();
         this.updateContentDisplay(data);
-        console.log('✅ Content refreshed successfully');
+        console.log("✅ Content refreshed successfully");
       } else {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
-      
     } catch (error) {
-      console.error('❌ Content refresh failed:', error);
+      console.error("❌ Content refresh failed:", error);
       this.showErrorNotification(`Refresh failed: ${error.message}`);
     }
   }
@@ -310,11 +312,11 @@ class ExampleContentScript {
    * Update content display
    */
   updateContentDisplay(data) {
-    let container = document.getElementById('extension-content-container');
-    
+    let container = document.getElementById("extension-content-container");
+
     if (!container) {
-      container = document.createElement('div');
-      container.id = 'extension-content-container';
+      container = document.createElement("div");
+      container.id = "extension-content-container";
       container.style.cssText = `
         position: fixed;
         top: 20px;
@@ -331,7 +333,7 @@ class ExampleContentScript {
       `;
       document.body.appendChild(container);
     }
-    
+
     container.innerHTML = `
       <div style="margin-bottom: 12px; font-weight: bold;">
         📊 Extension Content
@@ -349,27 +351,27 @@ class ExampleContentScript {
    * Setup keyboard shortcuts
    */
   setupKeyboardShortcuts() {
-    document.addEventListener('keydown', (event) => {
+    document.addEventListener("keydown", (event) => {
       // Ctrl+Shift+S: Show quick settings
-      if (event.ctrlKey && event.shiftKey && event.key === 'S') {
+      if (event.ctrlKey && event.shiftKey && event.key === "S") {
         event.preventDefault();
         this.showQuickSettings();
       }
-      
+
       // Ctrl+Shift+R: Force refresh
-      if (event.ctrlKey && event.shiftKey && event.key === 'R') {
+      if (event.ctrlKey && event.shiftKey && event.key === "R") {
         event.preventDefault();
         this.refreshContent();
       }
-      
+
       // Ctrl+Shift+E: Export settings
-      if (event.ctrlKey && event.shiftKey && event.key === 'E') {
+      if (event.ctrlKey && event.shiftKey && event.key === "E") {
         event.preventDefault();
         this.exportSettings();
       }
     });
-    
-    console.log('⌨️ Keyboard shortcuts set up');
+
+    console.log("⌨️ Keyboard shortcuts set up");
   }
 
   /**
@@ -379,14 +381,14 @@ class ExampleContentScript {
     try {
       // Get current settings
       const currentSettings = await this.settings.getSettings([
-        'feature_enabled',
-        'refresh_interval',
-        'api_key'
+        "feature_enabled",
+        "refresh_interval",
+        "api_key",
       ]);
-      
+
       // Create overlay
-      const overlay = document.createElement('div');
-      overlay.id = 'extension-quick-settings';
+      const overlay = document.createElement("div");
+      overlay.id = "extension-quick-settings";
       overlay.style.cssText = `
         position: fixed;
         top: 0;
@@ -400,14 +402,14 @@ class ExampleContentScript {
         justify-content: center;
         font-family: system-ui, -apple-system, sans-serif;
       `;
-      
+
       overlay.innerHTML = `
         <div style="background: white; padding: 24px; border-radius: 12px; min-width: 400px;">
           <h3 style="margin: 0 0 16px 0;">⚙️ Quick Settings</h3>
           
           <div style="margin-bottom: 16px;">
             <label style="display: flex; align-items: center; gap: 8px;">
-              <input type="checkbox" id="feature-toggle" ${currentSettings.feature_enabled?.value ? 'checked' : ''}>
+              <input type="checkbox" id="feature-toggle" ${currentSettings.feature_enabled?.value ? "checked" : ""}>
               Enable Feature
             </label>
           </div>
@@ -419,7 +421,7 @@ class ExampleContentScript {
           
           <div style="margin-bottom: 20px;">
             <label style="display: block; margin-bottom: 4px;">API Key:</label>
-            <input type="password" id="api-key-input" value="${currentSettings.api_key?.value || ''}" style="width: 100%;">
+            <input type="password" id="api-key-input" value="${currentSettings.api_key?.value || ""}" style="width: 100%;">
           </div>
           
           <div style="display: flex; gap: 8px; justify-content: flex-end;">
@@ -428,43 +430,48 @@ class ExampleContentScript {
           </div>
         </div>
       `;
-      
+
       document.body.appendChild(overlay);
-      
+
       // Setup event listeners
-      document.getElementById('quick-settings-save').addEventListener('click', async () => {
-        try {
-          const updates = {
-            feature_enabled: document.getElementById('feature-toggle').checked,
-            refresh_interval: parseInt(document.getElementById('refresh-input').value),
-            api_key: document.getElementById('api-key-input').value
-          };
-          
-          await this.settings.updateSettings(updates);
-          this.showSuccessNotification('Settings saved successfully');
-          
-        } catch (error) {
-          console.error('❌ Error saving settings:', error);
-          this.showErrorNotification('Failed to save settings');
-        }
-        
-        document.body.removeChild(overlay);
-      });
-      
-      document.getElementById('quick-settings-cancel').addEventListener('click', () => {
-        document.body.removeChild(overlay);
-      });
-      
+      document
+        .getElementById("quick-settings-save")
+        .addEventListener("click", async () => {
+          try {
+            const updates = {
+              feature_enabled:
+                document.getElementById("feature-toggle").checked,
+              refresh_interval: parseInt(
+                document.getElementById("refresh-input").value,
+              ),
+              api_key: document.getElementById("api-key-input").value,
+            };
+
+            await this.settings.updateSettings(updates);
+            this.showSuccessNotification("Settings saved successfully");
+          } catch (error) {
+            console.error("❌ Error saving settings:", error);
+            this.showErrorNotification("Failed to save settings");
+          }
+
+          document.body.removeChild(overlay);
+        });
+
+      document
+        .getElementById("quick-settings-cancel")
+        .addEventListener("click", () => {
+          document.body.removeChild(overlay);
+        });
+
       // Close on overlay click
-      overlay.addEventListener('click', (event) => {
+      overlay.addEventListener("click", (event) => {
         if (event.target === overlay) {
           document.body.removeChild(overlay);
         }
       });
-      
     } catch (error) {
-      console.error('❌ Error showing quick settings:', error);
-      this.showErrorNotification('Failed to load quick settings');
+      console.error("❌ Error showing quick settings:", error);
+      this.showErrorNotification("Failed to load quick settings");
     }
   }
 
@@ -474,21 +481,20 @@ class ExampleContentScript {
   async exportSettings() {
     try {
       const exportData = await this.settings.exportSettings();
-      
+
       // Create download link
-      const blob = new Blob([exportData], { type: 'application/json' });
+      const blob = new Blob([exportData], { type: "application/json" });
       const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
+      const a = document.createElement("a");
       a.href = url;
-      a.download = `extension-settings-${new Date().toISOString().split('T')[0]}.json`;
+      a.download = `extension-settings-${new Date().toISOString().split("T")[0]}.json`;
       a.click();
       URL.revokeObjectURL(url);
-      
-      this.showSuccessNotification('Settings exported successfully');
-      
+
+      this.showSuccessNotification("Settings exported successfully");
     } catch (error) {
-      console.error('❌ Export failed:', error);
-      this.showErrorNotification('Failed to export settings');
+      console.error("❌ Export failed:", error);
+      this.showErrorNotification("Failed to export settings");
     }
   }
 
@@ -497,17 +503,17 @@ class ExampleContentScript {
    */
   updatePageIndicators() {
     // Add visual indicator showing extension is active
-    let indicator = document.getElementById('extension-indicator');
-    
+    let indicator = document.getElementById("extension-indicator");
+
     if (!indicator) {
-      indicator = document.createElement('div');
-      indicator.id = 'extension-indicator';
+      indicator = document.createElement("div");
+      indicator.id = "extension-indicator";
       indicator.style.cssText = `
         position: fixed;
         bottom: 20px;
         left: 20px;
         padding: 8px 12px;
-        background: ${this.featureEnabled ? '#4CAF50' : '#FFC107'};
+        background: ${this.featureEnabled ? "#4CAF50" : "#FFC107"};
         color: white;
         border-radius: 20px;
         font-size: 12px;
@@ -518,13 +524,15 @@ class ExampleContentScript {
         user-select: none;
       `;
       document.body.appendChild(indicator);
-      
+
       // Click to show quick settings
-      indicator.addEventListener('click', () => this.showQuickSettings());
+      indicator.addEventListener("click", () => this.showQuickSettings());
     }
-    
-    indicator.textContent = this.featureEnabled ? '🟢 Extension Active' : '🟡 Extension Inactive';
-    indicator.style.background = this.featureEnabled ? '#4CAF50' : '#FFC107';
+
+    indicator.textContent = this.featureEnabled
+      ? "🟢 Extension Active"
+      : "🟡 Extension Inactive";
+    indicator.style.background = this.featureEnabled ? "#4CAF50" : "#FFC107";
   }
 
   /**
@@ -532,18 +540,18 @@ class ExampleContentScript {
    */
   setupFeatureListeners() {
     // Example: Listen for specific elements
-    document.addEventListener('click', this.handleFeatureClick.bind(this));
-    
+    document.addEventListener("click", this.handleFeatureClick.bind(this));
+
     // Example: Listen for form submissions
-    document.addEventListener('submit', this.handleFormSubmit.bind(this));
+    document.addEventListener("submit", this.handleFormSubmit.bind(this));
   }
 
   /**
    * Remove feature-specific event listeners
    */
   removeFeatureListeners() {
-    document.removeEventListener('click', this.handleFeatureClick.bind(this));
-    document.removeEventListener('submit', this.handleFormSubmit.bind(this));
+    document.removeEventListener("click", this.handleFeatureClick.bind(this));
+    document.removeEventListener("submit", this.handleFormSubmit.bind(this));
   }
 
   /**
@@ -551,10 +559,10 @@ class ExampleContentScript {
    */
   handleFeatureClick(event) {
     // Example: Process special elements
-    if (event.target.classList.contains('processable')) {
-      event.target.classList.add('processed');
-      event.target.setAttribute('data-processed', new Date().toISOString());
-      console.log('🖱️ Element processed:', event.target);
+    if (event.target.classList.contains("processable")) {
+      event.target.classList.add("processed");
+      event.target.setAttribute("data-processed", new Date().toISOString());
+      console.log("🖱️ Element processed:", event.target);
     }
   }
 
@@ -563,42 +571,42 @@ class ExampleContentScript {
    */
   handleFormSubmit(event) {
     // Example: Add analytics or modifications
-    console.log('📝 Form submitted:', event.target.action);
+    console.log("📝 Form submitted:", event.target.action);
   }
 
   /**
    * Show success notification
    */
   showSuccessNotification(message) {
-    this.showNotification(message, 'success', '✅');
+    this.showNotification(message, "success", "✅");
   }
 
   /**
    * Show error notification
    */
   showErrorNotification(message) {
-    this.showNotification(message, 'error', '❌');
+    this.showNotification(message, "error", "❌");
   }
 
   /**
    * Show info notification
    */
   showInfoNotification(message) {
-    this.showNotification(message, 'info', 'ℹ️');
+    this.showNotification(message, "info", "ℹ️");
   }
 
   /**
    * Show notification
    */
   showNotification(message, type, icon) {
-    const notification = document.createElement('div');
+    const notification = document.createElement("div");
     notification.style.cssText = `
       position: fixed;
       top: 20px;
       left: 50%;
       transform: translateX(-50%);
       padding: 12px 16px;
-      background: ${type === 'success' ? '#4CAF50' : type === 'error' ? '#F44336' : '#2196F3'};
+      background: ${type === "success" ? "#4CAF50" : type === "error" ? "#F44336" : "#2196F3"};
       color: white;
       border-radius: 8px;
       font-size: 14px;
@@ -606,10 +614,10 @@ class ExampleContentScript {
       box-shadow: 0 2px 10px rgba(0,0,0,0.2);
       animation: slideIn 0.3s ease;
     `;
-    
+
     notification.innerHTML = `${icon} ${message}`;
     document.body.appendChild(notification);
-    
+
     // Auto-remove after 3 seconds
     setTimeout(() => {
       if (notification.parentNode) {
@@ -622,38 +630,38 @@ class ExampleContentScript {
    * Cleanup and destroy
    */
   destroy() {
-    console.log('🧹 Cleaning up Example Content Script');
-    
+    console.log("🧹 Cleaning up Example Content Script");
+
     // Clear intervals
     if (this.refreshIntervalId) {
       clearInterval(this.refreshIntervalId);
     }
-    
+
     // Remove event listeners
     this.removeFeatureListeners();
-    
+
     // Clean up DOM elements
     const elementsToRemove = [
-      'extension-custom-styles',
-      'extension-content-container',
-      'extension-indicator',
-      'extension-quick-settings'
+      "extension-custom-styles",
+      "extension-content-container",
+      "extension-indicator",
+      "extension-quick-settings",
     ];
-    
-    elementsToRemove.forEach(id => {
+
+    elementsToRemove.forEach((id) => {
       const element = document.getElementById(id);
       if (element) {
         element.remove();
       }
     });
-    
+
     // Destroy settings instance
     if (this.settings) {
       this.settings.destroy();
       this.settings = null;
     }
-    
-    console.log('✅ Example Content Script cleaned up');
+
+    console.log("✅ Example Content Script cleaned up");
   }
 }
 
@@ -661,7 +669,7 @@ class ExampleContentScript {
 const exampleScript = new ExampleContentScript();
 
 // Cleanup on page unload
-window.addEventListener('beforeunload', () => {
+window.addEventListener("beforeunload", () => {
   exampleScript.destroy();
 });
 
@@ -669,7 +677,7 @@ window.addEventListener('beforeunload', () => {
 window.exampleScript = exampleScript;
 
 // Add CSS animations
-const style = document.createElement('style');
+const style = document.createElement("style");
 style.textContent = `
   @keyframes slideIn {
     from { transform: translateX(-50%) translateY(-20px); opacity: 0; }
@@ -678,4 +686,4 @@ style.textContent = `
 `;
 document.head.appendChild(style);
 
-console.log('🎯 Example Content Script loaded and ready');
+console.log("🎯 Example Content Script loaded and ready");

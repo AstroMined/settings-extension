@@ -62,10 +62,12 @@ Distribution packages are included in this repository for convenience and intern
 **Package Location**: `web-ext-artifacts/`
 
 **Available Packages**:
+
 - **Chrome/Edge**: `settings-extension-chrome.zip` - Compatible with Chromium-based browsers
 - **Firefox**: `settings-extension-firefox.xpi` - Firefox-specific package with manifest v2/v3 compatibility
 
 **Benefits**:
+
 - No build process required for testing
 - Consistent builds across team members
 - Quick deployment for internal testing
@@ -78,12 +80,14 @@ Distribution packages are included in this repository for convenience and intern
 ### For Development
 
 1. Clone the repository:
+
    ```bash
    git clone https://github.com/yourusername/settings-extension.git
    cd settings-extension
    ```
 
 2. Install dependencies:
+
    ```bash
    npm install
    ```
@@ -122,17 +126,20 @@ Distribution packages are included in this repository for convenience and intern
 const settings = new ContentScriptSettings();
 
 // Get a single setting
-const featureEnabled = await settings.getSetting('feature_enabled');
+const featureEnabled = await settings.getSetting("feature_enabled");
 
 // Get multiple settings
-const multipleSettings = await settings.getSettings(['api_key', 'refresh_interval']);
+const multipleSettings = await settings.getSettings([
+  "api_key",
+  "refresh_interval",
+]);
 
 // Update a setting
-await settings.updateSetting('feature_enabled', true);
+await settings.updateSetting("feature_enabled", true);
 
 // Listen for changes
 settings.addChangeListener((changes) => {
-  console.log('Settings changed:', changes);
+  console.log("Settings changed:", changes);
 });
 ```
 
@@ -243,10 +250,10 @@ const manager = new SettingsManager();
 await manager.initialize();
 
 // Get setting
-const setting = await manager.getSetting('key');
+const setting = await manager.getSetting("key");
 
 // Update setting
-await manager.updateSetting('key', value);
+await manager.updateSetting("key", value);
 
 // Export settings
 const json = await manager.exportSettings();
@@ -261,13 +268,13 @@ await manager.importSettings(jsonData);
 const settings = new ContentScriptSettings();
 
 // Get single setting
-const value = await settings.getSetting('key');
+const value = await settings.getSetting("key");
 
 // Get multiple settings
-const values = await settings.getSettings(['key1', 'key2']);
+const values = await settings.getSettings(["key1", "key2"]);
 
 // Update setting
-await settings.updateSetting('key', value);
+await settings.updateSetting("key", value);
 
 // Listen for changes
 settings.addChangeListener(callback);
@@ -328,15 +335,15 @@ For security concerns, please review our [Security Policy](SECURITY.md) and repo
 
 ## 🌐 Browser Compatibility
 
-| Browser | Minimum Version | Status | Package |
-|---------|----------------|--------|---------|
-| **Chrome** | 88+ | ✅ Fully Supported | `settings-extension-chrome.zip` |
-| **Edge** | 88+ (Chromium) | ✅ Fully Supported | `settings-extension-chrome.zip` |
-| **Firefox** | 109+ | ✅ Fully Supported | `settings-extension-firefox.xpi` |
-| **Safari** | - | ❌ Not Supported | - |
-| **Opera** | 74+ | 🟡 Compatible* | `settings-extension-chrome.zip` |
+| Browser     | Minimum Version | Status             | Package                          |
+| ----------- | --------------- | ------------------ | -------------------------------- |
+| **Chrome**  | 88+             | ✅ Fully Supported | `settings-extension-chrome.zip`  |
+| **Edge**    | 88+ (Chromium)  | ✅ Fully Supported | `settings-extension-chrome.zip`  |
+| **Firefox** | 109+            | ✅ Fully Supported | `settings-extension-firefox.xpi` |
+| **Safari**  | -               | ❌ Not Supported   | -                                |
+| **Opera**   | 74+             | 🟡 Compatible\*    | `settings-extension-chrome.zip`  |
 
-*Opera compatibility through Chromium base - not officially tested
+\*Opera compatibility through Chromium base - not officially tested
 
 ## 🚦 Roadmap
 
@@ -363,12 +370,14 @@ For security concerns, please review our [Security Policy](SECURITY.md) and repo
 ## 📞 Support
 
 ### Documentation
+
 - **[Complete Documentation Hub](./docs/README.md)** - Comprehensive documentation navigation
 - **[User Guides](./docs/user/README.md)** - End-user tutorials and references
 - **[Developer Guides](./docs/developer/README.md)** - Development workflows and standards
 - **[Architecture Documentation](./docs/architecture/README.md)** - Technical system design
 
 ### Community Support
+
 - **Issues**: [GitHub Issues](https://github.com/yourusername/settings-extension/issues)
 - **Discussions**: [GitHub Discussions](https://github.com/yourusername/settings-extension/discussions)
 - **Contributing**: [Contributing Guidelines](./docs/CONTRIBUTING.md)

@@ -16,16 +16,18 @@ Our documentation uses a hybrid three-framework approach to eliminate duplicatio
 
 ### Framework Selection Guide
 
-| Content Type | Framework | Location | Purpose |
-|--------------|-----------|----------|---------|
-| System architecture, design decisions | **arc42** | `/docs/architecture/` | Technical system documentation |
-| End-user guidance | **Diátaxis** | `/docs/user/` | User-facing documentation |
-| Development workflows, processes | **Developer Guides** | `/docs/developer/` | Practical development documentation |
+| Content Type                          | Framework            | Location              | Purpose                             |
+| ------------------------------------- | -------------------- | --------------------- | ----------------------------------- |
+| System architecture, design decisions | **arc42**            | `/docs/architecture/` | Technical system documentation      |
+| End-user guidance                     | **Diátaxis**         | `/docs/user/`         | User-facing documentation           |
+| Development workflows, processes      | **Developer Guides** | `/docs/developer/`    | Practical development documentation |
 
 ### Decision Matrix: What Goes Where?
 
 #### Architecture Documentation (arc42)
+
 **Use when documenting:**
+
 - System design and structure
 - Technical constraints and decisions
 - Component relationships
@@ -34,25 +36,31 @@ Our documentation uses a hybrid three-framework approach to eliminate duplicatio
 - Cross-cutting concerns
 
 **Example topics:**
+
 - "Why did we choose Manifest V3?"
 - "How do components communicate?"
 - "What are our performance requirements?"
 
 #### User Documentation (Diátaxis)
+
 **Use when creating:**
+
 - **Tutorials**: Step-by-step learning guides for newcomers
 - **How-to Guides**: Task-oriented solutions to specific problems
 - **Reference**: Complete technical information for lookup
 - **Explanations**: Conceptual understanding and background
 
 **Example topics:**
+
 - "Getting started with the extension" (Tutorial)
 - "How to backup your settings" (How-to)
 - "Settings types reference" (Reference)
 - "How synchronization works" (Explanation)
 
 #### Developer Documentation
+
 **Use when documenting:**
+
 - Development environment setup
 - Team processes and workflows
 - Debugging and troubleshooting
@@ -60,6 +68,7 @@ Our documentation uses a hybrid three-framework approach to eliminate duplicatio
 - Tool usage and configuration
 
 **Example topics:**
+
 - "Setting up your development environment"
 - "Running tests locally"
 - "Code review process"
@@ -70,52 +79,62 @@ Our documentation uses a hybrid three-framework approach to eliminate duplicatio
 ### Document Structure
 
 #### Standard Template
+
 All documentation files must follow this template:
 
 ```markdown
 # [Document Title]
 
 ## Executive Summary
+
 [2-3 sentence overview of what this document covers and why it matters]
 
 ## Scope
+
 - **Applies to**: [Specific components/versions this applies to]
 - **Last Updated**: YYYY-MM-DD
 - **Status**: Draft/Review/Approved
 
 ## [Main Content Sections]
+
 [Organized with clear headers and subsections]
 
 ## Related Documentation
+
 [Links to related documents with brief descriptions]
 
 ## Revision History
-| Date | Author | Changes |
-|------|--------|---------|
+
+| Date       | Author      | Changes                |
+| ---------- | ----------- | ---------------------- |
 | YYYY-MM-DD | Author Name | Description of changes |
 ```
 
 #### Content Organization
+
 - **Use descriptive headings**: Help readers scan and navigate
-- **Start with overview**: Provide context before diving into details  
+- **Start with overview**: Provide context before diving into details
 - **Progressive disclosure**: General concepts first, specific details later
 - **Logical flow**: Organize content in the order readers need it
 
 ### Writing Style
 
 #### Voice and Tone
+
 - **Active voice**: "Configure the extension" instead of "The extension can be configured"
 - **Present tense**: "The system validates input" instead of "The system will validate input"
 - **Direct and concise**: Remove unnecessary words and phrases
 - **Helpful tone**: Assume readers want to succeed and provide supportive guidance
 
 #### Language Guidelines
+
 - **Use simple, clear language**: Avoid jargon where possible
 - **Define technical terms**: Include definitions for domain-specific terms
 - **Consistent terminology**: Use the same terms throughout all documentation
 - **International audience**: Avoid idioms and cultural references
 
 #### Formatting Standards
+
 - **Bold**: Important concepts, UI elements, file names
 - **Italic**: Emphasis, first mention of key terms
 - **Code blocks**: Commands, code snippets, file contents
@@ -125,29 +144,30 @@ All documentation files must follow this template:
 ### Code Documentation
 
 #### JSDoc Standards
+
 ```javascript
 /**
  * Saves user settings to browser storage with validation and error handling.
- * 
+ *
  * @param {Object} settings - Settings object to save
  * @param {string} settings.theme - User interface theme preference
  * @param {boolean} settings.syncEnabled - Whether sync is enabled
  * @param {Object} [options={}] - Optional configuration
  * @param {boolean} [options.validate=true] - Whether to validate settings
  * @param {number} [options.retries=3] - Number of retry attempts on failure
- * 
+ *
  * @returns {Promise<boolean>} True if save successful, false otherwise
- * 
+ *
  * @throws {ValidationError} When settings fail validation
  * @throws {StorageError} When storage operation fails after all retries
- * 
+ *
  * @example
  * // Save user theme preference
  * const success = await saveSettings({ theme: 'dark', syncEnabled: true });
  * if (!success) {
  *   console.error('Failed to save settings');
  * }
- * 
+ *
  * @example
  * // Save with custom options
  * await saveSettings(
@@ -156,28 +176,31 @@ All documentation files must follow this template:
  * );
  */
 async function saveSettings(settings, options = {}) {
-    // Implementation...
+  // Implementation...
 }
 ```
 
 #### Inline Comments
+
 ```javascript
 // Complex algorithm requires explanation
 function calculateOptimalSyncInterval(userActivity, networkConditions) {
-    // Base interval starts at 5 minutes for active users
-    let interval = userActivity.isActive ? 300000 : 900000;
-    
-    // Adjust for network conditions - slower networks need longer intervals
-    const networkMultiplier = networkConditions.bandwidth < 1000 ? 1.5 : 1.0;
-    interval *= networkMultiplier;
-    
-    // Cap at reasonable limits (1 minute minimum, 30 minutes maximum)
-    return Math.max(60000, Math.min(interval, 1800000));
+  // Base interval starts at 5 minutes for active users
+  let interval = userActivity.isActive ? 300000 : 900000;
+
+  // Adjust for network conditions - slower networks need longer intervals
+  const networkMultiplier = networkConditions.bandwidth < 1000 ? 1.5 : 1.0;
+  interval *= networkMultiplier;
+
+  // Cap at reasonable limits (1 minute minimum, 30 minutes maximum)
+  return Math.max(60000, Math.min(interval, 1800000));
 }
 ```
 
 #### README Files
+
 Each major directory should have a README.md that provides:
+
 - Purpose and scope of the directory
 - Navigation to key files
 - Quick start or overview information
@@ -188,60 +211,72 @@ Each major directory should have a README.md that provides:
 ### Link Standards
 
 #### Relative Path Links
+
 Always use relative paths for internal documentation links:
 
 ```markdown
 <!-- Correct: Relative paths -->
+
 [Architecture Overview](../architecture/01-introduction-goals.md)
 [User Guide](../../user/README.md)
 [Testing Guide](../workflows/testing-guide.md)
 
 <!-- Incorrect: Absolute paths -->
+
 [Architecture Overview](/docs/architecture/01-introduction-goals.md)
 ```
 
 #### Link Descriptions
+
 Provide meaningful link text and context:
 
 ```markdown
 <!-- Good: Descriptive and contextual -->
-For implementation details, see the [Building Blocks View](../architecture/05-building-blocks.md) 
+
+For implementation details, see the [Building Blocks View](../architecture/05-building-blocks.md)
 which explains the component structure.
 
-For troubleshooting deployment issues, consult the 
+For troubleshooting deployment issues, consult the
 [Deployment Troubleshooting Guide](../guides/troubleshooting.md#deployment-issues).
 
 <!-- Poor: Generic link text -->
+
 Click [here](../architecture/05-building-blocks.md) for more information.
 See [this guide](../guides/troubleshooting.md) for help.
 ```
 
 #### Bidirectional Linking
+
 Related documents should link to each other:
 
 ```markdown
 <!-- In architecture document -->
-For the user perspective of these architectural concepts, see 
+
+For the user perspective of these architectural concepts, see
 [Core Concepts](../user/explanation/concepts.md).
 
 <!-- In user document -->
-For technical implementation details, see 
+
+For technical implementation details, see
 [Architecture Overview](../architecture/01-introduction-goals.md).
 ```
 
 ### Cross-Reference Patterns
 
 #### Hub and Spoke Pattern
+
 - Major sections have README files that serve as navigation hubs
 - Individual documents link back to their section hub
 - Hubs link to the main documentation hub
 
 #### Layered References
+
 - Architecture documents link to user documentation for user impact
 - User documentation links to developer guides for advanced usage
 - Developer guides link to architecture for system understanding
 
 #### Contextual References
+
 - Link to related information at the point where it's most relevant
 - Provide enough context so readers understand why they should follow the link
 - Use appropriate link density - not too sparse or too overwhelming
@@ -251,22 +286,26 @@ For technical implementation details, see
 ### Regular Maintenance Schedule
 
 #### Daily
+
 - Check for broken links in new/modified documents
 - Validate document templates are followed
 - Review and approve documentation changes
 
 #### Weekly
+
 - Update project status indicators
 - Review documentation metrics and usage
 - Process documentation feedback and issues
 
 #### Monthly
+
 - Comprehensive link validation across all docs
 - Review and update outdated content
 - Analyze documentation usage patterns
 - Update cross-reference connections
 
 #### Quarterly
+
 - Complete documentation structure review
 - Update documentation standards based on team feedback
 - Review and optimize navigation pathways
@@ -275,6 +314,7 @@ For technical implementation details, see
 ### Content Lifecycle
 
 #### Creation Process
+
 1. **Planning**
    - Identify documentation need
    - Determine appropriate framework and location
@@ -297,6 +337,7 @@ For technical implementation details, see
    - Announce significant new documentation
 
 #### Update Process
+
 1. **Regular Updates**
    - Code changes trigger documentation review
    - Feature releases require documentation updates
@@ -315,6 +356,7 @@ For technical implementation details, see
 ### Quality Assurance
 
 #### Automated Checks
+
 ```bash
 # Link validation script
 #!/bin/bash
@@ -338,6 +380,7 @@ done
 ```
 
 #### Manual Quality Checks
+
 - **Completeness**: All required sections present
 - **Accuracy**: Information is current and correct
 - **Clarity**: Content is understandable by target audience
@@ -349,17 +392,20 @@ done
 ### Recommended Tools
 
 #### Markdown Editors
+
 - **VS Code**: With markdown extensions for preview and linting
 - **Typora**: WYSIWYG markdown editor
 - **Mark Text**: Real-time preview markdown editor
 
 #### Validation Tools
+
 - **markdownlint**: Markdown syntax and style checking
 - **markdown-link-check**: Automated link validation
 - **Alex**: Inclusive language linting
 - **Vale**: Prose linting and style guide enforcement
 
 #### Diagram Tools
+
 - **Mermaid**: For flowcharts, sequence diagrams, and architecture diagrams
 - **PlantUML**: For UML diagrams
 - **Draw.io**: For complex diagrams and mockups
@@ -367,35 +413,36 @@ done
 ### Automation Integration
 
 #### GitHub Actions Workflow
+
 ```yaml
 name: Documentation Quality Check
 on:
   pull_request:
     paths:
-      - 'docs/**'
-      - '**.md'
+      - "docs/**"
+      - "**.md"
 
 jobs:
   docs-quality:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      
+
       - name: Lint Markdown
         uses: articulate/actions-markdownlint@v1
         with:
           config: .markdownlint.json
-          files: 'docs/**/*.md'
-          
+          files: "docs/**/*.md"
+
       - name: Check Links
         uses: gaurav-nelson/github-action-markdown-link-check@v1
         with:
-          use-quiet-mode: 'yes'
-          
+          use-quiet-mode: "yes"
+
       - name: Spell Check
         uses: streetsidesoftware/cspell-action@v2
         with:
-          files: 'docs/**/*.md'
+          files: "docs/**/*.md"
 ```
 
 ## Common Documentation Scenarios
@@ -403,6 +450,7 @@ jobs:
 ### Adding a New Feature
 
 #### Documentation Requirements
+
 1. **Architecture Impact**
    - Update building blocks view if new components added
    - Document architectural decisions made
@@ -420,6 +468,7 @@ jobs:
    - Update coding standards if new patterns introduced
 
 #### Documentation Creation Order
+
 1. Architecture decisions and component updates
 2. Developer documentation for implementation team
 3. User documentation for end users
@@ -428,12 +477,14 @@ jobs:
 ### Bug Fix Documentation
 
 #### When to Document Bug Fixes
+
 - **Security fixes**: Always document in security advisories
 - **Breaking changes**: Document in change logs and migration guides
 - **Workflow changes**: Update relevant how-to guides
 - **Recurring issues**: Add to troubleshooting guides
 
 #### Bug Fix Documentation Process
+
 1. Update troubleshooting guide with problem and solution
 2. Add known issues to relevant user documentation
 3. Update change log with fix details
@@ -442,12 +493,14 @@ jobs:
 ### API Changes
 
 #### API Documentation Requirements
+
 - Update reference documentation immediately
 - Create migration guides for breaking changes
 - Update code examples throughout documentation
 - Test all documented examples
 
 #### API Documentation Best Practices
+
 - Document parameters, return values, and exceptions
 - Provide working code examples
 - Include common usage patterns
@@ -458,18 +511,21 @@ jobs:
 ### Contributing New Documentation
 
 #### Getting Started
+
 1. Read this guide and the [Documentation Standards](../../.documentation-standards.md)
 2. Check existing documentation for similar content
 3. Identify the appropriate framework and location
 4. Create an issue to discuss significant new documentation
 
 #### Writing Process
+
 1. **Create branch**: Use descriptive branch name like `docs/add-performance-guide`
 2. **Write content**: Follow templates and standards
 3. **Self-review**: Check against quality criteria
 4. **Add cross-references**: Link to related content appropriately
 
 #### Submission Process
+
 1. **Pull request**: Use PR template with documentation checklist
 2. **Review process**: Technical and editorial review
 3. **Address feedback**: Respond to reviewer comments
@@ -478,12 +534,14 @@ jobs:
 ### Improving Existing Documentation
 
 #### Identifying Improvement Opportunities
+
 - User feedback and support requests
 - Documentation metrics and analytics
 - Team retrospectives and feedback
 - Regular content audits
 
 #### Making Improvements
+
 - Small fixes: Direct pull request with clear description
 - Large changes: Create issue first to discuss scope
 - Reorganization: Coordinate with documentation team
@@ -494,12 +552,14 @@ jobs:
 ### Key Performance Indicators
 
 #### Usage Metrics
+
 - Page views and popular content
 - User pathways through documentation
 - Search queries and results
 - Support ticket reduction
 
 #### Quality Metrics
+
 - Time to find information
 - Documentation accuracy (measured through feedback)
 - Cross-reference effectiveness
@@ -508,12 +568,14 @@ jobs:
 ### Continuous Improvement
 
 #### Feedback Collection
+
 - Documentation feedback forms
 - User interviews and surveys
 - Support team insights
 - Developer team retrospectives
 
 #### Improvement Process
+
 1. **Analyze metrics**: Identify patterns and issues
 2. **Prioritize improvements**: Focus on high-impact changes
 3. **Implement changes**: Update content and structure
@@ -524,21 +586,25 @@ jobs:
 ### Common Problems
 
 #### Broken Links
+
 - **Cause**: File reorganization, renaming, or deletion
 - **Solution**: Use link validation tools and automated checking
 - **Prevention**: Careful planning of reorganization changes
 
 #### Outdated Information
+
 - **Cause**: Code changes without documentation updates
 - **Solution**: Regular review cycles and change-triggered reviews
 - **Prevention**: Include documentation in definition of done
 
 #### Poor Discoverability
+
 - **Cause**: Inadequate cross-referencing and navigation
 - **Solution**: Improve hub pages and add contextual links
 - **Prevention**: Regular navigation pathway reviews
 
 #### Inconsistent Style
+
 - **Cause**: Multiple contributors without clear standards
 - **Solution**: Editorial review and style guide enforcement
 - **Prevention**: Clear templates and automated style checking
@@ -546,6 +612,7 @@ jobs:
 ### Getting Help
 
 #### Documentation Support
+
 - **Style and structure questions**: Consult this guide or ask documentation team
 - **Technical accuracy**: Get review from subject matter experts
 - **Framework selection**: Refer to decision matrix or ask for guidance
@@ -554,20 +621,23 @@ jobs:
 ## Related Documentation
 
 ### Standards and Conventions
+
 - **[Documentation Standards](../../.documentation-standards.md)** - High-level organization principles
 - **[Coding Standards](coding-standards.md)** - Code quality and documentation requirements
 - **[Git Workflow](git-workflow.md)** - Branching and commit standards for documentation
 
 ### Architecture Context
+
 - **[Architecture Overview](../../architecture/01-introduction-goals.md)** - System context for technical documentation
 - **[Quality Requirements](../../architecture/10-quality-requirements.md)** - Documentation quality targets
 
 ### Process Integration
+
 - **[Code Review Guide](../guides/code-review.md)** - Documentation review as part of code review
 - **[Contributing Guidelines](../../CONTRIBUTING.md)** - Overall contribution process including documentation
 
 ## Revision History
 
-| Date | Author | Changes |
-|------|--------|---------|
+| Date       | Author             | Changes                                   |
+| ---------- | ------------------ | ----------------------------------------- |
 | 2025-08-11 | Documentation Team | Initial comprehensive documentation guide |

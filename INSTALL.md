@@ -39,7 +39,7 @@ The extension is available in two formats:
 
 ### Method 2: Chrome Web Store (Future)
 
-*Note: This extension is not yet published to the Chrome Web Store. For now, use Developer Mode installation.*
+_Note: This extension is not yet published to the Chrome Web Store. For now, use Developer Mode installation._
 
 ## Firefox Installation
 
@@ -73,7 +73,7 @@ The extension is available in two formats:
 
 ### Method 3: Firefox Add-ons (Future)
 
-*Note: This extension is not yet published to Firefox Add-ons. For now, use temporary installation.*
+_Note: This extension is not yet published to Firefox Add-ons. For now, use temporary installation._
 
 ## Microsoft Edge Installation
 
@@ -122,6 +122,7 @@ The extension requires the following permissions:
 **Symptoms**: Extension doesn't appear after installation
 
 **Solutions**:
+
 - Ensure you extracted the ZIP file completely
 - Check that all files are present in the folder
 - Verify browser version compatibility
@@ -132,6 +133,7 @@ The extension requires the following permissions:
 **Symptoms**: Clicking the extension icon does nothing
 
 **Solutions**:
+
 - Check browser console for errors (F12 → Console)
 - Disable conflicting extensions temporarily
 - Reload the extension from the extensions page
@@ -141,6 +143,7 @@ The extension requires the following permissions:
 **Symptoms**: Changes don't persist after browser restart
 
 **Solutions**:
+
 - Check storage permissions are granted
 - Clear browser data and reinstall
 - Verify no other extensions are interfering with storage
@@ -150,6 +153,7 @@ The extension requires the following permissions:
 **Symptoms**: Firefox shows "unverified" or signature warnings
 
 **Solutions**:
+
 - Use Firefox Developer Edition for unsigned extensions
 - Use temporary installation method for testing
 - Wait for official Firefox Add-ons publication
@@ -186,11 +190,13 @@ The extension requires the following permissions:
 ## Uninstallation
 
 ### Chrome/Edge
+
 1. Navigate to `chrome://extensions/` or `edge://extensions/`
 2. Find the Settings Extension
 3. Click "Remove" and confirm
 
 ### Firefox
+
 1. Navigate to `about:addons`
 2. Find the Settings Extension
 3. Click "..." → "Remove" and confirm
@@ -207,7 +213,7 @@ The extension requires the following permissions:
 Both distribution packages have been validated and tested:
 
 - ✅ **Chrome Package**: `settings-extension-chrome.zip` - Validated and ready for installation
-- ✅ **Firefox Package**: `settings-extension-firefox.xpi` - Validated and ready for installation  
+- ✅ **Firefox Package**: `settings-extension-firefox.xpi` - Validated and ready for installation
 - ✅ **Package Integrity**: Both packages pass integrity checks
 - ✅ **Cross-browser Compatibility**: Tested on Chrome 88+, Firefox 109+, Edge 88+
 

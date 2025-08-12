@@ -48,15 +48,15 @@ The Settings Extension follows a client-side deployment model where the extensio
 
 ### 7.2 Deployment Characteristics
 
-| Characteristic | Details |
-|----------------|---------|
-| **Architecture Type** | Client-side browser extension |
+| Characteristic         | Details                           |
+| ---------------------- | --------------------------------- |
+| **Architecture Type**  | Client-side browser extension     |
 | **Distribution Model** | Store-based + Direct distribution |
-| **Update Mechanism** | Automatic browser-managed updates |
-| **Scalability** | Horizontal (per-browser instance) |
-| **Availability** | Browser-dependent |
-| **State Management** | Local browser storage |
-| **Security Model** | Browser sandbox + permissions |
+| **Update Mechanism**   | Automatic browser-managed updates |
+| **Scalability**        | Horizontal (per-browser instance) |
+| **Availability**       | Browser-dependent                 |
+| **State Management**   | Local browser storage             |
+| **Security Model**     | Browser sandbox + permissions     |
 
 ## Build and Packaging
 
@@ -70,29 +70,29 @@ flowchart TD
     B --> C[Unit Tests]
     C --> D[Integration Tests]
     D --> E[Build Process]
-    
+
     E --> F[Webpack Compilation]
     E --> G[Asset Processing]
     E --> H[Manifest Generation]
-    
+
     F --> I[JavaScript Bundling]
     G --> J[CSS Processing]
     H --> K[Browser-specific Manifests]
-    
+
     I --> L[Code Minification]
     J --> M[CSS Optimization]
     K --> N[Validation]
-    
+
     L --> O[Package Assembly]
     M --> O
     N --> O
-    
+
     O --> P{Target Browser?}
-    
+
     P -->|Chrome| Q[Chrome Package]
     P -->|Firefox| R[Firefox Package]
     P -->|Edge| S[Edge Package]
-    
+
     Q --> T[Web Store Upload]
     R --> U[AMO Upload]
     S --> V[Partner Center Upload]
@@ -101,9 +101,11 @@ flowchart TD
 ### 7.4 Build Configuration
 
 #### Development Build
+
 ```bash
 npm run build:dev
 ```
+
 - Source maps included
 - Debug logging enabled
 - Non-minified code
@@ -111,9 +113,11 @@ npm run build:dev
 - Local testing optimizations
 
 #### Production Build
+
 ```bash
 npm run build:prod
 ```
+
 - Code minification
 - Asset optimization
 - Production manifest
@@ -121,6 +125,7 @@ npm run build:prod
 - Security headers added
 
 #### Browser-Specific Builds
+
 ```bash
 npm run build:chrome    # Chrome Web Store package
 npm run build:firefox   # Firefox AMO package
@@ -172,6 +177,7 @@ settings-extension-package/
 ### 7.6 Official Store Distribution
 
 #### Chrome Web Store
+
 - **Target Audience**: Chrome browser users
 - **Distribution URL**: `https://chrome.google.com/webstore`
 - **Package Format**: `.zip` file
@@ -180,6 +186,7 @@ settings-extension-package/
 - **Rollout Strategy**: Staged rollout (1%, 10%, 50%, 100%)
 
 **Chrome Web Store Metadata:**
+
 ```json
 {
   "name": "Settings Extension",
@@ -195,6 +202,7 @@ settings-extension-package/
 ```
 
 #### Firefox Add-ons (AMO)
+
 - **Target Audience**: Firefox browser users
 - **Distribution URL**: `https://addons.mozilla.org`
 - **Package Format**: `.xpi` file
@@ -203,6 +211,7 @@ settings-extension-package/
 - **Signing**: Mozilla code signing required
 
 **Firefox AMO Metadata:**
+
 ```json
 {
   "name": "Settings Extension",
@@ -215,6 +224,7 @@ settings-extension-package/
 ```
 
 #### Microsoft Edge Add-ons
+
 - **Target Audience**: Edge browser users
 - **Distribution URL**: `https://microsoftedge.microsoft.com/addons`
 - **Package Format**: `.zip` file (Chrome-compatible)
@@ -224,6 +234,7 @@ settings-extension-package/
 ### 7.7 Alternative Distribution Channels
 
 #### Direct Distribution
+
 - **Use Case**: Enterprise deployment, beta testing
 - **Package Format**: Unpacked extension folder or `.zip`
 - **Installation**: Manual "Load unpacked" or drag-and-drop
@@ -231,6 +242,7 @@ settings-extension-package/
 - **Audience**: Developers, enterprise users, beta testers
 
 #### Enterprise Distribution
+
 - **Use Case**: Corporate environments
 - **Method**: Group Policy deployment
 - **Format**: Registry entries + extension files
@@ -238,6 +250,7 @@ settings-extension-package/
 - **Updates**: Controlled by IT policy
 
 #### Developer Distribution
+
 - **Use Case**: Development and testing
 - **Method**: Local file system
 - **Installation**: Developer mode loading
@@ -255,25 +268,25 @@ graph TD
     D --> E[Testing Environment]
     E --> F[Artifact Storage]
     F --> G[Distribution]
-    
+
     subgraph "Development Tools"
         H[IDE/Editor]
         I[Local Testing]
         J[Debug Tools]
     end
-    
+
     subgraph "CI/CD Tools"
         K[GitHub Actions]
         L[Automated Testing]
         M[Code Quality Checks]
     end
-    
+
     subgraph "Build Tools"
         N[Webpack]
         O[Babel]
         P[PostCSS]
     end
-    
+
     A --> H
     A --> I
     A --> J
@@ -287,22 +300,22 @@ graph TD
 
 #### Development Environment Requirements
 
-| Component | Requirement | Purpose |
-|-----------|-------------|---------|
-| **Node.js** | v16+ | Build system and tooling |
-| **npm** | v8+ | Package management |
-| **Git** | v2.20+ | Source control |
-| **Browser** | Chrome 88+, Firefox 78+ | Testing targets |
-| **Editor** | VS Code (recommended) | Development IDE |
+| Component   | Requirement             | Purpose                  |
+| ----------- | ----------------------- | ------------------------ |
+| **Node.js** | v16+                    | Build system and tooling |
+| **npm**     | v8+                     | Package management       |
+| **Git**     | v2.20+                  | Source control           |
+| **Browser** | Chrome 88+, Firefox 78+ | Testing targets          |
+| **Editor**  | VS Code (recommended)   | Development IDE          |
 
 #### Build Server Requirements
 
-| Resource | Minimum | Recommended | Purpose |
-|----------|---------|-------------|---------|
-| **CPU** | 2 cores | 4 cores | Build compilation |
-| **Memory** | 4GB | 8GB | Build processes |
-| **Storage** | 20GB | 50GB | Build artifacts |
-| **Network** | 10Mbps | 100Mbps | Package downloads |
+| Resource    | Minimum | Recommended | Purpose           |
+| ----------- | ------- | ----------- | ----------------- |
+| **CPU**     | 2 cores | 4 cores     | Build compilation |
+| **Memory**  | 4GB     | 8GB         | Build processes   |
+| **Storage** | 20GB    | 50GB        | Build artifacts   |
+| **Network** | 10Mbps  | 100Mbps     | Package downloads |
 
 ### 7.9 CI/CD Pipeline
 
@@ -324,7 +337,7 @@ jobs:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
         with:
-          node-version: '18'
+          node-version: "18"
       - run: npm ci
       - run: npm run lint
       - run: npm test
@@ -340,7 +353,7 @@ jobs:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
         with:
-          node-version: '18'
+          node-version: "18"
       - run: npm ci
       - run: npm run build:${{ matrix.browser }}
       - uses: actions/upload-artifact@v3
@@ -377,12 +390,12 @@ The Settings Extension operates within the browser's extension runtime environme
 
 #### System Requirements
 
-| Browser | Minimum Version | Manifest Version | API Level |
-|---------|----------------|------------------|-----------|
-| **Chrome** | 88.0 | Manifest V3 | Full |
-| **Firefox** | 78.0 | WebExtensions | Full |
-| **Edge** | 88.0 | Manifest V3 | Full |
-| **Safari** | Not Supported | N/A | N/A |
+| Browser     | Minimum Version | Manifest Version | API Level |
+| ----------- | --------------- | ---------------- | --------- |
+| **Chrome**  | 88.0            | Manifest V3      | Full      |
+| **Firefox** | 78.0            | WebExtensions    | Full      |
+| **Edge**    | 88.0            | Manifest V3      | Full      |
+| **Safari**  | Not Supported   | N/A              | N/A       |
 
 #### Runtime Resources
 
@@ -392,24 +405,24 @@ graph TD
     B --> C[Service Worker]
     B --> D[Content Scripts]
     B --> E[UI Components]
-    
+
     C --> F[Settings Manager]
     C --> G[Storage APIs]
     C --> H[Message Routing]
-    
+
     D --> I[Page Injection]
     D --> J[DOM Access]
-    
+
     E --> K[Popup Window]
     E --> L[Options Page]
-    
+
     subgraph "Resource Limits"
         M[Memory: ~10MB]
         N[Storage: ~10MB local]
         O[Storage: ~100KB sync]
         P[CPU: Shared]
     end
-    
+
     B --> M
     B --> N
     B --> O
@@ -421,12 +434,14 @@ graph TD
 The extension operates within browser security constraints:
 
 #### Permission Model
+
 - **Minimal Permissions**: Only request necessary permissions
 - **Storage Access**: Local and sync storage APIs
 - **Active Tab**: Access to active tab when needed
 - **No Host Permissions**: No broad web access required
 
 #### Security Boundaries
+
 ```
 ┌─────────────────────────────────────────────┐
 │              Browser Security               │
@@ -457,12 +472,14 @@ The extension operates within browser security constraints:
 ### 7.12 Monitoring and Logging
 
 #### Client-Side Monitoring
+
 - **Performance Metrics**: Operation timing, memory usage
 - **Error Tracking**: Exception logging, error rates
 - **Usage Analytics**: Feature usage (with user consent)
 - **Health Checks**: Storage availability, API functionality
 
 #### Logging Strategy
+
 ```javascript
 // Structured logging with different levels
 const Logger = {
@@ -471,35 +488,38 @@ const Logger = {
   info: (message, context) => console.info(message, context),
   debug: (message, context) => {
     if (DEBUG_MODE) console.debug(message, context);
-  }
+  },
 };
 ```
 
 ### 7.13 Update and Rollback Strategy
 
 #### Automatic Updates
+
 - **Browser-Managed**: Browsers handle update distribution
 - **Update Frequency**: Within 24-48 hours of store approval
 - **Rollout Control**: Staged rollout through store controls
 - **Emergency Updates**: Fast-track for critical security fixes
 
 #### Rollback Procedures
+
 1. **Store Rollback**: Revert to previous version in stores
 2. **User Communication**: Clear messaging about issues
 3. **Data Migration**: Backward compatibility for settings data
 4. **Emergency Disable**: Remote disable capability through stores
 
 #### Version Compatibility
+
 ```mermaid
 graph LR
     A[v1.0.0] --> B[v1.1.0]
     B --> C[v1.2.0]
     C --> D[v2.0.0]
-    
+
     A -.->|Settings Migration| D
     B -.->|Settings Migration| D
     C -.->|Settings Migration| D
-    
+
     subgraph "Compatibility Matrix"
         E[Backward Compatible]
         F[Migration Required]
@@ -511,14 +531,15 @@ graph LR
 
 #### Data Recovery Scenarios
 
-| Scenario | Impact | Recovery Method | RTO |
-|----------|---------|----------------|-----|
-| **Settings Corruption** | High | Restore from defaults | < 1 minute |
-| **Storage Failure** | Medium | Fallback to memory | Immediate |
-| **Extension Crash** | High | Browser restart | < 30 seconds |
-| **Store Removal** | Critical | Direct distribution | < 1 day |
+| Scenario                | Impact   | Recovery Method       | RTO          |
+| ----------------------- | -------- | --------------------- | ------------ |
+| **Settings Corruption** | High     | Restore from defaults | < 1 minute   |
+| **Storage Failure**     | Medium   | Fallback to memory    | Immediate    |
+| **Extension Crash**     | High     | Browser restart       | < 30 seconds |
+| **Store Removal**       | Critical | Direct distribution   | < 1 day      |
 
 #### Backup Strategies
+
 - **User-Initiated**: Export/import functionality
 - **Automatic Backup**: Browser sync storage
 - **Recovery Tools**: Built-in reset and recovery options
@@ -527,17 +548,18 @@ graph LR
 
 ### 7.15 Performance Targets
 
-| Metric | Target | Measurement Method |
-|--------|--------|--------------------|
-| **Installation Time** | < 10 seconds | Store installation timing |
-| **Initialization Time** | < 500ms | Extension startup timing |
-| **Memory Usage** | < 10MB | Browser task manager |
-| **Storage Usage** | < 5MB typical | Storage API monitoring |
-| **Update Time** | < 30 seconds | Browser update mechanism |
+| Metric                  | Target        | Measurement Method        |
+| ----------------------- | ------------- | ------------------------- |
+| **Installation Time**   | < 10 seconds  | Store installation timing |
+| **Initialization Time** | < 500ms       | Extension startup timing  |
+| **Memory Usage**        | < 10MB        | Browser task manager      |
+| **Storage Usage**       | < 5MB typical | Storage API monitoring    |
+| **Update Time**         | < 30 seconds  | Browser update mechanism  |
 
 ### 7.16 Scalability Considerations
 
 The extension scales horizontally across browser instances:
+
 - **Per-Browser Isolation**: Each browser maintains separate state
 - **Cross-Device Sync**: Browser's built-in sync mechanisms
 - **No Central Server**: No bottlenecks or single points of failure
@@ -552,6 +574,6 @@ The extension scales horizontally across browser instances:
 
 ## Revision History
 
-| Date | Author | Changes |
-|------|--------|---------|
+| Date       | Author            | Changes                                                    |
+| ---------- | ----------------- | ---------------------------------------------------------- |
 | 2025-08-11 | Architecture Team | Initial deployment architecture and operational procedures |

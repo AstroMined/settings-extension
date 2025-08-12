@@ -10,23 +10,24 @@
       "strict_min_version": "109.0"
     }
   },
-  
-  "permissions": [
-    "storage",
-    "activeTab"
-  ],
-  
+
+  "permissions": ["storage", "activeTab", "alarms", "tabs"],
+
   "background": {
     "service_worker": "background.js"
   },
-  
+
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": ["lib/browser-compat.js", "lib/content-settings.js", "content-script.js"]
+      "js": [
+        "lib/browser-compat.js",
+        "lib/content-settings.js",
+        "content-script.js"
+      ]
     }
   ],
-  
+
   "action": {
     "default_popup": "popup/popup.html",
     "default_icon": {
@@ -35,18 +36,18 @@
       "128": "icons/icon128.png"
     }
   },
-  
+
   "options_ui": {
     "page": "options/options.html",
     "open_in_tab": true
   },
-  
+
   "icons": {
     "16": "icons/icon16.png",
     "48": "icons/icon48.png",
     "128": "icons/icon128.png"
   },
-  
+
   "web_accessible_resources": [
     {
       "resources": ["config/defaults.json"],

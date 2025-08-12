@@ -15,11 +15,12 @@ Complete guide to setting up your local development environment for the Settings
 ### Required Software
 
 1. **Node.js** (v16.0.0 or higher, v18+ recommended)
+
    ```bash
    # Check your version (should be >= 16.0.0)
    node --version
    npm --version  # Should be >= 8.0.0
-   
+
    # Install via nvm (recommended)
    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
    nvm install 18
@@ -27,10 +28,11 @@ Complete guide to setting up your local development environment for the Settings
    ```
 
 2. **Git**
+
    ```bash
    # Check installation
    git --version
-   
+
    # Configure if needed
    git config --global user.name "Your Name"
    git config --global user.email "your.email@example.com"
@@ -52,6 +54,7 @@ Complete guide to setting up your local development environment for the Settings
 ### Development Tools Overview
 
 The project uses these key development tools:
+
 - **Webpack 5**: Modern bundling with development server
 - **Jest 29**: Testing framework with jsdom environment
 - **ESLint 8**: Code linting with Prettier integration
@@ -216,6 +219,7 @@ wait
 ### VS Code Setup
 
 Create `.vscode/settings.json`:
+
 ```json
 {
   "editor.formatOnSave": true,
@@ -228,6 +232,7 @@ Create `.vscode/settings.json`:
 ```
 
 Create `.vscode/launch.json` for debugging:
+
 ```json
 {
   "version": "0.2.0",
@@ -261,6 +266,7 @@ npm run lint:fix
 ## Environment Variables
 
 Create `.env` file in project root (optional):
+
 ```bash
 # Development settings
 NODE_ENV=development
@@ -278,6 +284,7 @@ SOURCE_MAPS=true
 ### Common Issues
 
 1. **"Module not found" errors**
+
    ```bash
    # Clear npm cache and reinstall
    npm cache clean --force
@@ -291,10 +298,11 @@ SOURCE_MAPS=true
    - Check browser console for errors
 
 3. **Build failures**
+
    ```bash
    # Check for syntax errors
    npm run lint
-   
+
    # Clean and rebuild
    npm run clean
    npm run build
@@ -329,15 +337,17 @@ SOURCE_MAPS=true
 ### Development Speed
 
 1. **Use watch mode** instead of repeated builds:
+
    ```bash
    npm run watch  # Keeps running, rebuilds on changes
    ```
 
 2. **Disable source maps** in development if slow:
+
    ```javascript
    // webpack.config.js
    module.exports = {
-     devtool: process.env.NODE_ENV === 'development' ? 'eval' : 'source-map'
+     devtool: process.env.NODE_ENV === "development" ? "eval" : "source-map",
    };
    ```
 
@@ -350,6 +360,7 @@ SOURCE_MAPS=true
 ### Memory Usage
 
 Monitor Node.js memory usage:
+
 ```bash
 # Check memory usage during build
 node --max-old-space-size=4096 node_modules/.bin/webpack
@@ -360,23 +371,27 @@ node --max-old-space-size=4096 node_modules/.bin/webpack
 After completing your local setup, follow these pathways based on your goals:
 
 ### For New Contributors
+
 1. **[Coding Standards](../conventions/coding-standards.md)** - Code quality requirements
 2. **[Git Workflow](../conventions/git-workflow.md)** - Branching and commit standards
 3. **[Contributing Guidelines](../../CONTRIBUTING.md)** - Complete contribution process
 4. **[Testing Guide](testing-guide.md)** - How to write and run tests
 
-### Understanding the System  
+### Understanding the System
+
 1. **[Architecture Overview](../../architecture/README.md)** - Complete system design
 2. **[Building Blocks View](../../architecture/05-building-blocks.md)** - Component structure you'll work with
 3. **[Architecture Decisions](../../architecture/09-architecture-decisions/)** - Key technical choices
 4. **[Quality Requirements](../../architecture/10-quality-requirements.md)** - Performance and reliability targets
 
 ### User Perspective
+
 1. **[Getting Started Guide](../../user/tutorials/getting-started.md)** - Experience what users experience
 2. **[Settings Types Reference](../../user/reference/settings-types.md)** - API you'll be working with
 3. **[User How-to Guides](../../user/how-to/)** - Common user workflows to support
 
 ### Development Workflows
+
 1. **[Extension Development Guide](../guides/extension-development.md)** - Browser extension patterns
 2. **[Cross-Browser Testing](../guides/cross-browser-testing.md)** - Multi-browser compatibility
 3. **[Debugging Guide](debugging-guide.md)** - Troubleshooting techniques
@@ -391,6 +406,6 @@ After completing your local setup, follow these pathways based on your goals:
 
 ## Revision History
 
-| Date | Author | Changes |
-|------|--------|---------|
+| Date       | Author         | Changes                   |
+| ---------- | -------------- | ------------------------- |
 | 2025-08-11 | Developer Team | Initial local setup guide |

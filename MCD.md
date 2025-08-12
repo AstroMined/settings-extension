@@ -58,10 +58,10 @@
 
 **Browser Compatibility**:
 
-- Uses native chrome.* APIs with feature detection for cross-browser support
+- Uses native chrome.\* APIs with feature detection for cross-browser support
 - Chrome: Full native API support
-- Edge: Full chrome.* API compatibility (Chromium-based)
-- Firefox: chrome.* APIs mapped to browser.* APIs automatically
+- Edge: Full chrome.\* API compatibility (Chromium-based)
+- Firefox: chrome._ APIs mapped to browser._ APIs automatically
 - Unminified browser-compat.js provides compatibility shims where needed
 
 **Infrastructure**:
@@ -87,47 +87,47 @@
 // Default settings structure
 const DEFAULT_SETTINGS = {
   // Boolean settings
-  "feature_enabled": {
-    "type": "boolean",
-    "value": true,
-    "description": "Enable main feature functionality"
+  feature_enabled: {
+    type: "boolean",
+    value: true,
+    description: "Enable main feature functionality",
   },
-  
+
   // Text settings
-  "api_key": {
-    "type": "text",
-    "value": "",
-    "description": "API key for external service",
-    "maxLength": 100
+  api_key: {
+    type: "text",
+    value: "",
+    description: "API key for external service",
+    maxLength: 100,
   },
-  
+
   // Long text settings
-  "custom_css": {
-    "type": "longtext",
-    "value": "/* Custom CSS styles */\n.example { color: blue; }",
-    "description": "Custom CSS for content injection",
-    "maxLength": 50000
+  custom_css: {
+    type: "longtext",
+    value: "/* Custom CSS styles */\n.example { color: blue; }",
+    description: "Custom CSS for content injection",
+    maxLength: 50000,
   },
-  
+
   // Number settings
-  "refresh_interval": {
-    "type": "number",
-    "value": 60,
-    "description": "Auto-refresh interval in seconds",
-    "min": 1,
-    "max": 3600
+  refresh_interval: {
+    type: "number",
+    value: 60,
+    description: "Auto-refresh interval in seconds",
+    min: 1,
+    max: 3600,
   },
-  
+
   // JSON settings
-  "advanced_config": {
-    "type": "json",
-    "value": {
-      "endpoint": "https://api.example.com",
-      "timeout": 5000,
-      "retries": 3
+  advanced_config: {
+    type: "json",
+    value: {
+      endpoint: "https://api.example.com",
+      timeout: 5000,
+      retries: 3,
     },
-    "description": "Advanced configuration object"
-  }
+    description: "Advanced configuration object",
+  },
 };
 ```
 
@@ -145,19 +145,21 @@ class SettingsManager {
   async initialize() {
     const stored = await chrome.storage.local.get();
     const defaults = await this.loadDefaults();
-    
-    this.settings = new Map(Object.entries({
-      ...defaults,
-      ...stored
-    }));
-    
+
+    this.settings = new Map(
+      Object.entries({
+        ...defaults,
+        ...stored,
+      }),
+    );
+
     this.initialized = true;
-    this.notifyListeners('initialized');
+    this.notifyListeners("initialized");
   }
 
   // Load default settings from JSON
   async loadDefaults() {
-    const response = await fetch('/config/defaults.json');
+    const response = await fetch("/config/defaults.json");
     return await response.json();
   }
 
@@ -186,60 +188,60 @@ class SettingsManager {
   // Update single setting
   async updateSetting(key, value) {
     if (!this.initialized) await this.initialize();
-    
+
     const setting = this.settings.get(key);
     if (!setting) throw new Error(`Setting ${key} not found`);
-    
+
     // Validate value based on type
     this.validateSetting(setting, value);
-    
+
     setting.value = value;
     this.settings.set(key, setting);
-    
+
     await chrome.storage.local.set({ [key]: setting });
-    this.notifyListeners('updated', { key, value });
+    this.notifyListeners("updated", { key, value });
   }
 
   // Update multiple settings
   async updateSettings(updates) {
     if (!this.initialized) await this.initialize();
-    
+
     const storageUpdates = {};
     for (const [key, value] of Object.entries(updates)) {
       const setting = this.settings.get(key);
       if (!setting) throw new Error(`Setting ${key} not found`);
-      
+
       this.validateSetting(setting, value);
       setting.value = value;
       this.settings.set(key, setting);
       storageUpdates[key] = setting;
     }
-    
+
     await chrome.storage.local.set(storageUpdates);
-    this.notifyListeners('updated', updates);
+    this.notifyListeners("updated", updates);
   }
 
   // Export settings to JSON
   async exportSettings() {
     if (!this.initialized) await this.initialize();
-    
+
     const exportData = {
       version: "1.0",
       timestamp: new Date().toISOString(),
-      settings: Object.fromEntries(this.settings)
+      settings: Object.fromEntries(this.settings),
     };
-    
+
     return JSON.stringify(exportData, null, 2);
   }
 
   // Import settings from JSON
   async importSettings(jsonData) {
     const importData = JSON.parse(jsonData);
-    
+
     if (!importData.settings) {
-      throw new Error('Invalid settings format');
+      throw new Error("Invalid settings format");
     }
-    
+
     // Validate and merge settings
     const validSettings = {};
     for (const [key, setting] of Object.entries(importData.settings)) {
@@ -248,46 +250,46 @@ class SettingsManager {
         validSettings[key] = setting;
       }
     }
-    
+
     await chrome.storage.local.set(validSettings);
     await this.initialize(); // Reload settings
-    
-    this.notifyListeners('imported', validSettings);
+
+    this.notifyListeners("imported", validSettings);
   }
 
   // Reset to defaults
   async resetToDefaults() {
     await chrome.storage.local.clear();
     await this.initialize();
-    this.notifyListeners('reset');
+    this.notifyListeners("reset");
   }
 
   // Validate setting value
   validateSetting(setting, value) {
     switch (setting.type) {
-      case 'boolean':
-        if (typeof value !== 'boolean') {
+      case "boolean":
+        if (typeof value !== "boolean") {
           throw new Error(`${setting.description} must be a boolean`);
         }
         break;
-      case 'text':
-        if (typeof value !== 'string') {
+      case "text":
+        if (typeof value !== "string") {
           throw new Error(`${setting.description} must be a string`);
         }
         if (setting.maxLength && value.length > setting.maxLength) {
           throw new Error(`${setting.description} exceeds maximum length`);
         }
         break;
-      case 'longtext':
-        if (typeof value !== 'string') {
+      case "longtext":
+        if (typeof value !== "string") {
           throw new Error(`${setting.description} must be a string`);
         }
         if (setting.maxLength && value.length > setting.maxLength) {
           throw new Error(`${setting.description} exceeds maximum length`);
         }
         break;
-      case 'number':
-        if (typeof value !== 'number') {
+      case "number":
+        if (typeof value !== "number") {
           throw new Error(`${setting.description} must be a number`);
         }
         if (setting.min !== undefined && value < setting.min) {
@@ -297,8 +299,8 @@ class SettingsManager {
           throw new Error(`${setting.description} above maximum value`);
         }
         break;
-      case 'json':
-        if (typeof value !== 'object' || value === null) {
+      case "json":
+        if (typeof value !== "object" || value === null) {
           throw new Error(`${setting.description} must be a valid object`);
         }
         break;
@@ -338,80 +340,95 @@ class ContentScriptSettings {
   // Request single setting
   async getSetting(key) {
     return new Promise((resolve, reject) => {
-      chrome.runtime.sendMessage({
-        type: 'GET_SETTING',
-        key: key
-      }, (response) => {
-        if (response.error) {
-          reject(new Error(response.error));
-        } else {
-          resolve(response.value);
-        }
-      });
+      chrome.runtime.sendMessage(
+        {
+          type: "GET_SETTING",
+          key: key,
+        },
+        (response) => {
+          if (response.error) {
+            reject(new Error(response.error));
+          } else {
+            resolve(response.value);
+          }
+        },
+      );
     });
   }
 
   // Request multiple settings
   async getSettings(keys) {
     return new Promise((resolve, reject) => {
-      chrome.runtime.sendMessage({
-        type: 'GET_SETTINGS',
-        keys: keys
-      }, (response) => {
-        if (response.error) {
-          reject(new Error(response.error));
-        } else {
-          resolve(response.values);
-        }
-      });
+      chrome.runtime.sendMessage(
+        {
+          type: "GET_SETTINGS",
+          keys: keys,
+        },
+        (response) => {
+          if (response.error) {
+            reject(new Error(response.error));
+          } else {
+            resolve(response.values);
+          }
+        },
+      );
     });
   }
 
   // Request all settings
   async getAllSettings() {
     return new Promise((resolve, reject) => {
-      chrome.runtime.sendMessage({
-        type: 'GET_ALL_SETTINGS'
-      }, (response) => {
-        if (response.error) {
-          reject(new Error(response.error));
-        } else {
-          resolve(response.settings);
-        }
-      });
+      chrome.runtime.sendMessage(
+        {
+          type: "GET_ALL_SETTINGS",
+        },
+        (response) => {
+          if (response.error) {
+            reject(new Error(response.error));
+          } else {
+            resolve(response.settings);
+          }
+        },
+      );
     });
   }
 
   // Update single setting
   async updateSetting(key, value) {
     return new Promise((resolve, reject) => {
-      chrome.runtime.sendMessage({
-        type: 'UPDATE_SETTING',
-        key: key,
-        value: value
-      }, (response) => {
-        if (response.error) {
-          reject(new Error(response.error));
-        } else {
-          resolve(response.success);
-        }
-      });
+      chrome.runtime.sendMessage(
+        {
+          type: "UPDATE_SETTING",
+          key: key,
+          value: value,
+        },
+        (response) => {
+          if (response.error) {
+            reject(new Error(response.error));
+          } else {
+            resolve(response.success);
+          }
+        },
+      );
     });
   }
 
   // Update multiple settings
   async updateSettings(updates) {
     return new Promise((resolve, reject) => {
-      chrome.runtime.sendMessage({
-        type: 'UPDATE_SETTINGS',
-        updates: updates
-      }, (response) => {
-        if (response.error) {
-          reject(new Error(response.error));
-        } else {
-          resolve(response.success);
-        }
-      });
+      chrome.runtime.sendMessage(
+        {
+          type: "UPDATE_SETTINGS",
+          updates: updates,
+        },
+        (response) => {
+          if (response.error) {
+            reject(new Error(response.error));
+          } else {
+            resolve(response.success);
+          }
+        },
+      );
     });
   }
 
@@ -428,7 +445,7 @@ class ContentScriptSettings {
   // Setup message listener for settings changes
   setupMessageListener() {
     chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-      if (message.type === 'SETTINGS_CHANGED') {
+      if (message.type === "SETTINGS_CHANGED") {
         for (const callback of this.listeners) {
           callback(message.changes);
         }
@@ -445,7 +462,7 @@ class ContentScriptSettings {
 class SettingsUI {
   constructor() {
     this.settingsManager = new SettingsManager();
-    this.currentTab = 'general';
+    this.currentTab = "general";
     this.unsavedChanges = false;
   }
 
@@ -459,11 +476,11 @@ class SettingsUI {
 
   // Render settings based on type
   renderSettings() {
-    const container = document.getElementById('settings-container');
-    container.innerHTML = '';
+    const container = document.getElementById("settings-container");
+    container.innerHTML = "";
 
     const settings = this.settingsManager.getAllSettings();
-    
+
     for (const [key, setting] of Object.entries(settings)) {
       const element = this.createSettingElement(key, setting);
       container.appendChild(element);
@@ -472,50 +489,50 @@ class SettingsUI {
 
   // Create setting element based on type
   createSettingElement(key, setting) {
-    const wrapper = document.createElement('div');
-    wrapper.className = 'setting-item';
-    wrapper.setAttribute('data-key', key);
+    const wrapper = document.createElement("div");
+    wrapper.className = "setting-item";
+    wrapper.setAttribute("data-key", key);
 
-    const label = document.createElement('label');
+    const label = document.createElement("label");
     label.textContent = setting.description;
-    label.className = 'setting-label';
+    label.className = "setting-label";
 
     let input;
     switch (setting.type) {
-      case 'boolean':
-        input = document.createElement('input');
-        input.type = 'checkbox';
+      case "boolean":
+        input = document.createElement("input");
+        input.type = "checkbox";
         input.checked = setting.value;
         break;
-      case 'text':
-        input = document.createElement('input');
-        input.type = 'text';
+      case "text":
+        input = document.createElement("input");
+        input.type = "text";
         input.value = setting.value;
         input.maxLength = setting.maxLength || 1000;
         break;
-      case 'longtext':
-        input = document.createElement('textarea');
+      case "longtext":
+        input = document.createElement("textarea");
         input.value = setting.value;
         input.maxLength = setting.maxLength || 50000;
         input.rows = 5;
         break;
-      case 'number':
-        input = document.createElement('input');
-        input.type = 'number';
+      case "number":
+        input = document.createElement("input");
+        input.type = "number";
         input.value = setting.value;
         input.min = setting.min;
         input.max = setting.max;
         break;
-      case 'json':
-        input = document.createElement('textarea');
+      case "json":
+        input = document.createElement("textarea");
         input.value = JSON.stringify(setting.value, null, 2);
-        input.className = 'json-input';
+        input.className = "json-input";
         input.rows = 10;
         break;
     }
 
-    input.className = 'setting-input';
-    input.addEventListener('change', () => this.onSettingChange(key, input));
+    input.className = "setting-input";
+    input.addEventListener("change", () => this.onSettingChange(key, input));
 
     wrapper.appendChild(label);
     wrapper.appendChild(input);
@@ -527,28 +544,27 @@ class SettingsUI {
   async onSettingChange(key, input) {
     try {
       let value = input.value;
-      
+
       // Parse value based on type
       const setting = await this.settingsManager.getSetting(key);
-      
-      if (setting.type === 'boolean') {
+
+      if (setting.type === "boolean") {
         value = input.checked;
-      } else if (setting.type === 'number') {
+      } else if (setting.type === "number") {
         value = parseFloat(value);
-      } else if (setting.type === 'json') {
+      } else if (setting.type === "json") {
         value = JSON.parse(value);
       }
 
       await this.settingsManager.updateSetting(key, value);
       this.showSuccess(`${setting.description} updated successfully`);
-      
     } catch (error) {
       this.showError(`Error updating setting: ${error.message}`);
       // Revert input value
       const setting = await this.settingsManager.getSetting(key);
-      if (setting.type === 'boolean') {
+      if (setting.type === "boolean") {
         input.checked = setting.value;
-      } else if (setting.type === 'json') {
+      } else if (setting.type === "json") {
         input.value = JSON.stringify(setting.value, null, 2);
       } else {
         input.value = setting.value;
@@ -560,18 +576,17 @@ class SettingsUI {
   async exportSettings() {
     try {
       const settingsJson = await this.settingsManager.exportSettings();
-      
-      const blob = new Blob([settingsJson], { type: 'application/json' });
+
+      const blob = new Blob([settingsJson], { type: "application/json" });
       const url = URL.createObjectURL(blob);
-      
-      const a = document.createElement('a');
+
+      const a = document.createElement("a");
       a.href = url;
-      a.download = `extension-settings-${new Date().toISOString().split('T')[0]}.json`;
+      a.download = `extension-settings-${new Date().toISOString().split("T")[0]}.json`;
       a.click();
-      
+
       URL.revokeObjectURL(url);
-      this.showSuccess('Settings exported successfully');
-      
+      this.showSuccess("Settings exported successfully");
     } catch (error) {
       this.showError(`Export failed: ${error.message}`);
     }
@@ -579,36 +594,38 @@ class SettingsUI {
 
   // Import settings
   async importSettings() {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = '.json';
-    
-    input.addEventListener('change', async (event) => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = ".json";
+
+    input.addEventListener("change", async (event) => {
       const file = event.target.files[0];
       if (!file) return;
-      
+
       try {
         const content = await file.text();
         await this.settingsManager.importSettings(content);
         this.renderSettings();
-        this.showSuccess('Settings imported successfully');
-        
+        this.showSuccess("Settings imported successfully");
       } catch (error) {
         this.showError(`Import failed: ${error.message}`);
       }
     });
-    
+
     input.click();
   }
 
   // Reset to defaults
   async resetToDefaults() {
-    if (confirm('Are you sure you want to reset all settings to defaults? This cannot be undone.')) {
+    if (
+      confirm(
+        "Are you sure you want to reset all settings to defaults? This cannot be undone.",
+      )
+    ) {
       try {
         await this.settingsManager.resetToDefaults();
         this.renderSettings();
-        this.showSuccess('Settings reset to defaults');
-        
+        this.showSuccess("Settings reset to defaults");
       } catch (error) {
         this.showError(`Reset failed: ${error.message}`);
       }
@@ -617,23 +634,23 @@ class SettingsUI {
 
   // Show success message
   showSuccess(message) {
-    this.showMessage(message, 'success');
+    this.showMessage(message, "success");
   }
 
   // Show error message
   showError(message) {
-    this.showMessage(message, 'error');
+    this.showMessage(message, "error");
   }
 
   // Show message
   showMessage(message, type) {
-    const container = document.getElementById('message-container');
-    const messageEl = document.createElement('div');
+    const container = document.getElementById("message-container");
+    const messageEl = document.createElement("div");
     messageEl.className = `message ${type}`;
     messageEl.textContent = message;
-    
+
     container.appendChild(messageEl);
-    
+
     setTimeout(() => {
       container.removeChild(messageEl);
     }, 5000);
@@ -641,9 +658,15 @@ class SettingsUI {
 
   // Setup event listeners
   setupEventListeners() {
-    document.getElementById('export-btn').addEventListener('click', () => this.exportSettings());
-    document.getElementById('import-btn').addEventListener('click', () => this.importSettings());
-    document.getElementById('reset-btn').addEventListener('click', () => this.resetToDefaults());
+    document
+      .getElementById("export-btn")
+      .addEventListener("click", () => this.exportSettings());
+    document
+      .getElementById("import-btn")
+      .addEventListener("click", () => this.importSettings());
+    document
+      .getElementById("reset-btn")
+      .addEventListener("click", () => this.resetToDefaults());
   }
 
   // Setup auto-save
@@ -700,23 +723,24 @@ settings-extension/
   "name": "Settings Extension",
   "version": "1.0.0",
   "description": "Comprehensive settings management for browser extensions",
-  
-  "permissions": [
-    "storage",
-    "activeTab"
-  ],
-  
+
+  "permissions": ["storage", "activeTab"],
+
   "background": {
     "service_worker": "background.js"
   },
-  
+
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": ["lib/browser-compat.js", "lib/content-settings.js", "content-script.js"]
+      "js": [
+        "lib/browser-compat.js",
+        "lib/content-settings.js",
+        "content-script.js"
+      ]
     }
   ],
-  
+
   "action": {
     "default_popup": "popup/popup.html",
     "default_icon": {
@@ -725,18 +749,18 @@ settings-extension/
       "128": "icons/icon128.png"
     }
   },
-  
+
   "options_ui": {
     "page": "options/options.html",
     "open_in_tab": true
   },
-  
+
   "icons": {
     "16": "icons/icon16.png",
     "48": "icons/icon48.png",
     "128": "icons/icon128.png"
   },
-  
+
   "web_accessible_resources": [
     {
       "resources": ["config/defaults.json"],
@@ -750,7 +774,7 @@ settings-extension/
 
 ```javascript
 // Service worker for settings management
-importScripts('lib/browser-compat.js', 'lib/settings-manager.js');
+importScripts("lib/browser-compat.js", "lib/settings-manager.js");
 
 let settingsManager;
 
@@ -768,58 +792,58 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
 
   try {
     switch (message.type) {
-      case 'GET_SETTING':
+      case "GET_SETTING":
         const setting = await settingsManager.getSetting(message.key);
         sendResponse({ value: setting });
         break;
-        
-      case 'GET_SETTINGS':
+
+      case "GET_SETTINGS":
         const settings = await settingsManager.getSettings(message.keys);
         sendResponse({ values: settings });
         break;
-        
-      case 'GET_ALL_SETTINGS':
+
+      case "GET_ALL_SETTINGS":
         const allSettings = await settingsManager.getAllSettings();
         sendResponse({ settings: allSettings });
         break;
-        
-      case 'UPDATE_SETTING':
+
+      case "UPDATE_SETTING":
         await settingsManager.updateSetting(message.key, message.value);
         sendResponse({ success: true });
-        
+
         // Notify all content scripts of change
         chrome.tabs.query({}, (tabs) => {
-          tabs.forEach(tab => {
+          tabs.forEach((tab) => {
             chrome.tabs.sendMessage(tab.id, {
-              type: 'SETTINGS_CHANGED',
-              changes: { [message.key]: message.value }
+              type: "SETTINGS_CHANGED",
+              changes: { [message.key]: message.value },
             });
           });
         });
         break;
-        
-      case 'UPDATE_SETTINGS':
+
+      case "UPDATE_SETTINGS":
         await settingsManager.updateSettings(message.updates);
         sendResponse({ success: true });
-        
+
         // Notify all content scripts of changes
         chrome.tabs.query({}, (tabs) => {
-          tabs.forEach(tab => {
+          tabs.forEach((tab) => {
             chrome.tabs.sendMessage(tab.id, {
-              type: 'SETTINGS_CHANGED',
-              changes: message.updates
+              type: "SETTINGS_CHANGED",
+              changes: message.updates,
             });
           });
         });
         break;
-        
+
       default:
-        sendResponse({ error: 'Unknown message type' });
+        sendResponse({ error: "Unknown message type" });
     }
   } catch (error) {
     sendResponse({ error: error.message });
   }
-  
+
   return true; // Keep message channel open for async response
 });
 
@@ -970,7 +994,6 @@ npm run format        # Format with Prettier
 
 **3.1 Content Script API**
 
-
 - Implement ContentScriptSettings class
 - Create message passing system with background
 - Add change event listeners
@@ -979,7 +1002,6 @@ npm run format        # Format with Prettier
 - **Acceptance**: Content scripts can access and modify settings
 
 **3.2 Example Content Script**
-
 
 - Create comprehensive example showing all API features
 - Add performance monitoring and error handling
@@ -1135,29 +1157,30 @@ npm run format        # Format with Prettier
 **Settings Manager Tests**
 
 ```javascript
-describe('SettingsManager', () => {
-  test('should initialize with defaults', async () => {
+describe("SettingsManager", () => {
+  test("should initialize with defaults", async () => {
     const manager = new SettingsManager();
     await manager.initialize();
-    expect(manager.getSetting('feature_enabled')).toBe(true);
+    expect(manager.getSetting("feature_enabled")).toBe(true);
   });
-  
-  test('should validate boolean settings', async () => {
+
+  test("should validate boolean settings", async () => {
     const manager = new SettingsManager();
     await manager.initialize();
-    
-    await expect(manager.updateSetting('feature_enabled', 'invalid'))
-      .rejects.toThrow('must be a boolean');
+
+    await expect(
+      manager.updateSetting("feature_enabled", "invalid"),
+    ).rejects.toThrow("must be a boolean");
   });
-  
-  test('should handle large longtext settings', async () => {
+
+  test("should handle large longtext settings", async () => {
     const manager = new SettingsManager();
     await manager.initialize();
-    
-    const largeText = 'x'.repeat(10000);
-    await manager.updateSetting('custom_css', largeText);
-    
-    const retrieved = await manager.getSetting('custom_css');
+
+    const largeText = "x".repeat(10000);
+    await manager.updateSetting("custom_css", largeText);
+
+    const retrieved = await manager.getSetting("custom_css");
     expect(retrieved.value).toBe(largeText);
   });
 });
@@ -1166,17 +1189,18 @@ describe('SettingsManager', () => {
 **Content Script API Tests**
 
 ```javascript
-describe('ContentScriptSettings', () => {
-  test('should get settings from background', async () => {
+describe("ContentScriptSettings", () => {
+  test("should get settings from background", async () => {
     const settings = new ContentScriptSettings();
-    const value = await settings.getSetting('feature_enabled');
-    expect(typeof value).toBe('boolean');
+    const value = await settings.getSetting("feature_enabled");
+    expect(typeof value).toBe("boolean");
   });
-  
-  test('should handle message passing errors', async () => {
+
+  test("should handle message passing errors", async () => {
     const settings = new ContentScriptSettings();
-    await expect(settings.getSetting('nonexistent'))
-      .rejects.toThrow('Setting nonexistent not found');
+    await expect(settings.getSetting("nonexistent")).rejects.toThrow(
+      "Setting nonexistent not found",
+    );
   });
 });
 ```
@@ -1398,10 +1422,10 @@ class ExampleContentScript {
   async init() {
     // Load initial settings
     await this.loadSettings();
-    
+
     // Setup change listeners
     this.setupChangeListeners();
-    
+
     // Apply settings to page
     this.applySettings();
   }
@@ -1409,36 +1433,35 @@ class ExampleContentScript {
   async loadSettings() {
     try {
       // Get individual setting
-      const featureEnabled = await this.settings.getSetting('feature_enabled');
-      console.log('Feature enabled:', featureEnabled.value);
-      
+      const featureEnabled = await this.settings.getSetting("feature_enabled");
+      console.log("Feature enabled:", featureEnabled.value);
+
       // Get multiple settings
       const basicSettings = await this.settings.getSettings([
-        'feature_enabled',
-        'refresh_interval',
-        'api_key'
+        "feature_enabled",
+        "refresh_interval",
+        "api_key",
       ]);
-      console.log('Basic settings:', basicSettings);
-      
+      console.log("Basic settings:", basicSettings);
+
       // Get all settings
       const allSettings = await this.settings.getAllSettings();
-      console.log('All settings:', allSettings);
-      
+      console.log("All settings:", allSettings);
     } catch (error) {
-      console.error('Error loading settings:', error);
+      console.error("Error loading settings:", error);
     }
   }
 
   setupChangeListeners() {
     // Listen for settings changes
     this.settings.addChangeListener((changes) => {
-      console.log('Settings changed:', changes);
-      
+      console.log("Settings changed:", changes);
+
       // React to specific setting changes
       if (changes.custom_css) {
         this.updateCustomCSS(changes.custom_css);
       }
-      
+
       if (changes.feature_enabled) {
         this.toggleFeature(changes.feature_enabled);
       }
@@ -1447,17 +1470,17 @@ class ExampleContentScript {
 
   async applySettings() {
     const settings = await this.settings.getAllSettings();
-    
+
     // Apply custom CSS
     if (settings.custom_css && settings.custom_css.value) {
       this.updateCustomCSS(settings.custom_css.value);
     }
-    
+
     // Setup refresh interval
     if (settings.refresh_interval) {
       this.setupRefreshInterval(settings.refresh_interval.value);
     }
-    
+
     // Configure API endpoint
     if (settings.advanced_config) {
       this.configureAPI(settings.advanced_config.value);
@@ -1466,15 +1489,15 @@ class ExampleContentScript {
 
   updateCustomCSS(css) {
     // Remove existing custom styles
-    const existingStyles = document.getElementById('extension-custom-styles');
+    const existingStyles = document.getElementById("extension-custom-styles");
     if (existingStyles) {
       existingStyles.remove();
     }
-    
+
     // Add new custom styles
     if (css && css.trim()) {
-      const style = document.createElement('style');
-      style.id = 'extension-custom-styles';
+      const style = document.createElement("style");
+      style.id = "extension-custom-styles";
       style.textContent = css;
       document.head.appendChild(style);
     }
@@ -1490,13 +1513,13 @@ class ExampleContentScript {
 
   enableFeature() {
     // Enable main feature functionality
-    document.body.classList.add('extension-enabled');
+    document.body.classList.add("extension-enabled");
     this.setupFeatureListeners();
   }
 
   disableFeature() {
     // Disable main feature functionality
-    document.body.classList.remove('extension-enabled');
+    document.body.classList.remove("extension-enabled");
     this.removeFeatureListeners();
   }
 
@@ -1505,7 +1528,7 @@ class ExampleContentScript {
     if (this.refreshIntervalId) {
       clearInterval(this.refreshIntervalId);
     }
-    
+
     // Setup new interval
     this.refreshIntervalId = setInterval(() => {
       this.refreshContent();
@@ -1515,9 +1538,9 @@ class ExampleContentScript {
   configureAPI(config) {
     // Configure API settings
     this.apiConfig = {
-      endpoint: config.endpoint || 'https://api.example.com',
+      endpoint: config.endpoint || "https://api.example.com",
       timeout: config.timeout || 5000,
-      retries: config.retries || 3
+      retries: config.retries || 3,
     };
   }
 
@@ -1525,21 +1548,21 @@ class ExampleContentScript {
     // Refresh page content based on settings
     try {
       const response = await fetch(this.apiConfig.endpoint, {
-        timeout: this.apiConfig.timeout
+        timeout: this.apiConfig.timeout,
       });
-      
+
       if (response.ok) {
         const data = await response.json();
         this.updateContent(data);
       }
     } catch (error) {
-      console.error('Content refresh failed:', error);
+      console.error("Content refresh failed:", error);
     }
   }
 
   updateContent(data) {
     // Update page content with new data
-    const container = document.getElementById('content-container');
+    const container = document.getElementById("content-container");
     if (container) {
       container.innerHTML = `
         <div class="updated-content">
@@ -1552,26 +1575,26 @@ class ExampleContentScript {
 
   setupFeatureListeners() {
     // Setup feature-specific event listeners
-    document.addEventListener('click', this.handleClick.bind(this));
-    document.addEventListener('keydown', this.handleKeydown.bind(this));
+    document.addEventListener("click", this.handleClick.bind(this));
+    document.addEventListener("keydown", this.handleKeydown.bind(this));
   }
 
   removeFeatureListeners() {
     // Remove feature-specific event listeners
-    document.removeEventListener('click', this.handleClick.bind(this));
-    document.removeEventListener('keydown', this.handleKeydown.bind(this));
+    document.removeEventListener("click", this.handleClick.bind(this));
+    document.removeEventListener("keydown", this.handleKeydown.bind(this));
   }
 
   handleClick(event) {
     // Handle click events when feature is enabled
-    if (event.target.classList.contains('special-element')) {
+    if (event.target.classList.contains("special-element")) {
       this.processSpecialElement(event.target);
     }
   }
 
   handleKeydown(event) {
     // Handle keyboard shortcuts
-    if (event.ctrlKey && event.key === 'k') {
+    if (event.ctrlKey && event.key === "k") {
       event.preventDefault();
       this.showQuickSettings();
     }
@@ -1579,14 +1602,14 @@ class ExampleContentScript {
 
   processSpecialElement(element) {
     // Process special elements based on settings
-    element.classList.add('processed');
-    element.setAttribute('data-processed', new Date().toISOString());
+    element.classList.add("processed");
+    element.setAttribute("data-processed", new Date().toISOString());
   }
 
   async showQuickSettings() {
     // Show quick settings overlay
-    const overlay = document.createElement('div');
-    overlay.id = 'quick-settings-overlay';
+    const overlay = document.createElement("div");
+    overlay.id = "quick-settings-overlay";
     overlay.innerHTML = `
       <div class="quick-settings">
         <h3>Quick Settings</h3>
@@ -1600,32 +1623,38 @@ class ExampleContentScript {
         <button id="close-quick-settings">Close</button>
       </div>
     `;
-    
+
     document.body.appendChild(overlay);
-    
+
     // Load current settings
-    const featureEnabled = await this.settings.getSetting('feature_enabled');
-    const refreshInterval = await this.settings.getSetting('refresh_interval');
-    
-    document.getElementById('feature-toggle').checked = featureEnabled.value;
-    document.getElementById('refresh-input').value = refreshInterval.value;
-    
+    const featureEnabled = await this.settings.getSetting("feature_enabled");
+    const refreshInterval = await this.settings.getSetting("refresh_interval");
+
+    document.getElementById("feature-toggle").checked = featureEnabled.value;
+    document.getElementById("refresh-input").value = refreshInterval.value;
+
     // Setup event listeners
-    document.getElementById('save-quick-settings').addEventListener('click', async () => {
-      const enabled = document.getElementById('feature-toggle').checked;
-      const interval = parseInt(document.getElementById('refresh-input').value);
-      
-      await this.settings.updateSettings({
-        feature_enabled: enabled,
-        refresh_interval: interval
+    document
+      .getElementById("save-quick-settings")
+      .addEventListener("click", async () => {
+        const enabled = document.getElementById("feature-toggle").checked;
+        const interval = parseInt(
+          document.getElementById("refresh-input").value,
+        );
+
+        await this.settings.updateSettings({
+          feature_enabled: enabled,
+          refresh_interval: interval,
+        });
+
+        document.body.removeChild(overlay);
       });
-      
-      document.body.removeChild(overlay);
-    });
-    
-    document.getElementById('close-quick-settings').addEventListener('click', () => {
-      document.body.removeChild(overlay);
-    });
+
+    document
+      .getElementById("close-quick-settings")
+      .addEventListener("click", () => {
+        document.body.removeChild(overlay);
+      });
   }
 
   // Cleanup method
@@ -1633,10 +1662,10 @@ class ExampleContentScript {
     if (this.refreshIntervalId) {
       clearInterval(this.refreshIntervalId);
     }
-    
+
     this.removeFeatureListeners();
-    
-    const customStyles = document.getElementById('extension-custom-styles');
+
+    const customStyles = document.getElementById("extension-custom-styles");
     if (customStyles) {
       customStyles.remove();
     }
@@ -1647,7 +1676,7 @@ class ExampleContentScript {
 const exampleScript = new ExampleContentScript();
 
 // Cleanup on page unload
-window.addEventListener('beforeunload', () => {
+window.addEventListener("beforeunload", () => {
   exampleScript.destroy();
 });
 ```
@@ -1660,31 +1689,55 @@ window.addEventListener('beforeunload', () => {
 // Replaces WebExtension Polyfill to avoid minified code issues
 
 // Detect browser environment
-const isChrome = typeof chrome !== 'undefined' && chrome.runtime;
-const isFirefox = typeof browser !== 'undefined' && browser.runtime;
-const isEdge = isChrome && navigator.userAgent.includes('Edg');
+const isChrome = typeof chrome !== "undefined" && chrome.runtime;
+const isFirefox = typeof browser !== "undefined" && browser.runtime;
+const isEdge = isChrome && navigator.userAgent.includes("Edg");
 
 // Use native APIs with fallback detection
 const browserAPI = {
   storage: {
-    local: isChrome ? chrome.storage.local : (isFirefox ? browser.storage.local : null),
-    sync: isChrome ? chrome.storage.sync : (isFirefox ? browser.storage.sync : null)
+    local: isChrome
+      ? chrome.storage.local
+      : isFirefox
+        ? browser.storage.local
+        : null,
+    sync: isChrome
+      ? chrome.storage.sync
+      : isFirefox
+        ? browser.storage.sync
+        : null,
   },
   runtime: {
-    sendMessage: isChrome ? chrome.runtime.sendMessage : (isFirefox ? browser.runtime.sendMessage : null),
-    onMessage: isChrome ? chrome.runtime.onMessage : (isFirefox ? browser.runtime.onMessage : null)
+    sendMessage: isChrome
+      ? chrome.runtime.sendMessage
+      : isFirefox
+        ? browser.runtime.sendMessage
+        : null,
+    onMessage: isChrome
+      ? chrome.runtime.onMessage
+      : isFirefox
+        ? browser.runtime.onMessage
+        : null,
   },
   tabs: {
-    query: isChrome ? chrome.tabs.query : (isFirefox ? browser.tabs.query : null),
-    sendMessage: isChrome ? chrome.tabs.sendMessage : (isFirefox ? browser.tabs.sendMessage : null)
+    query: isChrome ? chrome.tabs.query : isFirefox ? browser.tabs.query : null,
+    sendMessage: isChrome
+      ? chrome.tabs.sendMessage
+      : isFirefox
+        ? browser.tabs.sendMessage
+        : null,
   },
   action: {
-    onClicked: isChrome ? chrome.action.onClicked : (isFirefox ? browser.action.onClicked : null)
-  }
+    onClicked: isChrome
+      ? chrome.action.onClicked
+      : isFirefox
+        ? browser.action.onClicked
+        : null,
+  },
 };
 
 // Export for use in other modules
-if (typeof module !== 'undefined' && module.exports) {
+if (typeof module !== "undefined" && module.exports) {
   module.exports = browserAPI;
 } else {
   window.browserAPI = browserAPI;

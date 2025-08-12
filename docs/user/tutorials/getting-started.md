@@ -15,6 +15,7 @@ This tutorial will guide you through installing and using the Settings Extension
 ## What You'll Learn
 
 By the end of this tutorial, you'll know how to:
+
 1. Install the Settings Extension
 2. Open and navigate the extension interface
 3. View and modify basic settings
@@ -70,24 +71,27 @@ If you're in a corporate environment, the extension may be pre-installed or avai
    - The main settings panel opens
    - Several buttons at the bottom for actions
 
-*Screenshot placeholder: [Extension popup showing main interface]*
+_Screenshot placeholder: [Extension popup showing main interface]_
 
 ### Understanding the Popup Interface
 
 The popup is divided into three main areas:
 
 **Header Section:**
+
 - Extension title "Settings"
 - Advanced settings button (gear icon)
 
 **Main Content Area:**
+
 - List of your configurable settings
 - Each setting shows its current value
 - Settings are grouped for easy navigation
 
 **Footer Actions:**
+
 - Export: Save settings to a file
-- Import: Load settings from a file  
+- Import: Load settings from a file
 - Reset: Restore default values
 
 ## Step 3: Viewing Your Settings
@@ -102,7 +106,7 @@ When you first open the extension, you'll see your current settings:
 4. **Refresh Interval**: Number field for timing settings
 5. **Advanced Config**: JSON object for complex configurations
 
-*Screenshot placeholder: [Settings list showing different setting types]*
+_Screenshot placeholder: [Settings list showing different setting types]_
 
 ### Understanding Setting Types
 
@@ -129,7 +133,7 @@ Let's modify a simple setting to get comfortable with the interface:
    - Notice the switch changes color/position immediately
    - The change is saved automatically
 
-*Screenshot placeholder: [Before and after shots of toggle being switched]*
+_Screenshot placeholder: [Before and after shots of toggle being switched]_
 
 ### Modifying the Refresh Interval
 
@@ -161,27 +165,32 @@ Let's modify a simple setting to get comfortable with the interface:
    - Main area displays settings for the selected category
    - "Save All Changes" button at the top right
 
-*Screenshot placeholder: [Advanced settings page showing tabbed interface]*
+_Screenshot placeholder: [Advanced settings page showing tabbed interface]_
 
 ### Exploring the Tabs
 
 **General Tab:**
+
 - Core functionality settings
 - Most commonly used options
 
 **Appearance Tab:**
+
 - Visual customization options
 - Styling and theme preferences
 
 **Advanced Tab:**
+
 - Power user features
 - Complex configuration options
 
 **Import/Export Tab:**
+
 - Backup and restore tools
 - File management features
 
 **About Tab:**
+
 - Extension information
 - Version details and support
 
@@ -190,11 +199,13 @@ Let's modify a simple setting to get comfortable with the interface:
 ### Auto-Save vs Manual Save
 
 **In the Popup:**
+
 - Changes save automatically as you make them
 - No additional action required
 - Changes take effect immediately
 
 **In Advanced Settings:**
+
 - Changes are held in memory until you save
 - "Save All Changes" button becomes enabled when changes are pending
 - Click "Save All Changes" to make changes permanent
@@ -210,18 +221,22 @@ To verify your changes were saved:
 ## Common First-Time Issues
 
 ### Extension Not Visible
+
 **Problem**: Can't find the extension icon
 **Solution**: Click the browser extensions menu and pin the Settings Extension
 
 ### Settings Not Saving
+
 **Problem**: Changes don't persist after closing
 **Solution**: Ensure you clicked "Save All Changes" in advanced settings
 
 ### Invalid Values
+
 **Problem**: Error messages when entering values
 **Solution**: Check the setting's requirements (min/max values, text length limits)
 
 ### Permission Issues
+
 **Problem**: Extension doesn't work on certain pages
 **Solution**: This is normal - some browser pages restrict extensions
 
@@ -230,17 +245,20 @@ To verify your changes were saved:
 Now that you're familiar with the basics, you can:
 
 ### Continue Learning (User Guides)
+
 1. **[Create Your First Backup](first-backup.md)** - Essential backup functionality
-2. **[Set Up Profiles](profile-setup.md)** - Managing multiple configurations 
+2. **[Set Up Profiles](profile-setup.md)** - Managing multiple configurations
 3. **[Explore Sync Features](../how-to/sync-settings.md)** - Cross-device synchronization
 4. **[Understand Security](../explanation/security.md)** - Privacy and data protection
 
 ### Advanced Integration (Developer Resources)
+
 5. **[Extension Development Guide](../../developer/guides/extension-development.md)** - Integrating with other extensions
 6. **[Settings Types Reference](../reference/settings-types.md)** - Complete API reference
 7. **[Cross-Browser Compatibility](../../developer/guides/cross-browser-testing.md)** - Browser differences
 
 ### Understanding the System (Architecture)
+
 8. **[System Goals](../../architecture/01-introduction-goals.md)** - Why the extension works this way
 9. **[Quality Requirements](../../architecture/10-quality-requirements.md)** - Performance promises
 
@@ -255,6 +273,7 @@ Now that you're familiar with the basics, you can:
 ## Troubleshooting
 
 If you encounter issues:
+
 1. Refresh your browser
 2. Disable and re-enable the extension
 3. Check for browser updates
@@ -268,6 +287,6 @@ If you encounter issues:
 
 ## Revision History
 
-| Date | Author | Changes |
-|------|--------|---------|
+| Date       | Author             | Changes                       |
+| ---------- | ------------------ | ----------------------------- |
 | 2025-08-11 | Documentation Team | Initial getting started guide |
