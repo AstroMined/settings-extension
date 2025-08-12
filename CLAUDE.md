@@ -15,8 +15,17 @@ npm run serve            # Serve built extension for testing
 npm test                 # Run all tests with Jest (80% coverage threshold)
 npm run test:watch       # Run tests in watch mode
 npm run test:coverage    # Generate detailed coverage report
-npm run test:chrome      # Test extension in Chrome browser
-npm run test:firefox     # Test extension in Firefox browser
+npm run test:e2e         # Run enhanced E2E tests with Playwright (recommended)
+npm run test:e2e:ui      # Run E2E tests with Playwright UI mode
+npm run test:chrome      # Test extension in Chrome browser (manual)
+npm run test:firefox     # Test extension in Firefox browser (manual)
+
+# Enhanced E2E Testing (Preferred for Extension Testing)
+npm run test:e2e -- --project=chromium    # Run E2E tests in Chrome only
+npm run test:e2e -- --project=firefox     # Run E2E tests in Firefox only
+npm run test:e2e -- --grep "popup"        # Run specific E2E test patterns
+npm run test:e2e -- --headed              # Run E2E tests in headed mode
+npm run test:e2e -- --debug               # Run E2E tests with debugging
 
 # Code Quality (run before commits)
 npm run lint             # Check code with ESLint
@@ -24,10 +33,12 @@ npm run lint:fix         # Auto-fix ESLint issues
 npm run format           # Format code with Prettier
 
 # CRITICAL: Before making message handling changes, see "Critical Manifest V3 Patterns" section below!
+# IMPORTANT: For reliable extension testing, use npm run test:e2e instead of manual browser testing
 
 # Single Test Examples
-npm test -- settings-manager.test.js                    # Run specific test file
-npm test -- --testNamePattern="should save settings"    # Run specific test by name
+npm test -- settings-manager.test.js                         # Run specific test file
+npm test -- --testNamePattern="should save settings"         # Run specific test by name
+npm run test:e2e -- --grep "popup opens and displays"       # Run specific E2E test
 ```
 
 ## Architecture Overview

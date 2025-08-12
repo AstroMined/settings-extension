@@ -599,47 +599,45 @@ class SettingsOptions {
   }
 
   setupEventListeners() {
-    document.addEventListener("DOMContentLoaded", () => {
-      // Navigation links
-      document.querySelectorAll(".nav-link").forEach((link) => {
-        link.addEventListener("click", (e) => {
-          e.preventDefault();
-          const tabName = link.dataset.tab;
-          if (tabName) {
-            this.showTab(tabName);
-          }
-        });
-      });
-
-      // Action buttons
-      document
-        .getElementById("save-all-btn")
-        .addEventListener("click", () => this.saveAllChanges());
-      document
-        .getElementById("export-btn")
-        .addEventListener("click", () => this.exportSettings());
-      document
-        .getElementById("import-btn")
-        .addEventListener("click", () => this.importSettings());
-      document
-        .getElementById("reset-btn")
-        .addEventListener("click", () => this.resetToDefaults());
-
-      // Keyboard shortcuts
-      document.addEventListener("keydown", (e) => {
-        if (e.ctrlKey || e.metaKey) {
-          switch (e.key) {
-            case "s":
-              e.preventDefault();
-              this.saveAllChanges();
-              break;
-            case "e":
-              e.preventDefault();
-              this.exportSettings();
-              break;
-          }
+    // Navigation links
+    document.querySelectorAll(".nav-link").forEach((link) => {
+      link.addEventListener("click", (e) => {
+        e.preventDefault();
+        const tabName = link.dataset.tab;
+        if (tabName) {
+          this.showTab(tabName);
         }
       });
+    });
+
+    // Action buttons
+    document
+      .getElementById("save-all-btn")
+      .addEventListener("click", () => this.saveAllChanges());
+    document
+      .getElementById("export-btn")
+      .addEventListener("click", () => this.exportSettings());
+    document
+      .getElementById("import-btn")
+      .addEventListener("click", () => this.importSettings());
+    document
+      .getElementById("reset-btn")
+      .addEventListener("click", () => this.resetToDefaults());
+
+    // Keyboard shortcuts
+    document.addEventListener("keydown", (e) => {
+      if (e.ctrlKey || e.metaKey) {
+        switch (e.key) {
+          case "s":
+            e.preventDefault();
+            this.saveAllChanges();
+            break;
+          case "e":
+            e.preventDefault();
+            this.exportSettings();
+            break;
+        }
+      }
     });
   }
 }
