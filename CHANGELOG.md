@@ -7,6 +7,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.1] - 2025-08-13
+
+### Added
+
+- **Complete examples directory rebuild** - Production-ready integration examples for Manifest V3
+- **Advanced documentation suite**:
+  - Comprehensive integration guide (INTEGRATION.md) with critical MV3 patterns
+  - Complete troubleshooting guide with systematic problem resolution
+  - Full API reference documentation with TypeScript definitions
+  - Performance optimization guide with enterprise-grade techniques
+- **Production JavaScript examples**:
+  - Advanced background script with MV3 service worker patterns and keep-alive mechanisms
+  - Minimal integration example (<50 lines) for quick setup
+  - Comprehensive usage examples covering all API methods
+  - Enterprise production patterns with health monitoring and circuit breakers
+  - Complete testing framework with mocks and performance benchmarks
+- **Sophisticated UI integration examples**:
+  - Advanced popup integration matching actual implementation patterns
+  - Comprehensive content script example with real-world feature integration
+  - Complete MV3 manifest template showing exact requirements
+
+### Changed
+
+- **Examples directory completely rebuilt** - All files updated to reflect current sophisticated architecture
+- **Documentation accuracy** - Examples now match the advanced MV3 implementation patterns
+- **Developer experience** - Clear progression from 5-minute basic to enterprise-grade integration
+- **Error prevention** - Examples show proper async/sync patterns to prevent "message port closed" errors
+
+### Fixed
+
+- **Outdated example patterns** - Replaced simple examples with sophisticated current implementation patterns
+- **Documentation accuracy** - All examples now reflect actual codebase capabilities and architecture
+- **Integration guidance** - Comprehensive troubleshooting and best practices documentation
+
 ## [1.1.0] - 2025-08-13
 
 ### Added
