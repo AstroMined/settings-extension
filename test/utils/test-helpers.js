@@ -82,7 +82,7 @@ function createMockStorage(initialData = {}, options = {}) {
       // Simulate Chrome's behavior of validating JSON serializability
       try {
         JSON.stringify(data);
-      } catch (e) {
+      } catch {
         throw new Error(
           "Invalid data: contains circular references or non-serializable values",
         );
@@ -416,7 +416,7 @@ async function testPerformance(testFunction, maxTime = 100, options = {}) {
   if (config.warmup && config.iterations > 1) {
     try {
       await testFunction();
-    } catch (e) {
+    } catch {
       // Ignore warmup errors
     }
   }

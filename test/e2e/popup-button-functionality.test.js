@@ -79,7 +79,7 @@ test.describe("Popup Button Functionality", () => {
           if (!resetResponse?.success) {
             await browserAPI.storage.local.clear();
           }
-        } catch (error) {
+        } catch {
           await browserAPI.storage.local.clear();
         }
       });
@@ -283,7 +283,7 @@ test.describe("Popup Button Functionality", () => {
             await checkPage.waitForSelector("#general-tab", { timeout: 5000 });
             break;
           }
-        } catch (error) {
+        } catch {
           // Page might be closed or not accessible, continue checking others
           continue;
         }

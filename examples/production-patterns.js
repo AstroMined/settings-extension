@@ -745,7 +745,7 @@ class EnterpriseSettingsManager {
     try {
       await this.settings.getSetting("feature_enabled");
       return true;
-    } catch (error) {
+    } catch {
       throw new Error("Storage not accessible");
     }
   }

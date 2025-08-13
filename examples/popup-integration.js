@@ -749,9 +749,8 @@ class AdvancedSettingsPopup {
           const content = await file.text();
 
           // Validate JSON structure
-          let parsedData;
           try {
-            parsedData = JSON.parse(content);
+            JSON.parse(content);
           } catch (e) {
             throw new Error(`Invalid JSON file: ${e.message}`);
           }
@@ -1064,6 +1063,7 @@ class AdvancedSettingsPopup {
  * Production-Ready HTML Template
  * Copy this to your popup.html for complete functionality
  */
+// eslint-disable-next-line no-unused-vars
 const ADVANCED_POPUP_HTML_TEMPLATE = `
 <!DOCTYPE html>
 <html lang="en">

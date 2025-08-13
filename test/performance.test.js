@@ -324,7 +324,7 @@ describe("Performance Tests", () => {
 
         try {
           await mockSyncStorage.set({ syncSetting: { value: "test" } });
-        } catch (error) {
+        } catch {
           // Fallback: try again or use different approach
           await mockSyncStorage.set({ syncSetting: { value: "test" } });
         }

@@ -139,7 +139,7 @@ class TestRunner {
           console.log("⚠️  Coverage below threshold (80%)\n");
         }
       }
-    } catch (error) {
+    } catch {
       console.log("⚠️  Could not parse coverage report\n");
     }
   }
