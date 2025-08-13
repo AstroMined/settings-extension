@@ -138,7 +138,8 @@ This project has **comprehensive documentation** organized in three complementar
 
 - [Local Setup Guide](docs/developer/workflows/local-setup.md) - Development environment setup
 - [Architecture Overview](docs/architecture/01-introduction-goals.md) - System understanding
-- [Testing Guide](docs/developer/workflows/testing-guide.md) - Testing procedures
+- [Testing Guide](docs/developer/workflows/testing-guide.md) - **Zero-tolerance testing standards**
+- [Testing Decision Matrix](docs/developer/conventions/testing-decision-matrix.md) - **Unit vs E2E test boundaries**
 - [Settings API Reference](docs/user/reference/settings-types.md) - Complete settings documentation
 
 ## Settings Schema & Key Concepts
@@ -158,12 +159,14 @@ This project has **comprehensive documentation** organized in three complementar
 
 **Browser Compatibility**: Custom layer in `lib/browser-compat.js` handles Chrome/Firefox API differences without polyfills.
 
-**Testing Approach**: Jest + jsdom with multi-project config:
+**Testing Standards**: **ZERO TOLERANCE for failing tests**. All tests must pass 100% before any PR merge.
 
-- Unit tests (core functionality)
-- Integration tests (storage operations)
-- Performance tests (load times)
-- Cross-browser testing (Chrome/Firefox)
+- **Unit tests**: Pure functions only (validation, utilities) - see [Testing Decision Matrix](docs/developer/conventions/testing-decision-matrix.md)
+- **E2E tests**: Browser integration (storage, DOM, workflows) - uses Playwright with real browser instances  
+- **No integration tests**: Avoid over-mocked middle-ground that leads to flaky tests
+- **Enforcement**: Failing tests indicate either bad tests or bugs - no third option
+
+**→ See [Testing Guide](docs/developer/workflows/testing-guide.md) for complete standards**
 
 **Build System**: Simple file copying via `scripts/build.js` - no bundling or transpilation. Firefox build uses different manifest.
 
