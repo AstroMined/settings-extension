@@ -12,8 +12,8 @@ test.describe("Popup Button Functionality", () => {
   let extensionId;
   let serviceWorker;
 
-  test.beforeAll(async ({ page: _page }, testInfo) => {
-    // Note: page parameter required by Playwright destructuring pattern
+  // eslint-disable-next-line no-empty-pattern
+  test.beforeAll(async ({}, testInfo) => {
     console.log(
       `Test setup for project: ${testInfo?.project?.name || "default"}`,
     );

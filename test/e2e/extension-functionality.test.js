@@ -64,9 +64,9 @@ test.describe("Browser Extension Functionality", () => {
   let extensionId;
   let serviceWorker;
 
-  test.beforeAll(async ({ page: _page }, testInfo) => {
+  // eslint-disable-next-line no-empty-pattern
+  test.beforeAll(async ({}, testInfo) => {
     try {
-      // Note: page parameter required by Playwright destructuring pattern
       console.log(
         `Test setup for project: ${testInfo?.project?.name || "default"}`,
       );
