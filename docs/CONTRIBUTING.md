@@ -1,8 +1,14 @@
 # Contributing to Settings Extension
 
-## Welcome!
+## Executive Summary
 
 Thank you for your interest in contributing to the Settings Extension project! We welcome contributions from developers of all skill levels and backgrounds. This guide will help you get started and ensure your contributions can be integrated smoothly.
+
+## Scope
+
+- **Applies to**: All contributors to the Settings Extension project
+- **Last Updated**: 2025-08-13
+- **Status**: Approved
 
 ## Quick Start
 
@@ -615,7 +621,7 @@ We use these labels to categorize issues:
 **For Users**:
 
 - Check [user documentation](user/README.md)
-- Look at [troubleshooting guides](user/how-to/troubleshooting.md)
+- Look at [troubleshooting guides](developer/guides/troubleshooting.md)
 - Search existing issues
 - Create new issue if problem persists
 
@@ -713,6 +719,29 @@ By contributing to this project, you agree that your contributions will be licen
 Your contributions make this project better for everyone. Whether you're fixing bugs, adding features, improving documentation, or helping other users, your efforts are appreciated and valued.
 
 Welcome to the Settings Extension community! 🎉
+
+## References
+
+- [Complete Documentation Hub](README.md) - Main navigation and documentation map
+- [Developer Documentation](developer/README.md) - Complete developer guides
+- [User Documentation](user/README.md) - End-user guides and references
+- [Architecture Documentation](architecture/README.md) - System design and structure
+- [Documentation Map](DOCUMENTATION-MAP.md) - Cross-reference relationships and navigation paths
+- [Chrome Extension Documentation](https://developer.chrome.com/docs/extensions/)
+- [Firefox WebExtension APIs](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions)
+- [JavaScript Testing with Jest](https://jestjs.io/docs/getting-started)
+- [Git Documentation](https://git-scm.com/doc)
+- [Node.js Installation](https://nodejs.org/en/download/)
+- [VS Code](https://code.visualstudio.com/) with recommended extensions
+- [Chrome for Developers](https://www.google.com/chrome/dev/)
+- [Firefox Developer Edition](https://www.mozilla.org/en-US/firefox/developer/)
+
+## Revision History
+
+| Date       | Author             | Changes                                        |
+| ---------- | ------------------ | ---------------------------------------------- |
+| 2025-08-13 | Documentation Team | Initial contributing guide                     |
+| 2025-08-13 | Documentation Team | Added References and Revision History sections |
 
 ---
 

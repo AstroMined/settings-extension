@@ -587,6 +587,13 @@ For advanced users and those integrating the extension:
 - **[Testing Guide](../../developer/workflows/testing-guide.md)** - How concepts are validated in testing
 - **[Performance Profiling](../../developer/guides/performance-profiling.md)** - Performance implications of these concepts
 
+## References
+
+- [Browser Extension Architecture](https://developer.chrome.com/docs/extensions/mv3/architecture-overview/)
+- [Web Storage APIs](https://developer.mozilla.org/en-US/docs/Web/API/Web_Storage_API)
+- [JSON Schema Validation](https://json-schema.org/)
+- [Data Synchronization Patterns](https://docs.microsoft.com/en-us/azure/architecture/patterns/event-sourcing)
+
 ## Revision History
 
 | Date       | Author             | Changes                           |

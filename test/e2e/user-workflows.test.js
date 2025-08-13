@@ -9,7 +9,6 @@ const path = require("path");
 // Removed complex helper functions - using launchPersistentContext approach
 
 test.describe("End-to-End User Workflows", () => {
-  let browser;
   let context;
   let extensionId;
 
@@ -70,35 +69,41 @@ test.describe("End-to-End User Workflows", () => {
    */
   test.beforeEach(async () => {
     const resetPage = await context.newPage();
-    
+
     try {
       console.log("Resetting extension storage to defaults...");
-      await resetPage.goto(`chrome-extension://${extensionId}/popup/popup.html`);
-      
+      await resetPage.goto(
+        `chrome-extension://${extensionId}/popup/popup.html`,
+      );
+
       // Wait for extension to initialize
       await resetPage.waitForTimeout(2000);
-      
+
       // Reset storage using the extension's message passing system
       await resetPage.evaluate(async () => {
         try {
           // Use the same communication pattern as the popup
           console.log("Sending reset message to background script...");
-          
-          const resetResponse = await browserAPI.runtime.sendMessage({ 
-            type: "RESET_SETTINGS" 
+
+          const resetResponse = await browserAPI.runtime.sendMessage({
+            type: "RESET_SETTINGS",
           });
-          
+
           if (resetResponse && resetResponse.success) {
-            console.log("Storage reset completed successfully via background script");
+            console.log(
+              "Storage reset completed successfully via background script",
+            );
           } else {
-            console.warn("Reset message failed, attempting direct storage clear");
+            console.warn(
+              "Reset message failed, attempting direct storage clear",
+            );
             // Fallback: Clear storage directly
             await browserAPI.storage.local.clear();
             console.log("Storage cleared via direct API call");
           }
         } catch (error) {
           console.warn("Reset via message passing failed:", error.message);
-          
+
           // Final fallback: Clear storage directly
           try {
             await browserAPI.storage.local.clear();
@@ -108,36 +113,43 @@ test.describe("End-to-End User Workflows", () => {
           }
         }
       });
-      
+
       // Wait for reset to complete and settings to reinitialize
       await resetPage.waitForTimeout(2000);
-      
+
       // Verify the reset was successful by requesting settings from background script
       const verificationResult = await resetPage.evaluate(async () => {
         try {
-          const settingsResponse = await browserAPI.runtime.sendMessage({ 
-            type: "GET_ALL_SETTINGS" 
+          const settingsResponse = await browserAPI.runtime.sendMessage({
+            type: "GET_ALL_SETTINGS",
           });
-          
+
           if (settingsResponse && settingsResponse.settings) {
             const settingsCount = Object.keys(settingsResponse.settings).length;
-            console.log(`Storage reset verification: ${settingsCount} settings loaded`);
+            console.log(
+              `Storage reset verification: ${settingsCount} settings loaded`,
+            );
             return { success: true, settingsCount };
           } else {
-            return { success: false, error: "No settings returned from background script" };
+            return {
+              success: false,
+              error: "No settings returned from background script",
+            };
           }
         } catch (error) {
           console.warn("Settings verification failed:", error.message);
           return { success: false, error: error.message };
         }
       });
-      
+
       if (verificationResult.success) {
         console.log("Storage reset verification passed");
       } else {
-        console.warn("Storage reset verification failed:", verificationResult.error);
+        console.warn(
+          "Storage reset verification failed:",
+          verificationResult.error,
+        );
       }
-      
     } catch (error) {
       console.error("Failed to reset extension storage:", error);
       // Don't fail the test setup, but log the issue
@@ -215,25 +227,25 @@ test.describe("End-to-End User Workflows", () => {
         await expect(textInput).toHaveValue(newValue);
 
         // Click the save button to persist changes to storage
-        const saveButton = page.locator('#save-all-btn');
+        const saveButton = page.locator("#save-all-btn");
         await expect(saveButton).toBeEnabled();
         await saveButton.click();
-        
+
         // Wait for save operation to complete and success message to appear
-        await page.waitForSelector('.message.success', { timeout: 5000 });
-        
+        await page.waitForSelector(".message.success", { timeout: 5000 });
+
         // Verify save button is disabled after successful save
         await expect(saveButton).toBeDisabled();
-        
+
         // Wait for the save operation to complete
         await page.waitForTimeout(1000);
 
         // Navigate away and back to verify persistence
         await page.reload();
-        
+
         // Wait for the page to fully reload and settings to load
         await page.waitForTimeout(2000);
-        
+
         await expect(textInput).toHaveValue(newValue);
 
         // Restore original value
@@ -262,22 +274,22 @@ test.describe("End-to-End User Workflows", () => {
         }
 
         // Click the save button to persist all changes to storage
-        const saveButton = page.locator('#save-all-btn');
+        const saveButton = page.locator("#save-all-btn");
         await expect(saveButton).toBeEnabled();
         await saveButton.click();
-        
+
         // Wait for save operation to complete and success message to appear
-        await page.waitForSelector('.message.success', { timeout: 5000 });
-        
+        await page.waitForSelector(".message.success", { timeout: 5000 });
+
         // Verify save button is disabled after successful save
         await expect(saveButton).toBeDisabled();
-        
+
         // Wait for the save operation to complete
         await page.waitForTimeout(1000);
 
         // Verify all changes persisted
         await page.reload();
-        
+
         // Wait for the page to fully reload and settings to load
         await page.waitForTimeout(2000);
 
@@ -335,7 +347,7 @@ test.describe("End-to-End User Workflows", () => {
 
       if (await importButton.isVisible()) {
         // Create a test settings file
-        const testSettings = {
+        const testSettingsForImport = {
           version: "1.0",
           timestamp: new Date().toISOString(),
           settings: {
@@ -349,6 +361,10 @@ test.describe("End-to-End User Workflows", () => {
 
         // This test would need file upload functionality
         // For now, just verify the import button exists
+        console.log(
+          "Import test settings ready:",
+          Object.keys(testSettingsForImport),
+        );
         await expect(importButton).toBeVisible();
       }
 
@@ -427,7 +443,7 @@ test.describe("End-to-End User Workflows", () => {
       await page.goto("https://example.com");
 
       // Inject test script that uses content script API
-      const apiAvailable = await page.evaluate(() => {
+      await page.evaluate(() => {
         return typeof window.ContentScriptSettings !== "undefined";
       });
 
@@ -519,8 +535,11 @@ test.describe("End-to-End User Workflows", () => {
     test("should restore settings after browser restart", async () => {
       // Skip this test as it requires complex browser context recreation
       // that's better handled in integration tests
-      test.skip(true, 'Browser restart simulation requires persistent storage testing approach');
-      
+      test.skip(
+        true,
+        "Browser restart simulation requires persistent storage testing approach",
+      );
+
       /*
       // This test would need to be restructured to properly handle
       // browser context recreation with extension reloading
@@ -542,20 +561,23 @@ test.describe("End-to-End User Workflows", () => {
 
     test("should handle extension update during restart", async () => {
       const page = await context.newPage();
-      
+
       try {
         await page.goto(`chrome-extension://${extensionId}/popup/popup.html`);
 
         // Wait for extension to initialize
         await Promise.race([
-          page.waitForSelector("#settings-container", { state: "visible", timeout: 15000 }),
-          page.waitForSelector("#loading", { state: "hidden", timeout: 15000 })
+          page.waitForSelector("#settings-container", {
+            state: "visible",
+            timeout: 15000,
+          }),
+          page.waitForSelector("#loading", { state: "hidden", timeout: 15000 }),
         ]);
 
         // Test extension update scenarios
         // Verify extension loads properly after potential updates
         await expect(page.locator("#settings-container")).toBeVisible();
-        
+
         console.log("Extension update handling test passed");
       } finally {
         await page.close();

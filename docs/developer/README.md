@@ -127,6 +127,14 @@ settings-extension/
 - **[API Design Conventions](conventions/api-design.md)** - API consistency standards
 - **[Git Workflow](conventions/git-workflow.md)** - Branching and commit standards
 
+## References
+
+- [Chrome Extension Development](https://developer.chrome.com/docs/extensions/)
+- [Firefox WebExtensions](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions)
+- [Node.js Development Guide](https://nodejs.org/en/docs/guides/)
+- [Jest Testing Framework](https://jestjs.io/docs/getting-started)
+- [ESLint Configuration](https://eslint.org/docs/user-guide/)
+
 ## Revision History
 
 | Date       | Author         | Changes                                   |

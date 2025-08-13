@@ -313,7 +313,7 @@ These goals shape development practices:
 - **[Extension Development](../developer/guides/extension-development.md)** - Using the architectural patterns
 - **[Performance Profiling](../developer/guides/performance-profiling.md)** - Measuring quality goal achievement
 
-## External References
+## References
 
 - [Chrome Extensions Manifest V3](https://developer.chrome.com/docs/extensions/mv3/)
 - [Firefox WebExtensions](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions)

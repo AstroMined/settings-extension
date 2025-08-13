@@ -7,46 +7,54 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.0] - 2025-08-13
+
 ### Added
 
-- Initial project structure
-- Comprehensive MCD documentation
-- Cross-browser compatibility framework
-- Settings management core functionality
-- Export/import capabilities
-- Content script API
+- Comprehensive architecture documentation with diagrams covering:
+  - API integration patterns
+  - Browser compatibility layer
+  - Component interactions and message passing
+  - Error handling strategies
+  - Settings flow and storage architecture
+  - User workflow documentation
+- Enhanced E2E testing framework with Playwright
+- New popup button functionality test suite
+- Production-ready integration patterns and examples
+- Detailed troubleshooting guide for common issues
+- Cross-browser testing improvements
 
 ### Changed
 
-- Updated MCD for internal company use (250-300 users)
-- Replaced WebExtension Polyfill with native browser APIs
-- Updated cross-browser support for Chrome, Edge, and Firefox
-- Simplified deployment process for internal distribution via Slack
-- Updated support model from IT service desk to Slack channel
-- Streamlined build process to local development only
-- Replaced automated CI/CD pipeline with simple ZIP distribution
-
-### Deprecated
-
-- N/A
-
-### Removed
-
-- Chrome Web Store and Firefox Add-ons deployment references
-- WebExtension Polyfill dependency (minified code)
-- Automated build pipeline and GitHub Actions workflows
-- Complex npm scripts and build tooling
-- External analytics and user adoption tracking
-- Store compatibility testing requirements
+- **Major browser compatibility layer refactor** (745 changes in `lib/browser-compat.js`)
+  - Improved Chrome/Firefox API handling
+  - Enhanced error handling and fallback mechanisms
+  - Better memory management and performance
+- **Service worker architecture improvements** (144 changes in `background.js`)
+  - Enhanced message routing and handling
+  - Improved storage operations and caching
+  - Better error recovery and logging
+- **UI and UX enhancements** in popup functionality
+  - Improved user interaction handling
+  - Better visual feedback and error states
+  - Enhanced accessibility features
+- Documentation restructure using arc42 framework for architecture docs
+- Enhanced developer workflow documentation
+- Improved testing guide with specific E2E procedures
 
 ### Fixed
 
-- N/A
+- Browser compatibility issues across Chrome/Firefox
+- Message passing reliability in Manifest V3 service workers
+- Popup functionality and button interactions
+- Storage operation error handling
+- Performance optimizations for content script operations
 
 ### Security
 
-- Eliminated minified code to ensure fast Firefox security review
-- Added unminified browser-compat.js for cross-browser compatibility
+- Enhanced error handling to prevent information disclosure
+- Improved input validation in settings operations
+- Better isolation of browser-specific code paths
 
 ## [1.0.0] - 2025-01-XX
 

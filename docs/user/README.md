@@ -122,6 +122,13 @@ Help improve the extension and its documentation:
 - **[Bug Reporting Guide](../developer/guides/bug-reporting.md)** - Reporting issues effectively
 - **[Documentation Hub](../README.md)** - Main documentation navigation
 
+## References
+
+- [Chrome Extension User Guide](https://support.google.com/chrome_webstore/answer/2664769)
+- [Firefox Add-ons User Guide](https://support.mozilla.org/en-US/kb/find-and-install-add-ons-add-features-to-firefox)
+- [Browser Extension Security](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/Security_best_practices)
+- [Data Privacy Guidelines](https://www.mozilla.org/en-US/privacy/principles/)
+
 ## Revision History
 
 | Date       | Author             | Changes                              |

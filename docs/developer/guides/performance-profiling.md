@@ -804,6 +804,13 @@ const performanceMonitor = new PerformanceMonitor();
 - **[Sync Mechanism Explanation](../../user/explanation/sync-mechanism.md)** - User-facing performance implications
 - **[Settings Types Reference](../../user/reference/settings-types.md)** - Performance characteristics of different setting types
 
+## References
+
+- [Chrome DevTools Performance](https://developer.chrome.com/docs/devtools/performance/)
+- [Firefox Developer Tools Performance](https://developer.mozilla.org/en-US/docs/Tools/Performance)
+- [Web Performance APIs](https://developer.mozilla.org/en-US/docs/Web/API/Performance_API)
+- [Extension Performance Best Practices](https://developer.chrome.com/docs/extensions/mv3/devguide/)
+
 ## Revision History
 
 | Date       | Author           | Changes                             |

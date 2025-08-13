@@ -217,7 +217,7 @@ Always use relative paths for internal documentation links:
 ```markdown
 <!-- Correct: Relative paths -->
 
-[Architecture Overview](../architecture/01-introduction-goals.md)
+[Architecture Overview](../../architecture/01-introduction-goals.md)
 [User Guide](../../user/README.md)
 [Testing Guide](../workflows/testing-guide.md)
 
@@ -233,7 +233,7 @@ Provide meaningful link text and context:
 ```markdown
 <!-- Good: Descriptive and contextual -->
 
-For implementation details, see the [Building Blocks View](../architecture/05-building-blocks.md)
+For implementation details, see the [Building Blocks View](../../architecture/05-building-blocks.md)
 which explains the component structure.
 
 For troubleshooting deployment issues, consult the
@@ -241,7 +241,7 @@ For troubleshooting deployment issues, consult the
 
 <!-- Poor: Generic link text -->
 
-Click [here](../architecture/05-building-blocks.md) for more information.
+Click [Building Blocks View](../../architecture/05-building-blocks.md) for more information.
 See [this guide](../guides/troubleshooting.md) for help.
 ```
 
@@ -253,12 +253,12 @@ Related documents should link to each other:
 <!-- In architecture document -->
 
 For the user perspective of these architectural concepts, see
-[Core Concepts](../user/explanation/concepts.md).
+[Core Concepts](../../user/explanation/concepts.md).
 
 <!-- In user document -->
 
 For technical implementation details, see
-[Architecture Overview](../architecture/01-introduction-goals.md).
+[Architecture Overview](../../architecture/01-introduction-goals.md).
 ```
 
 ### Cross-Reference Patterns
@@ -635,6 +635,14 @@ jobs:
 
 - **[Code Review Guide](../guides/code-review.md)** - Documentation review as part of code review
 - **[Contributing Guidelines](../../CONTRIBUTING.md)** - Overall contribution process including documentation
+
+## References
+
+- [Documentation Standards](../../.documentation-standards.md) - Organization principles
+- [arc42 Documentation Template](https://arc42.org/)
+- [Diátaxis Documentation System](https://diataxis.fr/)
+- [Technical Writing Guidelines](https://developers.google.com/tech-writing)
+- [Markdown Guide](https://www.markdownguide.org/)
 
 ## Revision History
 

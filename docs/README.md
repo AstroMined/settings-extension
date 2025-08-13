@@ -10,6 +10,12 @@ Our documentation follows a structured approach combining three complementary fr
 - **[User Documentation](user/)** - End-user guides using Diátaxis framework
 - **[Developer Documentation](developer/)** - Practical workflow guides for contributors
 
+## Scope
+
+- **Applies to**: Complete Settings Extension documentation structure and navigation
+- **Last Updated**: 2025-08-13
+- **Status**: Approved
+
 ## Quick Navigation by Role
 
 ### 🎯 I want to use the Settings Extension
@@ -310,7 +316,15 @@ The Settings Extension is a comprehensive Manifest V3 browser extension framewor
 - Support burden remains manageable through self-service docs
 - Architecture decisions are clearly documented and justified
 
-## External Resources
+## References
+
+### Internal Documentation
+
+- [Architecture Documentation](architecture/) - Technical design using arc42 framework
+- [User Documentation](user/) - End-user guides using Diátaxis framework
+- [Developer Documentation](developer/) - Practical workflow guides for contributors
+- [Documentation Standards](.documentation-standards.md) - Documentation organization approach
+- [Documentation Map](DOCUMENTATION-MAP.md) - Cross-reference relationships and navigation paths
 
 ### Browser Extension Development
 

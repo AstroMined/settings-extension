@@ -588,18 +588,18 @@ class ContentScriptSettings {
 
 These components are implemented using guidance from:
 
-- **[Extension Development Guide](../../developer/guides/extension-development.md)** - Practical implementation of these building blocks
-- **[Local Setup Guide](../../developer/workflows/local-setup.md)** - Development environment for working with these components
-- **[Testing Guide](../../developer/workflows/testing-guide.md)** - Testing procedures for each component
-- **[Debugging Guide](../../developer/workflows/debugging-guide.md)** - Debugging techniques for component interactions
+- **[Extension Development Guide](../developer/guides/extension-development.md)** - Practical implementation of these building blocks
+- **[Local Setup Guide](../developer/workflows/local-setup.md)** - Development environment for working with these components
+- **[Testing Guide](../developer/workflows/testing-guide.md)** - Testing procedures for each component
+- **[Debugging Guide](../developer/workflows/debugging-guide.md)** - Debugging techniques for component interactions
 
 ### User-Facing Implementation
 
 These building blocks create the user experience described in:
 
-- **[Settings Types Reference](../../user/reference/settings-types.md)** - User-facing API implemented by these components
-- **[Core Concepts](../../user/explanation/concepts.md)** - User mental models these components support
-- **[Getting Started Guide](../../user/tutorials/getting-started.md)** - User workflows enabled by this architecture
+- **[Settings Types Reference](../user/reference/settings-types.md)** - User-facing API implemented by these components
+- **[Core Concepts](../user/explanation/concepts.md)** - User mental models these components support
+- **[Getting Started Guide](../user/tutorials/getting-started.md)** - User workflows enabled by this architecture
 
 ### Architecture Context
 
@@ -613,6 +613,14 @@ These building blocks create the user experience described in:
 - **[Chrome Extension Architecture](https://developer.chrome.com/docs/extensions/mv3/architecture-overview/)** - Browser extension architectural patterns
 - **[Component-Based Architecture](https://www.componentdriven.org/)** - General component architecture principles
 - **[Layered Architecture Pattern](https://www.oreilly.com/library/view/software-architecture-patterns/9781491971437/ch01.html)** - Layered architecture design
+
+## References
+
+- [Chrome Extension Architecture](https://developer.chrome.com/docs/extensions/mv3/architecture-overview/)
+- [Component-Based Architecture](https://www.componentdriven.org/)
+- [Layered Architecture Pattern](https://www.oreilly.com/library/view/software-architecture-patterns/9781491971437/ch01.html)
+- [Manifest V3 Service Workers](https://developer.chrome.com/docs/extensions/mv3/service-workers/)
+- [Browser Storage APIs](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/storage)
 
 ## Revision History
 

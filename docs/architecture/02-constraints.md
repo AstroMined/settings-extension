@@ -329,6 +329,30 @@ Some constraints may change over time:
 - **Policy Changes**: Web store policies continue to evolve
 - **Technology Maturity**: Better tooling may reduce technical constraints
 
+## Related Documentation
+
+### User-Facing Impact
+
+These architectural constraints directly impact user experience and security, as explained in:
+
+- **[Security & Privacy Guide](../user/explanation/security.md)** - User understanding of security constraints and their benefits
+- **[Configuration Options](../user/reference/configuration.md)** - User-configurable settings limited by these constraints
+- **[Getting Started Guide](../user/tutorials/getting-started.md)** - Installation and setup procedures reflecting platform constraints
+
+### Implementation Context
+
+These constraints shape development practices described in:
+
+- **[Extension Development Guide](../developer/guides/extension-development.md)** - Development patterns constrained by browser limitations
+- **[Cross-Browser Testing](../developer/guides/cross-browser-testing.md)** - Testing approaches for platform compatibility constraints
+- **[Coding Standards](../developer/conventions/coding-standards.md)** - Code patterns required by security constraints
+
+### Architecture Context
+
+- **[Solution Strategy](04-solution-strategy.md)** - High-level approaches for working within these constraints
+- **[Building Blocks](05-building-blocks.md)** - Components designed around constraint limitations
+- **[Architecture Decisions](09-architecture-decisions/)** - Specific technical choices made due to constraints
+
 ## References
 
 - [Chrome Extension Manifest V3](https://developer.chrome.com/docs/extensions/mv3/)

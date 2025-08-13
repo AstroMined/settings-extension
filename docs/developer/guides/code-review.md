@@ -477,6 +477,13 @@ npm run test:performance
 - **[Quality Requirements](../../architecture/10-quality-requirements.md)** - Quality attributes and targets
 - **[Architecture Decisions](../../architecture/09-architecture-decisions/)** - Technical decision context
 
+## References
+
+- [GitHub Code Review Guidelines](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/reviewing-changes-in-pull-requests)
+- [Best Practices for Code Review](https://google.github.io/eng-practices/review/)
+- [The Art of Readable Code](https://www.oreilly.com/library/view/the-art-of/9781449318482/)
+- [Effective Code Reviews](https://www.ibm.com/developerworks/rational/library/11-proven-practices-for-peer-review/)
+
 ## Revision History
 
 | Date       | Author           | Changes                   |

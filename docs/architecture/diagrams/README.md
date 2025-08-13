@@ -48,20 +48,20 @@ Extension deployment and runtime environment:
 
 ### Component Architecture
 
-- **[component-interactions.md](component-interactions.md)** - C4 Level 3: Detailed component view
-- **[settings-flow.md](settings-flow.md)** - Settings operation sequence diagrams
-- **[message-passing.md](message-passing.md)** - Inter-component communication flows
+- **[component-interactions.md](component-interactions.md)** - C4 Level 3: Detailed component view *(Draft - Placeholder)*
+- **[settings-flow.md](settings-flow.md)** - Settings operation sequence diagrams *(Draft - Placeholder)*
+- **[message-passing.md](message-passing.md)** - Inter-component communication flows *(Draft - Placeholder)*
 
 ### Runtime Views
 
-- **[user-workflows.md](user-workflows.md)** - User interaction sequences
-- **[error-handling.md](error-handling.md)** - Error scenario handling
-- **[browser-compatibility.md](browser-compatibility.md)** - Cross-browser operation flows
+- **[user-workflows.md](user-workflows.md)** - User interaction sequences *(Draft - Placeholder)*
+- **[error-handling.md](error-handling.md)** - Error scenario handling *(Draft - Placeholder)*
+- **[browser-compatibility.md](browser-compatibility.md)** - Cross-browser operation flows *(Draft - Placeholder)*
 
 ### Technical Details
 
-- **[storage-architecture.md](storage-architecture.md)** - Storage system design
-- **[api-integration.md](api-integration.md)** - Browser API integration patterns
+- **[storage-architecture.md](storage-architecture.md)** - Storage system design *(Draft - Placeholder)*
+- **[api-integration.md](api-integration.md)** - Browser API integration patterns *(Draft - Placeholder)*
 
 ## Diagram Standards
 
@@ -178,14 +178,18 @@ Export as PNG/SVG and commit both source and rendered versions.
 
 ## Cross-Reference Guide
 
-| Diagram                                                | Related Architecture Documentation          | Purpose                                  |
-| ------------------------------------------------------ | ------------------------------------------- | ---------------------------------------- |
-| [system-context.md](system-context.md)                 | [System Context](../03-context.md)          | Show extension in browser ecosystem      |
-| [container-overview.md](container-overview.md)         | [Building Blocks](../05-building-blocks.md) | Visualize major components               |
-| [component-interactions.md](component-interactions.md) | [Building Blocks](../05-building-blocks.md) | Detail component relationships           |
-| [settings-flow.md](settings-flow.md)                   | [Runtime View](../06-runtime-view.md)       | Show settings operation flows            |
-| [message-passing.md](message-passing.md)               | [Runtime View](../06-runtime-view.md)       | Illustrate inter-component communication |
-| [user-workflows.md](user-workflows.md)                 | [User Documentation](../../user/)           | Map user interactions to system flows    |
+| Diagram                                                | Related Architecture Documentation          | Purpose                                  | Status     |
+| ------------------------------------------------------ | ------------------------------------------- | ---------------------------------------- | ---------- |
+| [system-context.md](system-context.md)                 | [System Context](../03-context.md)          | Show extension in browser ecosystem      | Complete   |
+| [container-overview.md](container-overview.md)         | [Building Blocks](../05-building-blocks.md) | Visualize major components               | Complete   |
+| [component-interactions.md](component-interactions.md) | [Building Blocks](../05-building-blocks.md) | Detail component relationships           | Placeholder|
+| [settings-flow.md](settings-flow.md)                   | [Runtime View](../06-runtime-view.md)       | Show settings operation flows            | Placeholder|
+| [message-passing.md](message-passing.md)               | [Runtime View](../06-runtime-view.md)       | Illustrate inter-component communication | Placeholder|
+| [user-workflows.md](user-workflows.md)                 | [User Documentation](../../user/)           | Map user interactions to system flows    | Placeholder|
+| [error-handling.md](error-handling.md)                 | [Quality Requirements](../10-quality-requirements.md) | Visualize error handling architecture | Placeholder|
+| [browser-compatibility.md](browser-compatibility.md)   | [Browser Compatibility ADR](../09-architecture-decisions/004-browser-compatibility-layer.md) | Show cross-browser compatibility patterns | Placeholder|
+| [storage-architecture.md](storage-architecture.md)     | [Storage Strategy ADR](../09-architecture-decisions/003-storage-strategy.md) | Illustrate storage system design | Placeholder|
+| [api-integration.md](api-integration.md)               | [Runtime View](../06-runtime-view.md)       | Detail browser API integration patterns  | Placeholder|
 
 ## Quality Standards
 
@@ -222,4 +226,5 @@ This diagram collection was created to address the need for visual architecture 
 
 | Date       | Author            | Changes                                  |
 | ---------- | ----------------- | ---------------------------------------- |
+| 2025-08-13 | Documentation Team | Created 8 placeholder diagram files for missing architecture diagrams |
 | 2025-08-11 | Architecture Team | Initial diagrams directory and standards |

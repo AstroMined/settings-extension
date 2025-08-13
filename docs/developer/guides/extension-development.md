@@ -1247,6 +1247,14 @@ Understanding user needs improves development decisions:
 - **[Manifest V3 Migration Guide](https://developer.chrome.com/docs/extensions/migrating/)** - Migration from Manifest V2
 - **[Chrome Extension Architecture](https://developer.chrome.com/docs/extensions/mv3/architecture-overview/)** - Architecture overview
 
+## References
+
+- [Chrome Extension Development Guide](https://developer.chrome.com/docs/extensions/)
+- [Firefox WebExtension API](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions)
+- [Manifest V3 Migration Guide](https://developer.chrome.com/docs/extensions/migrating/)
+- [Chrome Extension Architecture](https://developer.chrome.com/docs/extensions/mv3/architecture-overview/)
+- [WebExtensions API Compatibility](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/Browser_support_for_JavaScript_APIs)
+
 ## Revision History
 
 | Date       | Author         | Changes                             |

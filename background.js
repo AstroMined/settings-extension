@@ -10,7 +10,10 @@ self.addEventListener("error", (error) => {
 });
 
 self.addEventListener("unhandledrejection", (event) => {
-  console.error("Unhandled promise rejection in background script:", event.reason);
+  console.error(
+    "Unhandled promise rejection in background script:",
+    event.reason,
+  );
 });
 
 // Core Chrome Extension API listeners (registered before imports)
@@ -32,7 +35,7 @@ try {
 
 try {
   chrome.runtime.onStartup.addListener(handleStartup);
-  console.log("✅ Startup listener registered successfully");  
+  console.log("✅ Startup listener registered successfully");
 } catch (error) {
   console.error("❌ Failed to register startup listener:", error);
 }
@@ -118,8 +121,8 @@ async function initializeSettings() {
 function handleMessage(message, sender, sendResponse) {
   console.log("📨 RECEIVED MESSAGE:", {
     type: message?.type,
-    sender: sender?.tab?.id || 'popup/options',
-    timestamp: new Date().toISOString()
+    sender: sender?.tab?.id || "popup/options",
+    timestamp: new Date().toISOString(),
   });
 
   // Handle PING immediately (synchronous)
@@ -131,27 +134,33 @@ function handleMessage(message, sender, sendResponse) {
 
   // Settings manager should be initialized at startup, but handle edge cases
   if (!settingsManager) {
-    console.warn("Settings manager not available, attempting re-initialization...");
-    
+    console.warn(
+      "Settings manager not available, attempting re-initialization...",
+    );
+
     // Handle re-initialization asynchronously
-    initializeSettingsOnStartup().then(() => {
-      if (!settingsManager) {
+    initializeSettingsOnStartup()
+      .then(() => {
+        if (!settingsManager) {
+          sendResponse({
+            error:
+              "Settings manager not available. Service worker may need to be restarted.",
+            fallback: true,
+          });
+          return;
+        }
+        // Process the message after initialization
+        processAsyncMessage(message, sender, sendResponse);
+      })
+      .catch((error) => {
+        console.error("Failed to re-initialize settings manager:", error);
         sendResponse({
-          error: "Settings manager not available. Service worker may need to be restarted.",
+          error:
+            "Settings manager not available. Service worker may need to be restarted.",
           fallback: true,
         });
-        return;
-      }
-      // Process the message after initialization
-      processAsyncMessage(message, sender, sendResponse);
-    }).catch(error => {
-      console.error("Failed to re-initialize settings manager:", error);
-      sendResponse({
-        error: "Settings manager not available. Service worker may need to be restarted.",
-        fallback: true,
       });
-    });
-    
+
     console.log("✅ Message handler returning true for async initialization");
     return true; // Keep channel open for async response
   }
@@ -165,7 +174,7 @@ function handleMessage(message, sender, sendResponse) {
 async function processAsyncMessage(message, sender, sendResponse) {
   try {
     console.log("🔄 Processing async message:", message.type);
-    
+
     switch (message.type) {
       case "GET_SETTING":
         await handleGetSetting(message, sendResponse);
@@ -210,7 +219,7 @@ async function processAsyncMessage(message, sender, sendResponse) {
       default:
         sendResponse({ error: `Unknown message type: ${message.type}` });
     }
-    
+
     console.log("✅ Async message processed successfully");
   } catch (error) {
     console.error("❌ Error processing async message:", error);
@@ -241,7 +250,10 @@ async function handleGetAllSettings(message, sendResponse) {
   console.log("🔍 Getting all settings...");
   try {
     const allSettings = await settingsManager.getAllSettings();
-    console.log("📤 Sending settings response:", Object.keys(allSettings || {}));
+    console.log(
+      "📤 Sending settings response:",
+      Object.keys(allSettings || {}),
+    );
     sendResponse({ settings: allSettings });
     console.log("✅ Settings response sent successfully");
   } catch (error) {
@@ -325,21 +337,38 @@ async function handleCheckStorageQuota(message, sendResponse) {
  */
 async function broadcastSettingsChange(changes, sender) {
   try {
-    const tabs = await self.browserAPI.tabs.query({});
+    const tabs = await self.browserAPI.tabs.query({ status: "complete" });
 
-    const broadcastPromises = tabs.map(async (tab) => {
+    // Filter to only active tabs with valid URLs
+    const validTabs = tabs.filter((tab) => {
+      // Skip extension pages and invalid URLs
+      if (
+        !tab.url ||
+        tab.url.startsWith("chrome-extension://") ||
+        tab.url.startsWith("chrome://")
+      ) {
+        return false;
+      }
       // Skip the sender tab to avoid double updates
       if (sender && sender.tab && sender.tab.id === tab.id) {
-        return;
+        return false;
       }
+      return true;
+    });
 
+    const broadcastPromises = validTabs.map(async (tab) => {
       try {
         await self.browserAPI.tabs.sendMessage(tab.id, {
           type: "SETTINGS_CHANGED",
           changes: changes,
         });
       } catch (error) {
-        // Tab might not have content script injected, ignore
+        // Tab might not have content script injected or might be closed
+        // Only log in debug mode to avoid console spam
+        if (error.message.includes("Could not establish connection")) {
+          // This is expected for tabs without our content script
+          return;
+        }
         console.debug(
           `Failed to send message to tab ${tab.id}:`,
           error.message,
@@ -361,20 +390,38 @@ async function broadcastSettingsImport(sender) {
   try {
     const allSettings = await settingsManager.getAllSettings();
 
-    const tabs = await self.browserAPI.tabs.query({});
+    const tabs = await self.browserAPI.tabs.query({ status: "complete" });
 
-    const broadcastPromises = tabs.map(async (tab) => {
+    // Filter to only active tabs with valid URLs
+    const validTabs = tabs.filter((tab) => {
+      // Skip extension pages and invalid URLs
+      if (
+        !tab.url ||
+        tab.url.startsWith("chrome-extension://") ||
+        tab.url.startsWith("chrome://")
+      ) {
+        return false;
+      }
       // Skip the sender tab
       if (sender && sender.tab && sender.tab.id === tab.id) {
-        return;
+        return false;
       }
+      return true;
+    });
 
+    const broadcastPromises = validTabs.map(async (tab) => {
       try {
         await self.browserAPI.tabs.sendMessage(tab.id, {
           type: "SETTINGS_IMPORTED",
           settings: allSettings,
         });
       } catch (error) {
+        // Tab might not have content script injected or might be closed
+        // Only log in debug mode to avoid console spam
+        if (error.message.includes("Could not establish connection")) {
+          // This is expected for tabs without our content script
+          return;
+        }
         console.debug(
           `Failed to send import message to tab ${tab.id}:`,
           error.message,
@@ -396,20 +443,38 @@ async function broadcastSettingsReset(sender) {
   try {
     const allSettings = await settingsManager.getAllSettings();
 
-    const tabs = await self.browserAPI.tabs.query({});
+    const tabs = await self.browserAPI.tabs.query({ status: "complete" });
 
-    const broadcastPromises = tabs.map(async (tab) => {
+    // Filter to only active tabs with valid URLs
+    const validTabs = tabs.filter((tab) => {
+      // Skip extension pages and invalid URLs
+      if (
+        !tab.url ||
+        tab.url.startsWith("chrome-extension://") ||
+        tab.url.startsWith("chrome://")
+      ) {
+        return false;
+      }
       // Skip the sender tab
       if (sender && sender.tab && sender.tab.id === tab.id) {
-        return;
+        return false;
       }
+      return true;
+    });
 
+    const broadcastPromises = validTabs.map(async (tab) => {
       try {
         await self.browserAPI.tabs.sendMessage(tab.id, {
           type: "SETTINGS_RESET",
           settings: allSettings,
         });
       } catch (error) {
+        // Tab might not have content script injected or might be closed
+        // Only log in debug mode to avoid console spam
+        if (error.message.includes("Could not establish connection")) {
+          // This is expected for tabs without our content script
+          return;
+        }
         console.debug(
           `Failed to send reset message to tab ${tab.id}:`,
           error.message,
@@ -479,13 +544,6 @@ function handleStorageChange(changes, areaName) {
       }
     }, 1000);
   }
-}
-
-/**
- * Handle unhandled errors
- */
-function handleError(error) {
-  console.error("Unhandled error in background script:", error);
 }
 
 // Export functions for testing

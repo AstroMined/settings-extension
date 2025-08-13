@@ -6,19 +6,16 @@
 const {
   createMockStorage,
   createMockRuntime,
-  generateTestSettings,
   createMockBrowserEnvironment,
 } = require("./utils/test-helpers");
-const browserAPI = require("../lib/browser-compat");
 const SettingsManager = require("../lib/settings-manager");
 
 describe("Cross-Browser Compatibility", () => {
-  let testSettings;
   let originalBrowser;
   let originalChrome;
+  let settingsManager;
 
   beforeEach(() => {
-    testSettings = generateTestSettings();
     originalBrowser = global.browser;
     originalChrome = global.chrome;
   });
@@ -52,7 +49,7 @@ describe("Cross-Browser Compatibility", () => {
     test("should handle Chrome storage API", async () => {
       // Test Chrome storage API compatibility
       await global.chrome.storage.local.set({ test: "value" });
-      const result = await global.chrome.storage.local.get("test");
+      await global.chrome.storage.local.get("test");
 
       expect(global.chrome.storage.local.set).toHaveBeenCalledWith({
         test: "value",
@@ -93,7 +90,7 @@ describe("Cross-Browser Compatibility", () => {
     test("should handle Firefox storage API", async () => {
       // Test Firefox storage API compatibility
       await global.browser.storage.local.set({ test: "value" });
-      const result = await global.browser.storage.local.get("test");
+      await global.browser.storage.local.get("test");
 
       expect(global.browser.storage.local.set).toHaveBeenCalledWith({
         test: "value",
@@ -136,7 +133,7 @@ describe("Cross-Browser Compatibility", () => {
 
       // Test both promise and callback patterns
       await mockStorage.set({ key: "value" });
-      const result = await mockStorage.get("key");
+      await mockStorage.get("key");
 
       expect(mockStorage.set).toHaveBeenCalledWith({ key: "value" });
       expect(mockStorage.get).toHaveBeenCalledWith("key");
@@ -147,7 +144,7 @@ describe("Cross-Browser Compatibility", () => {
       const mockStorage = createMockStorage();
 
       await mockStorage.set({ syncKey: "syncValue" });
-      const result = await mockStorage.get("syncKey");
+      await mockStorage.get("syncKey");
 
       expect(mockStorage.set).toHaveBeenCalledWith({ syncKey: "syncValue" });
       expect(mockStorage.get).toHaveBeenCalledWith("syncKey");
@@ -459,7 +456,7 @@ describe("Cross-Browser Compatibility", () => {
 
       // Should not throw during initialization
       expect(() => {
-        const browserAPI = require("../lib/browser-compat");
+        require("../lib/browser-compat");
       }).not.toThrow();
 
       const browserAPI = require("../lib/browser-compat");
@@ -487,7 +484,7 @@ describe("Cross-Browser Compatibility", () => {
         },
       ];
 
-      for (const { browser, env, syncErrors } of scenarios) {
+      for (const { env } of scenarios) {
         global.browser = env.browser;
         global.chrome = env.chrome;
 
@@ -545,7 +542,7 @@ describe("Cross-Browser Compatibility", () => {
           refresh_interval: 120,
         });
 
-        const originalSettings = await settingsManager.getAllSettings();
+        await settingsManager.getAllSettings();
         settingsManager.destroy();
 
         // Simulate browser restart with new manager

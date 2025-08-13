@@ -391,6 +391,13 @@ graph TB
 - **[Component Interactions](component-interactions.md)** - Detailed component relationships within containers
 - **[Extension Development Guide](../../developer/guides/extension-development.md)** - Implementation guidance for these containers
 
+## References
+
+- [C4 Model Container Diagrams](https://c4model.com/#ContainerDiagram)
+- [Chrome Extension Architecture](https://developer.chrome.com/docs/extensions/mv3/architecture-overview/)
+- [Service Worker Architecture](https://developer.chrome.com/docs/extensions/mv3/service-workers/)
+- [Browser Extension UI Patterns](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/user_interface)
+
 ## Revision History
 
 | Date       | Author            | Changes                                                   |

@@ -879,7 +879,7 @@ Technical security implementation details:
 
 For advanced security understanding and development:
 
-- **[Extension Development](../../developer/guides/extension-development.md)** - Secure development practices
+- **[Extension Development](../../docs/developer/guides/extension-development.md)** - Secure development practices
 - **[Bug Reporting](../../developer/guides/bug-reporting.md)** - Security vulnerability reporting procedures
 - **[Coding Standards](../../developer/conventions/coding-standards.md)** - Security coding practices
 
@@ -888,6 +888,14 @@ For advanced security understanding and development:
 - **[OWASP Security Guidelines](https://owasp.org/)** - Web application security best practices
 - **[Chrome Extension Security](https://developer.chrome.com/docs/extensions/mv3/security/)** - Browser extension security guidelines
 - **[Mozilla Extension Security](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/Security_best_practices)** - Firefox extension security
+
+## References
+
+- [OWASP Security Guidelines](https://owasp.org/)
+- [Chrome Extension Security](https://developer.chrome.com/docs/extensions/mv3/security/)
+- [Mozilla Extension Security](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/Security_best_practices)
+- [GDPR Compliance](https://gdpr.eu/)
+- [Browser Security Model](https://developer.mozilla.org/en-US/docs/Web/Security)
 
 ## Revision History
 

@@ -890,6 +890,14 @@ Testing ensures these user experiences work correctly:
 - **[Web-ext CLI](https://extensionworkshop.com/documentation/develop/web-ext-command-reference/)** - Extension testing and validation tool
 - **[Chrome Extension Testing](https://developer.chrome.com/docs/extensions/mv3/tut_debugging/)** - Browser-specific testing guidance
 
+## References
+
+- [Jest Testing Framework](https://jestjs.io/)
+- [jsdom Documentation](https://github.com/jsdom/jsdom)
+- [Web-ext CLI](https://extensionworkshop.com/documentation/develop/web-ext-command-reference/)
+- [Chrome Extension Testing](https://developer.chrome.com/docs/extensions/mv3/tut_debugging/)
+- [Firefox Extension Testing](https://extensionworkshop.com/documentation/develop/debugging/)
+
 ## Revision History
 
 | Date       | Author         | Changes               |

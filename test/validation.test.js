@@ -3,10 +3,7 @@
  * Tests validation logic for boolean, text, longtext, number, and JSON settings
  */
 
-const {
-  createValidationTestSuite,
-  generateTestSettings,
-} = require("./utils/test-helpers");
+const { generateTestSettings } = require("./utils/test-helpers");
 
 // Import validation functions
 const {
@@ -24,10 +21,8 @@ const {
 } = require("../lib/validation.js");
 
 describe("Settings Validation", () => {
-  let testSettings;
-
   beforeEach(() => {
-    testSettings = generateTestSettings();
+    generateTestSettings();
   });
 
   describe("Boolean Validation", () => {

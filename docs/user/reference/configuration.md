@@ -877,6 +877,24 @@ If configuration becomes corrupted:
 - Backup recommendation: Before major changes
 - Sharing guideline: Remove sensitive data
 
+## Related Documentation
+
+### Performance and Quality Context
+
+These configuration options are designed to meet specific quality and performance targets defined in:
+
+- **[Quality Requirements](../../architecture/10-quality-requirements.md)** - Performance targets and quality goals that inform configuration defaults
+- **[System Constraints](../../architecture/02-constraints.md)** - Technical limitations affecting configuration options
+- **[Building Blocks View](../../architecture/05-building-blocks.md)** - Component architecture underlying configuration management
+
+### Implementation Guidance
+
+For developers implementing or modifying configuration options:
+
+- **[Extension Development Guide](../../developer/guides/extension-development.md)** - Implementation patterns for configuration handling
+- **[Performance Profiling](../../developer/guides/performance-profiling.md)** - Measuring impact of configuration changes
+- **[Testing Guide](../../developer/workflows/testing-guide.md)** - Testing configuration scenarios
+
 ## References
 
 - [Settings Types Reference](settings-types.md) - Detailed setting type documentation

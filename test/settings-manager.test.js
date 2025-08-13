@@ -6,7 +6,6 @@
 const {
   createMockStorage,
   generateTestSettings,
-  createValidationTestSuite,
   testPerformance,
 } = require("./utils/test-helpers");
 
@@ -76,8 +75,7 @@ global.browser = {
 // Mock fetch to prevent network requests in tests
 global.fetch = jest.fn().mockRejectedValue(new Error("Network error"));
 
-const SettingsManager = require("../lib/settings-manager");
-const browserAPI = require("../lib/browser-compat");
+const SettingsManager = require("../lib/settings-manager"); // eslint-disable-line no-unused-vars
 
 describe("SettingsManager", () => {
   let mockStorage;

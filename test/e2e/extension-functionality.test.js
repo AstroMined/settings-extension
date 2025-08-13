@@ -11,23 +11,31 @@ class ExtensionTestHelpers {
   static async waitForExtensionReady(page, timeout = 15000) {
     // Wait for either settings container to appear or loading to disappear
     return Promise.race([
-      page.waitForSelector("#settings-container", { state: "visible", timeout }),
-      page.waitForSelector("#loading", { state: "hidden", timeout })
+      page.waitForSelector("#settings-container", {
+        state: "visible",
+        timeout,
+      }),
+      page.waitForSelector("#loading", { state: "hidden", timeout }),
     ]);
   }
 
   static async waitForPageFullyLoaded(page, timeout = 15000) {
     // More comprehensive page load detection
-    await page.waitForFunction(() => {
-      const container = document.getElementById('settings-container');
-      const loading = document.getElementById('loading');
-      const isReady = document.readyState === 'complete';
-      
-      return isReady && 
-             container && 
-             container.style.display !== 'none' && 
-             (!loading || loading.style.display === 'none');
-    }, { timeout });
+    await page.waitForFunction(
+      () => {
+        const container = document.getElementById("settings-container");
+        const loading = document.getElementById("loading");
+        const isReady = document.readyState === "complete";
+
+        return (
+          isReady &&
+          container &&
+          container.style.display !== "none" &&
+          (!loading || loading.style.display === "none")
+        );
+      },
+      { timeout },
+    );
   }
 
   static async debugPageState(page) {
@@ -35,22 +43,23 @@ class ExtensionTestHelpers {
       const state = await page.evaluate(() => {
         return {
           readyState: document.readyState,
-          loadingVisible: document.getElementById('loading')?.style.display,
-          containerVisible: document.getElementById('settings-container')?.style.display,
-          settingsCount: document.querySelectorAll('.setting-item, input').length
+          loadingVisible: document.getElementById("loading")?.style.display,
+          containerVisible:
+            document.getElementById("settings-container")?.style.display,
+          settingsCount: document.querySelectorAll(".setting-item, input")
+            .length,
         };
       });
-      console.log('Page debug state:', state);
+      console.log("Page debug state:", state);
       return state;
     } catch (error) {
-      console.log('Could not get page state:', error.message);
+      console.log("Could not get page state:", error.message);
       return null;
     }
   }
 }
 
 test.describe("Browser Extension Functionality", () => {
-  let browser;
   let context;
   let extensionId;
 
@@ -62,9 +71,11 @@ test.describe("Browser Extension Functionality", () => {
     console.log(`Using user data dir: ${userDataDir}`);
 
     // Check if dist folder exists
-    const fs = require('fs');
+    const fs = require("fs");
     if (!fs.existsSync(extensionPath)) {
-      throw new Error(`Extension build not found at ${extensionPath}. Run 'npm run build' first.`);
+      throw new Error(
+        `Extension build not found at ${extensionPath}. Run 'npm run build' first.`,
+      );
     }
 
     try {
@@ -85,30 +96,35 @@ test.describe("Browser Extension Functionality", () => {
       console.log("Detecting extension service worker...");
       let serviceWorker = null;
       const maxAttempts = 5;
-      
+
       for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-        console.log(`Service worker detection attempt ${attempt}/${maxAttempts}`);
-        
+        console.log(
+          `Service worker detection attempt ${attempt}/${maxAttempts}`,
+        );
+
         // Check existing service workers
         const workers = context.serviceWorkers();
         if (workers.length > 0) {
           serviceWorker = workers[0];
           break;
         }
-        
+
         // Wait for service worker event
         try {
           serviceWorker = await Promise.race([
             context.waitForEvent("serviceworker", { timeout: 5000 }),
-            new Promise((_, reject) => 
-              setTimeout(() => reject(new Error('Service worker timeout')), 5000)
-            )
+            new Promise((_, reject) =>
+              setTimeout(
+                () => reject(new Error("Service worker timeout")),
+                5000,
+              ),
+            ),
           ]);
           if (serviceWorker) break;
         } catch (error) {
           console.log(`Attempt ${attempt} failed: ${error.message}`);
           if (attempt < maxAttempts) {
-            await new Promise(resolve => setTimeout(resolve, 2000));
+            await new Promise((resolve) => setTimeout(resolve, 2000));
           }
         }
       }
@@ -117,7 +133,7 @@ test.describe("Browser Extension Functionality", () => {
         const workerUrl = serviceWorker.url();
         extensionId = workerUrl.split("/")[2];
         console.log(`Extension loaded successfully! ID: ${extensionId}`);
-        
+
         // Verify the service worker is responsive
         const page = await context.newPage();
         try {
@@ -182,19 +198,27 @@ test.describe("Browser Extension Functionality", () => {
       // Wait for popup initialization - more robust approach
       // Either wait for settings container to appear OR loading to disappear
       await Promise.race([
-        page.waitForSelector("#settings-container", { state: "visible", timeout: 15000 }),
-        page.waitForSelector("#loading", { state: "hidden", timeout: 15000 })
+        page.waitForSelector("#settings-container", {
+          state: "visible",
+          timeout: 15000,
+        }),
+        page.waitForSelector("#loading", { state: "hidden", timeout: 15000 }),
       ]);
 
       // Ensure settings are fully loaded
-      await page.waitForFunction(() => {
-        const container = document.getElementById('settings-container');
-        const loading = document.getElementById('loading');
-        return container && 
-               container.style.display !== 'none' && 
-               loading && 
-               loading.style.display === 'none';
-      }, { timeout: 15000 });
+      await page.waitForFunction(
+        () => {
+          const container = document.getElementById("settings-container");
+          const loading = document.getElementById("loading");
+          return (
+            container &&
+            container.style.display !== "none" &&
+            loading &&
+            loading.style.display === "none"
+          );
+        },
+        { timeout: 15000 },
+      );
 
       // Check that the loading spinner disappears and settings container appears
       await expect(page.locator("#loading")).toBeHidden();
@@ -208,9 +232,17 @@ test.describe("Browser Extension Functionality", () => {
     } catch (error) {
       console.error("Popup settings test failed:", error);
       // Add debugging info
-      const loadingState = await page.locator("#loading").isVisible().catch(() => 'unknown');
-      const containerState = await page.locator("#settings-container").isVisible().catch(() => 'unknown');
-      console.error(`Debug - Loading visible: ${loadingState}, Container visible: ${containerState}`);
+      const loadingState = await page
+        .locator("#loading")
+        .isVisible()
+        .catch(() => "unknown");
+      const containerState = await page
+        .locator("#settings-container")
+        .isVisible()
+        .catch(() => "unknown");
+      console.error(
+        `Debug - Loading visible: ${loadingState}, Container visible: ${containerState}`,
+      );
       throw error;
     } finally {
       await page.close();
@@ -226,18 +258,26 @@ test.describe("Browser Extension Functionality", () => {
 
       // Wait for options page initialization with better strategy
       await Promise.race([
-        page.waitForSelector("#general-tab", { state: "visible", timeout: 15000 }),
-        page.waitForSelector("#loading", { state: "hidden", timeout: 15000 })
+        page.waitForSelector("#general-tab", {
+          state: "visible",
+          timeout: 15000,
+        }),
+        page.waitForSelector("#loading", { state: "hidden", timeout: 15000 }),
       ]);
 
       // Ensure page is fully loaded
-      await page.waitForFunction(() => {
-        const generalTab = document.getElementById('general-tab');
-        const loading = document.getElementById('loading');
-        return generalTab && 
-               generalTab.style.display !== 'none' && 
-               (!loading || loading.style.display === 'none');
-      }, { timeout: 15000 });
+      await page.waitForFunction(
+        () => {
+          const generalTab = document.getElementById("general-tab");
+          const loading = document.getElementById("loading");
+          return (
+            generalTab &&
+            generalTab.style.display !== "none" &&
+            (!loading || loading.style.display === "none")
+          );
+        },
+        { timeout: 15000 },
+      );
 
       // Check that the loading spinner disappears and tab content appears
       await expect(page.locator("#loading")).toBeHidden();
@@ -251,9 +291,17 @@ test.describe("Browser Extension Functionality", () => {
     } catch (error) {
       console.error("Options page test failed:", error);
       // Add debugging info
-      const loadingState = await page.locator("#loading").isVisible().catch(() => 'unknown');
-      const tabState = await page.locator("#general-tab").isVisible().catch(() => 'unknown');
-      console.error(`Debug - Loading visible: ${loadingState}, Tab visible: ${tabState}`);
+      const loadingState = await page
+        .locator("#loading")
+        .isVisible()
+        .catch(() => "unknown");
+      const tabState = await page
+        .locator("#general-tab")
+        .isVisible()
+        .catch(() => "unknown");
+      console.error(
+        `Debug - Loading visible: ${loadingState}, Tab visible: ${tabState}`,
+      );
       throw error;
     } finally {
       await page.close();
@@ -262,25 +310,32 @@ test.describe("Browser Extension Functionality", () => {
 
   test("can change a boolean setting", async () => {
     const page = await context.newPage();
-    
+
     try {
       await page.goto(`chrome-extension://${extensionId}/popup/popup.html`);
 
       // Wait for settings to load
-      await page.waitForSelector("#settings-container", { state: "visible", timeout: 15000 });
+      await page.waitForSelector("#settings-container", {
+        state: "visible",
+        timeout: 15000,
+      });
 
       // Find a boolean setting and toggle it
       const booleanToggle = page.locator('input[type="checkbox"]').first();
       await expect(booleanToggle).toBeVisible();
-      
+
       const initialState = await booleanToggle.isChecked();
       await booleanToggle.click();
 
       // Wait for the change to be processed
-      await page.waitForFunction((expected) => {
-        const checkbox = document.querySelector('input[type="checkbox"]');
-        return checkbox && checkbox.checked === expected;
-      }, !initialState, { timeout: 5000 });
+      await page.waitForFunction(
+        (expected) => {
+          const checkbox = document.querySelector('input[type="checkbox"]');
+          return checkbox && checkbox.checked === expected;
+        },
+        !initialState,
+        { timeout: 5000 },
+      );
 
       // Verify the state changed
       const newState = await booleanToggle.isChecked();
@@ -316,7 +371,7 @@ test.describe("Browser Extension Functionality", () => {
 
       const textInput = page.locator('input[type="text"]').first();
       await expect(textInput).toBeVisible();
-      
+
       const testValue = `Persistent Test ${Date.now()}`;
       await textInput.clear();
       await textInput.fill(testValue);
@@ -364,7 +419,7 @@ test.describe("Browser Extension Functionality", () => {
     try {
       // Navigate to a test page
       await page.goto("https://example.com");
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState("networkidle");
 
       // Wait a moment for content script injection
       await page.waitForTimeout(2000);
@@ -373,15 +428,18 @@ test.describe("Browser Extension Functionality", () => {
       const contentScriptResults = await page.evaluate(() => {
         return {
           hasContentScript: typeof window.ContentScriptSettings !== "undefined",
-          hasSettingsAPI: typeof window.ContentScriptSettings?.getSettings === "function",
+          hasSettingsAPI:
+            typeof window.ContentScriptSettings?.getSettings === "function",
           documentReady: document.readyState,
           extensionScripts: Array.from(document.scripts)
-            .filter(script => script.src && script.src.includes('chrome-extension'))
-            .map(script => script.src)
+            .filter(
+              (script) => script.src && script.src.includes("chrome-extension"),
+            )
+            .map((script) => script.src),
         };
       });
 
-      console.log('Content script test results:', contentScriptResults);
+      console.log("Content script test results:", contentScriptResults);
 
       // Basic page functionality check
       await expect(page.locator("h1")).toBeVisible();
@@ -396,11 +454,13 @@ test.describe("Browser Extension Functionality", () => {
             return { success: false, error: error.message };
           }
         });
-        
-        console.log('Content script settings access:', settingsAccess);
+
+        console.log("Content script settings access:", settingsAccess);
         expect(settingsAccess.success).toBe(true);
       } else {
-        console.log('Content script not injected - this may be expected based on manifest configuration');
+        console.log(
+          "Content script not injected - this may be expected based on manifest configuration",
+        );
       }
     } finally {
       await page.close();
@@ -425,7 +485,7 @@ test.describe("Browser Extension Functionality", () => {
 
   test("background service worker is responsive", async () => {
     const page = await context.newPage();
-    
+
     try {
       await page.goto(`chrome-extension://${extensionId}/popup/popup.html`);
       await ExtensionTestHelpers.waitForExtensionReady(page);
@@ -433,33 +493,49 @@ test.describe("Browser Extension Functionality", () => {
       // Test background script communication
       const communicationTests = await page.evaluate(async () => {
         const results = [];
-        
+
         try {
           // Test basic ping
-          const pingResult = await browserAPI.runtime.sendMessage({ type: "PING" });
-          results.push({ test: 'ping', success: !!pingResult?.pong, result: pingResult });
-          
+          const pingResult = await browserAPI.runtime.sendMessage({
+            type: "PING",
+          });
+          results.push({
+            test: "ping",
+            success: !!pingResult?.pong,
+            result: pingResult,
+          });
+
           // Test settings retrieval through background
-          const settingsResult = await browserAPI.runtime.sendMessage({ type: "GET_ALL_SETTINGS" });
-          results.push({ test: 'get_settings', success: !!settingsResult, result: settingsResult });
-          
+          const settingsResult = await browserAPI.runtime.sendMessage({
+            type: "GET_ALL_SETTINGS",
+          });
+          results.push({
+            test: "get_settings",
+            success: !!settingsResult,
+            result: settingsResult,
+          });
+
           // Test extension info
-          const manifestResult = await browserAPI.runtime.sendMessage({ type: "GET_MANIFEST" });
-          results.push({ test: 'manifest', success: !!manifestResult, result: manifestResult });
-          
+          const manifestResult = await browserAPI.runtime.sendMessage({
+            type: "GET_MANIFEST",
+          });
+          results.push({
+            test: "manifest",
+            success: !!manifestResult,
+            result: manifestResult,
+          });
         } catch (error) {
-          results.push({ test: 'error', success: false, error: error.message });
+          results.push({ test: "error", success: false, error: error.message });
         }
-        
+
         return results;
       });
 
-      console.log('Background script communication tests:', communicationTests);
-      
+      console.log("Background script communication tests:", communicationTests);
+
       // Verify at least basic communication works
-      const pingTest = communicationTests.find(test => test.test === 'ping');
+      const pingTest = communicationTests.find((test) => test.test === "ping");
       expect(pingTest?.success).toBe(true);
-      
     } finally {
       await page.close();
     }
@@ -491,19 +567,20 @@ test.describe("Browser Extension Functionality", () => {
 
       // Log warnings for debugging but don't fail tests
       if (consoleWarnings.length > 0) {
-        console.log('Console warnings detected:', consoleWarnings);
+        console.log("Console warnings detected:", consoleWarnings);
       }
 
       // Check that no critical errors occurred
       const criticalErrors = consoleErrors.filter(
-        (error) => !error.includes("Warning") && 
-                   !error.includes("favicon") &&
-                   !error.includes("ERR_INTERNET_DISCONNECTED") &&
-                   !error.includes("DevTools")
+        (error) =>
+          !error.includes("Warning") &&
+          !error.includes("favicon") &&
+          !error.includes("ERR_INTERNET_DISCONNECTED") &&
+          !error.includes("DevTools"),
       );
 
       if (criticalErrors.length > 0) {
-        console.error('Critical console errors detected:', criticalErrors);
+        console.error("Critical console errors detected:", criticalErrors);
       }
 
       expect(criticalErrors).toHaveLength(0);

@@ -279,11 +279,29 @@ If you encounter issues:
 3. Check for browser updates
 4. Contact your system administrator
 
-## References
+## Related Documentation
 
-- [Settings Types Reference](../reference/settings-types.md) - Complete list of setting types
-- [Keyboard Shortcuts](../reference/keyboard-shortcuts.md) - Speed up your workflow
-- [Security Considerations](../explanation/security.md) - Understanding data protection
+### Understanding the Architecture
+
+This tutorial demonstrates the user interface built on top of the system architecture described in:
+
+- **[Building Blocks View](../../architecture/05-building-blocks.md)** - Component structure enabling the workflows in this tutorial
+- **[Quality Requirements](../../architecture/10-quality-requirements.md)** - Performance and usability targets met by this interface
+- **[System Context](../../architecture/03-context.md)** - How the extension integrates with your browser environment
+
+### Next Steps and Advanced Usage
+
+- [Settings Types Reference](../reference/settings-types.md) - Complete list of setting types and their capabilities
+- [Configuration Options](../reference/configuration.md) - Advanced configuration for power users
+- [Export/Import Guide](../how-to/export-import.md) - Managing your settings across devices
+
+### Troubleshooting and Support
+
+- [Security Considerations](../explanation/security.md) - Understanding data protection and privacy
+- [Keyboard Shortcuts](../reference/keyboard-shortcuts.md) - Speed up your workflow with keyboard shortcuts
+- [Developer Troubleshooting](../../developer/guides/troubleshooting.md) - Technical solutions for complex issues
+
+## References
 
 ## Revision History
 

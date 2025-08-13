@@ -1001,9 +1001,11 @@ tree dist/ -L 2 2>/dev/null || ls -la dist/
 ### Support Resources
 
 1. **Internal Documentation**
-   - [Architecture Documentation](../../architecture/README.md)
-   - [User Documentation](../../user/README.md)
-   - [API Reference](../../user/reference/api.md)
+   - [Runtime View](../../architecture/06-runtime-view.md) - Expected system behavior for comparison with issues
+   - [Architecture Documentation](../../architecture/README.md) - Complete system design context
+   - [Quality Requirements](../../architecture/10-quality-requirements.md) - Performance expectations and targets
+   - [User Documentation](../../user/README.md) - User-facing features and workflows
+   - [Settings Types Reference](../../user/reference/settings-types.md) - Complete API reference
 
 2. **External Resources**
    - [Chrome Extension Documentation](https://developer.chrome.com/docs/extensions/)

@@ -6,9 +6,7 @@
 const {
   createMockStorage,
   generateTestSettings,
-  delay,
 } = require("./utils/test-helpers");
-const browserAPI = require("../lib/browser-compat");
 const SettingsManager = require("../lib/settings-manager");
 
 describe("Storage Integration", () => {
@@ -351,7 +349,7 @@ describe("Storage Integration", () => {
     test("should validate data integrity after persistence operations", async () => {
       await settingsManager.initializeWithEmbeddedDefaults();
 
-      const originalSettings = await settingsManager.getAllSettings();
+      await settingsManager.getAllSettings();
 
       // Make multiple updates
       await settingsManager.updateSettings({

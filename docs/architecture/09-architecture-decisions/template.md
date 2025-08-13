@@ -163,8 +163,8 @@ This decision will be reviewed:
 
 [Links to other ADRs that are related to this one. Include both dependencies (decisions this one builds on) and dependent decisions (decisions that build on this one).]
 
-- [ADR-XXX: Related Decision](XXX-related-decision.md) - [Relationship description]
-- [ADR-YYY: Another Related Decision](YYY-another-decision.md) - [Relationship description]
+- [ADR-001: Manifest V3](001-manifest-v3.md) - [Relationship description]
+- [ADR-002: Vanilla JavaScript](002-vanilla-javascript.md) - [Relationship description]
 
 ## References
 
@@ -172,7 +172,7 @@ This decision will be reviewed:
 
 - [Reference 1 Title](https://example.com) - [Brief description]
 - [Reference 2 Title](https://example.com) - [Brief description]
-- [Internal Documentation](../path/to/doc.md) - [Brief description]
+- [Architecture Overview](../01-introduction-goals.md) - [Brief description]
 
 ## Revision History
 

@@ -5,8 +5,11 @@ class SettingsPopup {
     this.validationErrors = new Map();
     this.isInitialized = false;
 
-    this.setupEventListeners();
-    this.initialize();
+    // Small delay to ensure DOM is fully ready (fixes race condition)
+    setTimeout(() => {
+      this.setupEventListeners();
+      this.initialize();
+    }, 0);
   }
 
   async initialize() {
@@ -34,12 +37,21 @@ class SettingsPopup {
 
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
-        console.log(`Testing background script connection (attempt ${attempt}/${maxRetries})...`);
+        console.log(
+          `Testing background script connection (attempt ${attempt}/${maxRetries})...`,
+        );
 
         const response = await new Promise((resolve, reject) => {
-          const timeout = setTimeout(() => {
-            reject(new Error(`Background script ping timeout (attempt ${attempt})`));
-          }, Math.min(2000 * attempt, 8000)); // Progressive timeout: 2s, 4s, 8s
+          const timeout = setTimeout(
+            () => {
+              reject(
+                new Error(
+                  `Background script ping timeout (attempt ${attempt})`,
+                ),
+              );
+            },
+            Math.min(2000 * attempt, 8000),
+          ); // Progressive timeout: 2s, 4s, 8s
 
           browserAPI.runtime
             .sendMessage({ type: "PING" })
@@ -48,7 +60,7 @@ class SettingsPopup {
               if (response && response.pong) {
                 resolve(response);
               } else {
-                reject(new Error('Invalid ping response'));
+                reject(new Error("Invalid ping response"));
               }
             })
             .catch((error) => {
@@ -60,21 +72,24 @@ class SettingsPopup {
         console.log("Background script ping response:", response);
         return; // Success - exit retry loop
       } catch (error) {
-        console.error(`Background script connection test failed (attempt ${attempt}):`, error);
+        console.error(
+          `Background script connection test failed (attempt ${attempt}):`,
+          error,
+        );
         lastError = error;
-        
+
         if (attempt < maxRetries) {
           // Wait before retry (exponential backoff)
           const delay = Math.min(500 * Math.pow(2, attempt - 1), 2000);
           console.log(`Retrying in ${delay}ms...`);
-          await new Promise(resolve => setTimeout(resolve, delay));
+          await new Promise((resolve) => setTimeout(resolve, delay));
         }
       }
     }
 
     // All retries failed
     throw new Error(
-      `Service worker not responding after ${maxRetries} attempts. ${lastError?.message || 'Unknown error'}. Please reload the extension.`
+      `Service worker not responding after ${maxRetries} attempts. ${lastError?.message || "Unknown error"}. Please reload the extension.`,
     );
   }
 
@@ -84,32 +99,29 @@ class SettingsPopup {
 
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
-        console.log(`Loading settings (attempt ${attempt}/${maxRetries})...`);
-
         const response = await new Promise((resolve, reject) => {
-          const timeout = setTimeout(() => {
-            reject(new Error(`Settings load timeout after ${5 + attempt * 2} seconds (attempt ${attempt})`));
-          }, (5 + attempt * 2) * 1000); // Progressive timeout: 7s, 9s
-
-          console.log("📤 POPUP: Sending GET_ALL_SETTINGS message...");
-          console.log("📤 POPUP: Using browserAPI:", typeof browserAPI);
-          console.log("📤 POPUP: browserAPI.runtime:", typeof browserAPI?.runtime);
+          const timeout = setTimeout(
+            () => {
+              reject(
+                new Error(
+                  `Settings load timeout after ${5 + attempt * 2} seconds (attempt ${attempt})`,
+                ),
+              );
+            },
+            (5 + attempt * 2) * 1000,
+          ); // Progressive timeout: 7s, 9s
 
           browserAPI.runtime
             .sendMessage({ type: "GET_ALL_SETTINGS" })
             .then((response) => {
-              console.log("📨 POPUP: Received response:", response);
               clearTimeout(timeout);
               resolve(response);
             })
             .catch((error) => {
-              console.error("❌ POPUP: Message sending failed:", error);
               clearTimeout(timeout);
               reject(error);
             });
         });
-
-        console.log("Received response from background script:", response);
 
         if (!response) {
           throw new Error("No response from background script");
@@ -124,25 +136,23 @@ class SettingsPopup {
         }
 
         this.currentSettings = new Map(Object.entries(response.settings));
-        console.log("Successfully loaded settings:", this.currentSettings);
         return; // Success - exit retry loop
-
       } catch (error) {
         console.error(`Error loading settings (attempt ${attempt}):`, error);
         lastError = error;
-        
+
         if (attempt < maxRetries) {
           // Wait before retry
           const delay = 1000 * attempt; // 1s, 2s
-          console.log(`Retrying settings load in ${delay}ms...`);
-          await new Promise(resolve => setTimeout(resolve, delay));
+          await new Promise((resolve) => setTimeout(resolve, delay));
         }
       }
     }
 
     // All retries failed
-    console.error("Failed to load settings after all retries:", lastError);
-    throw new Error(`Failed to load settings after ${maxRetries} attempts: ${lastError?.message || 'Unknown error'}`);
+    throw new Error(
+      `Failed to load settings after ${maxRetries} attempts: ${lastError?.message || "Unknown error"}`,
+    );
   }
 
   renderSettings() {
@@ -476,36 +486,53 @@ class SettingsPopup {
   }
 
   async importSettings() {
-    const input = document.createElement("input");
-    input.type = "file";
-    input.accept = ".json";
+    try {
+      const input = document.createElement("input");
+      input.type = "file";
+      input.accept = ".json";
 
-    input.addEventListener("change", async (event) => {
-      const file = event.target.files[0];
-      if (!file) return;
+      input.addEventListener("change", async (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
 
-      try {
-        const content = await file.text();
+        try {
+          const content = await file.text();
+          const response = await browserAPI.runtime.sendMessage({
+            type: "IMPORT_SETTINGS",
+            data: content,
+          });
 
-        const response = await browserAPI.runtime.sendMessage({
-          type: "IMPORT_SETTINGS",
-          data: content,
-        });
+          if (response.error) {
+            throw new Error(response.error);
+          }
 
-        if (response.error) {
-          throw new Error(response.error);
+          await this.loadSettings();
+          this.renderSettings();
+          this.showSuccess("Settings imported successfully");
+        } catch (error) {
+          console.error("Import failed:", error);
+          this.showError(`Import failed: ${error.message}`);
         }
+      });
 
-        await this.loadSettings();
-        this.renderSettings();
-        this.showSuccess("Settings imported successfully");
-      } catch (error) {
-        console.error("Import failed:", error);
-        this.showError(`Import failed: ${error.message}`);
-      }
+      input.click();
+    } catch (error) {
+      console.error("Error in importSettings method:", error);
+      this.showError(`Import setup failed: ${error.message}`);
+    }
+  }
+
+  // Helper method to get current UI values for debugging
+  getUIValues() {
+    const values = {};
+    const inputs = document.querySelectorAll(
+      "#settings-container input, #settings-container textarea",
+    );
+    inputs.forEach((input) => {
+      const key = input.id.replace("setting-", "");
+      values[key] = input.type === "checkbox" ? input.checked : input.value;
     });
-
-    input.click();
+    return values;
   }
 
   async resetToDefaults() {
@@ -545,7 +572,9 @@ class SettingsPopup {
       // Use the proper Manifest V3 options API
       if (chrome.runtime.openOptionsPage) {
         chrome.runtime.openOptionsPage();
-        console.log("✅ Options page opened using chrome.runtime.openOptionsPage()");
+        console.log(
+          "✅ Options page opened using chrome.runtime.openOptionsPage()",
+        );
       } else {
         // Fallback for older browsers or if openOptionsPage isn't available
         console.log("⚠️ Falling back to manual tab creation");
@@ -562,7 +591,9 @@ class SettingsPopup {
         });
       } catch (fallbackError) {
         console.error("❌ Fallback also failed:", fallbackError);
-        this.showError("Unable to open advanced settings. Please try right-clicking the extension icon and selecting 'Options'.");
+        this.showError(
+          "Unable to open advanced settings. Please try right-clicking the extension icon and selecting 'Options'.",
+        );
       }
     }
   }
@@ -598,24 +629,34 @@ class SettingsPopup {
   }
 
   setupEventListeners() {
-    document.addEventListener("DOMContentLoaded", () => {
-      document
-        .getElementById("export-btn")
-        .addEventListener("click", () => this.exportSettings());
-      document
-        .getElementById("import-btn")
-        .addEventListener("click", () => this.importSettings());
-      document
-        .getElementById("reset-btn")
-        .addEventListener("click", () => this.resetToDefaults());
-      document
-        .getElementById("advanced-btn")
-        .addEventListener("click", () => this.openAdvancedSettings());
-    });
+    const exportBtn = document.getElementById("export-btn");
+    const importBtn = document.getElementById("import-btn");
+    const resetBtn = document.getElementById("reset-btn");
+    const advancedBtn = document.getElementById("advanced-btn");
+
+    if (exportBtn) {
+      exportBtn.addEventListener("click", () => this.exportSettings());
+    }
+
+    if (importBtn) {
+      importBtn.addEventListener("click", () => this.importSettings());
+    }
+
+    if (resetBtn) {
+      resetBtn.addEventListener("click", () => this.resetToDefaults());
+    }
+
+    if (advancedBtn) {
+      advancedBtn.addEventListener("click", () => this.openAdvancedSettings());
+    }
   }
 }
 
 // Initialize the popup when the DOM is ready
 document.addEventListener("DOMContentLoaded", () => {
-  new SettingsPopup();
+  try {
+    window.settingsPopupInstance = new SettingsPopup();
+  } catch (error) {
+    console.error("Error creating SettingsPopup instance:", error);
+  }
 });

@@ -386,6 +386,22 @@ This guide provides step-by-step instructions for backing up and restoring your 
 - **Organization**: Create dedicated backup folders
 - **Cloud sync**: Use cloud storage for automatic sync
 
+## Related Documentation
+
+### Troubleshooting Backup Issues
+
+If you encounter problems with backup or restore operations:
+
+- **[Developer Troubleshooting Guide](../../developer/guides/troubleshooting.md)** - Technical solutions for backup/restore failures
+- **[Bug Reporting Guide](../../developer/guides/bug-reporting.md)** - How to report backup-related issues effectively
+
+### Understanding Backup Architecture  
+
+For deeper understanding of how backups work:
+
+- **[Building Blocks View](../../architecture/05-building-blocks.md)** - Storage components underlying backup functionality
+- **[Quality Requirements](../../architecture/10-quality-requirements.md)** - Reliability targets for backup operations
+
 ## References
 
 - [First Backup Tutorial](../tutorials/first-backup.md) - Learn backup basics

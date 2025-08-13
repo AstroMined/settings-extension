@@ -558,6 +558,30 @@ flowchart TD
     N --> H
 ```
 
+## Related Documentation
+
+### Debugging Runtime Issues
+
+When runtime scenarios don't behave as described here, developers can use guidance from:
+
+- **[Troubleshooting Guide](../developer/guides/troubleshooting.md)** - Debugging common runtime problems and component interaction issues
+- **[Debugging Guide](../developer/workflows/debugging-guide.md)** - Tools and techniques for investigating runtime behavior
+- **[Performance Profiling](../developer/guides/performance-profiling.md)** - Measuring actual runtime performance against scenario requirements
+
+### Implementation Context
+
+These runtime scenarios are implemented using patterns from:
+
+- **[Extension Development Guide](../developer/guides/extension-development.md)** - Code patterns that implement these runtime behaviors
+- **[Testing Guide](../developer/workflows/testing-guide.md)** - Test strategies for validating runtime scenarios
+- **[Cross-Browser Testing](../developer/guides/cross-browser-testing.md)** - Ensuring consistent runtime behavior across browsers
+
+### Architecture Context
+
+- **[Building Blocks](05-building-blocks.md)** - Static component structure supporting these runtime interactions
+- **[Quality Requirements](10-quality-requirements.md)** - Performance targets that these scenarios must meet
+- **[System Context](03-context.md)** - External system interactions during runtime
+
 ## References
 
 - [Browser Extension Message Passing](https://developer.chrome.com/docs/extensions/mv3/messaging/)

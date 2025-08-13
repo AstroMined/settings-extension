@@ -329,6 +329,13 @@ C4Deployment
 - **[Container Overview](container-overview.md)** - Next level of architectural detail
 - **[Browser Extension Development](../../developer/guides/extension-development.md)** - Implementation guidance for this context
 
+## References
+
+- [C4 Model System Context Diagrams](https://c4model.com/#SystemContextDiagram)
+- [Browser Extension Architecture](https://developer.chrome.com/docs/extensions/mv3/architecture-overview/)
+- [Web Store Distribution](https://developer.chrome.com/webstore/)
+- [Firefox Add-on Ecosystem](https://addons.mozilla.org/)
+
 ## Revision History
 
 | Date       | Author            | Changes                                          |

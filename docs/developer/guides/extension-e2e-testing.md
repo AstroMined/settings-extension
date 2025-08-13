@@ -4,10 +4,11 @@
 
 This guide provides comprehensive instructions for running reliable end-to-end (E2E) tests on browser extensions using Playwright. It covers the enhanced testing framework we've developed specifically for Manifest V3 extensions, including robust extension loading, cross-browser compatibility, and advanced testing patterns.
 
-**Scope:** Complete E2E testing workflows for browser extensions  
-**Status:** Production-ready (Enhanced December 2024)  
-**Applies To:** Manifest V3 browser extensions, Chrome/Firefox/Edge  
-**Last Updated:** December 2024
+## Scope
+
+- **Applies to**: E2E testing workflows for Manifest V3 browser extensions (Chrome/Firefox/Edge)
+- **Last Updated**: 2025-08-13
+- **Status**: Approved
 
 ## Quick Start
 
@@ -31,6 +32,7 @@ npm run test:e2e -- --project=firefox
 ### Why Not Playwright MCP Server?
 
 **Important:** Playwright MCP Server is **not suitable** for browser extension testing because:
+
 - It doesn't support `launchPersistentContext()` required for extension loading
 - Extension loading arguments (`--load-extension`) are not properly handled
 - Browser contexts don't maintain extension state between operations
@@ -66,22 +68,22 @@ test.beforeAll(async () => {
   // Enhanced service worker detection with retries
   let serviceWorker = null;
   const maxAttempts = 5;
-  
+
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     const workers = context.serviceWorkers();
     if (workers.length > 0) {
       serviceWorker = workers[0];
       break;
     }
-    
+
     try {
-      serviceWorker = await context.waitForEvent("serviceworker", { 
-        timeout: 5000 
+      serviceWorker = await context.waitForEvent("serviceworker", {
+        timeout: 5000,
       });
       if (serviceWorker) break;
     } catch (error) {
       if (attempt < maxAttempts) {
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        await new Promise((resolve) => setTimeout(resolve, 2000));
       }
     }
   }
@@ -89,7 +91,9 @@ test.beforeAll(async () => {
   if (serviceWorker) {
     extensionId = serviceWorker.url().split("/")[2];
   } else {
-    throw new Error("Extension service worker not found after multiple attempts");
+    throw new Error(
+      "Extension service worker not found after multiple attempts",
+    );
   }
 });
 ```
@@ -110,22 +114,30 @@ class ExtensionTestHelpers {
   static async waitForExtensionReady(page, timeout = 15000) {
     // Wait for either settings container to appear or loading to disappear
     return Promise.race([
-      page.waitForSelector("#settings-container", { state: "visible", timeout }),
-      page.waitForSelector("#loading", { state: "hidden", timeout })
+      page.waitForSelector("#settings-container", {
+        state: "visible",
+        timeout,
+      }),
+      page.waitForSelector("#loading", { state: "hidden", timeout }),
     ]);
   }
 
   static async waitForPageFullyLoaded(page, timeout = 15000) {
-    await page.waitForFunction(() => {
-      const container = document.getElementById('settings-container');
-      const loading = document.getElementById('loading');
-      const isReady = document.readyState === 'complete';
-      
-      return isReady && 
-             container && 
-             container.style.display !== 'none' && 
-             (!loading || loading.style.display === 'none');
-    }, { timeout });
+    await page.waitForFunction(
+      () => {
+        const container = document.getElementById("settings-container");
+        const loading = document.getElementById("loading");
+        const isReady = document.readyState === "complete";
+
+        return (
+          isReady &&
+          container &&
+          container.style.display !== "none" &&
+          (!loading || loading.style.display === "none")
+        );
+      },
+      { timeout },
+    );
   }
 
   static async debugPageState(page) {
@@ -133,15 +145,17 @@ class ExtensionTestHelpers {
       const state = await page.evaluate(() => {
         return {
           readyState: document.readyState,
-          loadingVisible: document.getElementById('loading')?.style.display,
-          containerVisible: document.getElementById('settings-container')?.style.display,
-          settingsCount: document.querySelectorAll('.setting-item, input').length
+          loadingVisible: document.getElementById("loading")?.style.display,
+          containerVisible:
+            document.getElementById("settings-container")?.style.display,
+          settingsCount: document.querySelectorAll(".setting-item, input")
+            .length,
         };
       });
-      console.log('Page debug state:', state);
+      console.log("Page debug state:", state);
       return state;
     } catch (error) {
-      console.log('Could not get page state:', error.message);
+      console.log("Could not get page state:", error.message);
       return null;
     }
   }
@@ -153,25 +167,29 @@ class ExtensionTestHelpers {
 ```javascript
 test("enhanced settings interaction", async () => {
   const page = await context.newPage();
-  
+
   try {
     await page.goto(`chrome-extension://${extensionId}/popup/popup.html`);
-    
+
     // Use helper for reliable waiting
     await ExtensionTestHelpers.waitForExtensionReady(page);
-    
+
     const textInput = page.locator('input[type="text"]').first();
     await expect(textInput).toBeVisible();
-    
+
     const testValue = `Test ${Date.now()}`;
     await textInput.clear();
     await textInput.fill(testValue);
 
     // Wait for save to complete
-    await page.waitForFunction((expected) => {
-      const input = document.querySelector('input[type="text"]');
-      return input && input.value === expected;
-    }, testValue, { timeout: 5000 });
+    await page.waitForFunction(
+      (expected) => {
+        const input = document.querySelector('input[type="text"]');
+        return input && input.value === expected;
+      },
+      testValue,
+      { timeout: 5000 },
+    );
 
     // Verify change persisted
     await expect(textInput).toHaveValue(testValue);
@@ -188,6 +206,7 @@ test("enhanced settings interaction", async () => {
 ### Browser-Specific Configurations
 
 #### Chrome/Edge Configuration
+
 ```javascript
 const chromeContext = await chromium.launchPersistentContext(userDataDir, {
   headless: false,
@@ -201,23 +220,24 @@ const chromeContext = await chromium.launchPersistentContext(userDataDir, {
 ```
 
 #### Firefox Configuration
+
 ```javascript
 // Firefox requires different extension loading approach
 const firefoxContext = await firefox.launchPersistentContext(userDataDir, {
   headless: false,
-  // Firefox handles extensions differently - 
+  // Firefox handles extensions differently -
   // may require web-ext for testing or manual installation
 });
 ```
 
 ### Known Browser Differences
 
-| Feature | Chrome/Edge | Firefox | Notes |
-|---------|-------------|---------|-------|
-| Extension Loading | `--load-extension` | Manual/web-ext | Firefox may need different approach |
-| Service Worker | Supported | Supported | Both support Manifest V3 |
-| Context Persistence | Reliable | Reliable | Both maintain extension state |
-| Headless Mode | Limited | Limited | Extensions work better in headed mode |
+| Feature             | Chrome/Edge        | Firefox        | Notes                                 |
+| ------------------- | ------------------ | -------------- | ------------------------------------- |
+| Extension Loading   | `--load-extension` | Manual/web-ext | Firefox may need different approach   |
+| Service Worker      | Supported          | Supported      | Both support Manifest V3              |
+| Context Persistence | Reliable           | Reliable       | Both maintain extension state         |
+| Headless Mode       | Limited            | Limited        | Extensions work better in headed mode |
 
 ## Testing Patterns
 
@@ -226,13 +246,13 @@ const firefoxContext = await firefox.launchPersistentContext(userDataDir, {
 ```javascript
 test("extension loads and initializes", async () => {
   const page = await context.newPage();
-  
+
   await page.goto(`chrome-extension://${extensionId}/popup/popup.html`);
   await ExtensionTestHelpers.waitForExtensionReady(page);
-  
+
   await expect(page.locator(".popup-container")).toBeVisible();
   await expect(page.locator(".popup-header h1")).toHaveText("Settings");
-  
+
   await page.close();
 });
 ```
@@ -242,23 +262,25 @@ test("extension loads and initializes", async () => {
 ```javascript
 test("settings persist across sessions", async () => {
   const page = await context.newPage();
-  
+
   // Set a value
   await page.goto(`chrome-extension://${extensionId}/popup/popup.html`);
   await ExtensionTestHelpers.waitForExtensionReady(page);
-  
+
   const input = page.locator('input[type="text"]').first();
   const testValue = `Persistent ${Date.now()}`;
   await input.fill(testValue);
   await page.waitForTimeout(1000); // Allow save
-  
+
   // Verify persistence in new page
   await page.close();
   const newPage = await context.newPage();
   await newPage.goto(`chrome-extension://${extensionId}/popup/popup.html`);
   await ExtensionTestHelpers.waitForExtensionReady(newPage);
-  
-  await expect(newPage.locator('input[type="text"]').first()).toHaveValue(testValue);
+
+  await expect(newPage.locator('input[type="text"]').first()).toHaveValue(
+    testValue,
+  );
   await newPage.close();
 });
 ```
@@ -268,7 +290,7 @@ test("settings persist across sessions", async () => {
 ```javascript
 test("background service worker responds", async () => {
   const page = await context.newPage();
-  
+
   await page.goto(`chrome-extension://${extensionId}/popup/popup.html`);
   await ExtensionTestHelpers.waitForExtensionReady(page);
 
@@ -283,7 +305,7 @@ test("background service worker responds", async () => {
 
   expect(communicationResult.success).toBe(true);
   expect(communicationResult.response?.pong).toBe(true);
-  
+
   await page.close();
 });
 ```
@@ -293,9 +315,9 @@ test("background service worker responds", async () => {
 ```javascript
 test("content script injection works", async () => {
   const page = await context.newPage();
-  
+
   await page.goto("https://example.com");
-  await page.waitForLoadState('networkidle');
+  await page.waitForLoadState("networkidle");
   await page.waitForTimeout(2000); // Allow content script injection
 
   const hasContentScript = await page.evaluate(() => {
@@ -311,10 +333,10 @@ test("content script injection works", async () => {
         return { success: false, error: error.message };
       }
     });
-    
+
     expect(settingsAccess.success).toBe(true);
   }
-  
+
   await page.close();
 });
 ```
@@ -335,15 +357,16 @@ test("no console errors in extension pages", async () => {
   // Test multiple pages
   await page.goto(`chrome-extension://${extensionId}/popup/popup.html`);
   await ExtensionTestHelpers.waitForExtensionReady(page);
-  
+
   await page.goto(`chrome-extension://${extensionId}/options/options.html`);
   await ExtensionTestHelpers.waitForExtensionReady(page);
 
   // Filter out expected errors
   const criticalErrors = consoleErrors.filter(
-    (error) => !error.includes("Warning") && 
-               !error.includes("favicon") &&
-               !error.includes("DevTools")
+    (error) =>
+      !error.includes("Warning") &&
+      !error.includes("favicon") &&
+      !error.includes("DevTools"),
   );
 
   expect(criticalErrors).toHaveLength(0);
@@ -358,7 +381,7 @@ test("no console errors in extension pages", async () => {
 ```javascript
 test("extension loads within performance thresholds", async () => {
   const page = await context.newPage();
-  
+
   const startTime = Date.now();
   await page.goto(`chrome-extension://${extensionId}/popup/popup.html`);
   await ExtensionTestHelpers.waitForExtensionReady(page);
@@ -366,7 +389,7 @@ test("extension loads within performance thresholds", async () => {
 
   // Extension should load within 2 seconds
   expect(loadTime).toBeLessThan(2000);
-  
+
   await page.close();
 });
 ```
@@ -376,20 +399,20 @@ test("extension loads within performance thresholds", async () => {
 ```javascript
 test("extension memory usage is reasonable", async () => {
   const page = await context.newPage();
-  
+
   await page.goto(`chrome-extension://${extensionId}/popup/popup.html`);
   await ExtensionTestHelpers.waitForExtensionReady(page);
 
   const memoryUsage = await page.evaluate(() => {
     return {
       usedJSHeapSize: performance.memory?.usedJSHeapSize || 0,
-      totalJSHeapSize: performance.memory?.totalJSHeapSize || 0
+      totalJSHeapSize: performance.memory?.totalJSHeapSize || 0,
     };
   });
 
   // Extension should use less than 10MB
   expect(memoryUsage.usedJSHeapSize).toBeLessThan(10 * 1024 * 1024);
-  
+
   await page.close();
 });
 ```
@@ -406,30 +429,30 @@ on: [push, pull_request]
 jobs:
   e2e-tests:
     runs-on: ubuntu-latest
-    
+
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
-          cache: 'npm'
-      
+          node-version: "18"
+          cache: "npm"
+
       - name: Install dependencies
         run: npm ci
-      
+
       - name: Build extension
         run: npm run build
-      
+
       - name: Install Playwright browsers
         run: npx playwright install chromium firefox
-      
+
       - name: Run E2E tests
         run: npm run test:e2e
         env:
           CI: true
-      
+
       - name: Upload test results
         uses: actions/upload-artifact@v4
         if: always()
@@ -456,44 +479,52 @@ npm run test:e2e -- --last-failed
 ### Common Issues and Solutions
 
 #### Extension Not Loading
+
 ```
 Error: Extension service worker not found
 ```
 
 **Solutions:**
+
 1. Ensure `npm run build` completed successfully
 2. Check that `dist/` directory exists and contains manifest.json
 3. Verify browser arguments include both `--disable-extensions-except` and `--load-extension`
 4. Try increasing service worker detection timeout
 
 #### Flaky Loading Tests
+
 ```
 Error: Timeout waiting for #loading element
 ```
 
 **Solutions:**
+
 1. Use our enhanced wait strategies (`ExtensionTestHelpers.waitForExtensionReady`)
 2. Don't rely on loading element visibility - it may hide immediately
 3. Use `Promise.race()` with multiple wait conditions
 4. Implement retry logic for timing-sensitive operations
 
 #### Cross-Browser Differences
+
 ```
 Firefox: Extension not appearing in about:debugging
 ```
 
 **Solutions:**
+
 1. Firefox may require `web-ext run` for testing
 2. Consider manual extension installation for Firefox tests
 3. Use browser-specific test configurations
 4. Document browser limitations in test comments
 
 #### Context Cleanup Issues
+
 ```
 Error: Browser context not closed properly
 ```
 
 **Solutions:**
+
 1. Always use try/finally blocks for page cleanup
 2. Check `page.isClosed()` before closing
 3. Implement proper context cleanup in `afterAll` hooks
@@ -520,16 +551,16 @@ npm run test:e2e -- --trace on
 // Add to test for performance insights
 test("debug performance", async () => {
   const page = await context.newPage();
-  
+
   // Enable performance monitoring
   await page.coverage.startJSCoverage();
-  
+
   await page.goto(`chrome-extension://${extensionId}/popup/popup.html`);
   await ExtensionTestHelpers.waitForExtensionReady(page);
-  
+
   const coverage = await page.coverage.stopJSCoverage();
-  console.log('JS Coverage:', coverage.length);
-  
+  console.log("JS Coverage:", coverage.length);
+
   await ExtensionTestHelpers.debugPageState(page);
   await page.close();
 });
@@ -573,7 +604,7 @@ const test = base.extend({
     if (!page.isClosed()) {
       await page.close();
     }
-  }
+  },
 });
 
 // Use in tests
@@ -587,7 +618,7 @@ test("using fixture", async ({ extensionPage }) => {
 ```javascript
 test("mock background communication", async () => {
   const page = await context.newPage();
-  
+
   // Intercept and mock background messages
   await page.addInitScript(() => {
     const originalSendMessage = chrome.runtime.sendMessage;
@@ -599,7 +630,7 @@ test("mock background communication", async () => {
       return originalSendMessage.call(this, message, callback);
     };
   });
-  
+
   await page.goto(`chrome-extension://${extensionId}/popup/popup.html`);
   // Test with mocked responses
 });
@@ -610,12 +641,14 @@ test("mock background communication", async () => {
 If you were attempting to use Playwright MCP Server for extension testing, migrate to this approach:
 
 ### Before (MCP Server - Not Working)
+
 ```javascript
 // This doesn't work for extensions
 await mcp.browser.navigate(`chrome-extension://${extensionId}/popup.html`);
 ```
 
 ### After (Enhanced Playwright - Working)
+
 ```javascript
 const page = await context.newPage();
 await page.goto(`chrome-extension://${extensionId}/popup/popup.html`);
@@ -636,14 +669,17 @@ For questions or improvements to this testing framework, please refer to the pro
 
 ## Revision History
 
-| Date | Author | Changes |
-|------|--------|---------|
-| 2024-12-12 | Development Team | Initial enhanced E2E testing guide with MCP server analysis |
+| Date       | Author           | Changes                                                              |
+| ---------- | ---------------- | -------------------------------------------------------------------- |
+| 2024-12-12 | Development Team | Initial enhanced E2E testing guide with MCP server analysis          |
 | 2024-12-12 | Development Team | Added robust extension loading, wait strategies, and troubleshooting |
 
-## Related Documentation
+## References
 
 - [Extension Development Guide](extension-development.md)
 - [Cross-Browser Testing Guide](cross-browser-testing.md)
 - [Performance Profiling Guide](performance-profiling.md)
 - [Troubleshooting Guide](troubleshooting.md)
+- [Playwright Documentation](https://playwright.dev/)
+- [Chrome Extension Testing](https://developer.chrome.com/docs/extensions/mv3/tut_debugging/)
+- [Firefox Extension Testing](https://extensionworkshop.com/documentation/develop/debugging/)

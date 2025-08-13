@@ -64,7 +64,7 @@ describe("Message Passing Integration", () => {
         const settings = await settingsManager.getSettings(message.keys);
         return { values: settings };
       },
-      GET_ALL_SETTINGS: async (message) => {
+      GET_ALL_SETTINGS: async (_message) => {
         const settings = await settingsManager.getAllSettings();
         return { settings };
       },
@@ -76,7 +76,7 @@ describe("Message Passing Integration", () => {
         await settingsManager.updateSettings(message.updates);
         return { success: true };
       },
-      EXPORT_SETTINGS: async (message) => {
+      EXPORT_SETTINGS: async (_message) => {
         const data = await settingsManager.exportSettings();
         return { data };
       },
@@ -84,7 +84,7 @@ describe("Message Passing Integration", () => {
         await settingsManager.importSettings(message.data);
         return { success: true };
       },
-      RESET_SETTINGS: async (message) => {
+      RESET_SETTINGS: async (_message) => {
         await settingsManager.resetToDefaults();
         return { success: true };
       },
@@ -482,11 +482,7 @@ describe("Message Passing Integration", () => {
       };
 
       mockRuntime.sendMessage.mockImplementation(async (message) => {
-        try {
-          return await messageHandlers[message.type](message);
-        } catch (error) {
-          throw error;
-        }
+        return await messageHandlers[message.type](message);
       });
 
       try {
@@ -541,7 +537,7 @@ describe("Message Passing Integration", () => {
     test("should handle high message volume", async () => {
       // Test performance with many concurrent messages
       const startTime = performance.now();
-      const promises = Array.from({ length: 20 }, async (_, i) => {
+      const promises = Array.from({ length: 20 }, async () => {
         return await contentScript.getSetting("testBoolean");
       });
 

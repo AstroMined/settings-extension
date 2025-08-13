@@ -231,13 +231,13 @@ describe("Performance Tests", () => {
     test("should handle memory cleanup properly", async () => {
       // Test memory cleanup after operations
       const cleanupTest = async () => {
-        let data = { ...largeSettings };
+        const data = { ...largeSettings };
 
         // Simulate usage
         await delay(10);
 
-        // Clean up
-        data = null;
+        // Clean up - data will be garbage collected
+        console.log("Data processed:", Object.keys(data).length);
       };
 
       await cleanupTest();
