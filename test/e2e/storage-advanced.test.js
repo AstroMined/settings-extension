@@ -6,48 +6,19 @@
 import { test, expect } from '@playwright/test';
 import path from 'path';
 
+const BrowserFactory = require('./utils/browser-factory');
+
 let context;
 let extensionId;
 
 test.describe('Advanced Storage and Sync', () => {
   test.beforeAll(async ({}, testInfo) => {
-    const { chromium } = require('@playwright/test');
-    const extensionPath = path.resolve(__dirname, '../../dist');
-    const userDataDir = path.resolve(__dirname, '../../test-user-data-storage');
+    // Use browser factory for consistent configuration across environments
+    context = await BrowserFactory.createExtensionContext(testInfo);
 
-    context = await chromium.launchPersistentContext(userDataDir, {
-      headless: false,
-      args: [
-        `--disable-extensions-except=${extensionPath}`,
-        `--load-extension=${extensionPath}`,
-        '--no-sandbox',
-        '--disable-dev-shm-usage',
-      ],
-    });
-
-    // Enhanced service worker detection
-    let serviceWorker = null;
-    const maxAttempts = 5;
-
-    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-      const workers = context.serviceWorkers();
-      if (workers.length > 0) {
-        serviceWorker = workers[0];
-        break;
-      }
-
-      try {
-        serviceWorker = await context.waitForEvent('serviceworker', {
-          timeout: 5000,
-        });
-        if (serviceWorker) break;
-      } catch (error) {
-        if (attempt < maxAttempts) {
-          await new Promise((resolve) => setTimeout(resolve, 2000));
-        }
-      }
-    }
-
+    // Get extension service worker using browser factory helper
+    const serviceWorker = await BrowserFactory.getExtensionServiceWorker(context);
+    
     if (serviceWorker) {
       extensionId = serviceWorker.url().split('/')[2];
       console.log(`Extension ID: ${extensionId}`);

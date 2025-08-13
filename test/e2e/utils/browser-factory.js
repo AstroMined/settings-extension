@@ -57,7 +57,7 @@ class BrowserFactory {
 
     // Browser-specific configuration
     const baseConfig = {
-      headless: false,
+      headless: process.env.CI ? true : false, // Headless in CI, headed locally for debugging
       ignoreHTTPSErrors: true,
       args: [
         `--disable-extensions-except=${extensionPath}`,
