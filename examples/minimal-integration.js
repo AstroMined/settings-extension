@@ -1,13 +1,13 @@
 /**
  * Minimal Settings Integration Example - Production Ready in <50 lines
  *
- * This example shows the absolute essentials to get settings working in your 
+ * This example shows the absolute essentials to get settings working in your
  * content script. Despite being minimal, it includes proper error handling,
  * caching, and real-time updates reflecting the actual ContentScriptSettings API.
  *
  * ✅ Production patterns included:
  * - Proper async/await error handling with timeouts
- * - Cache utilization for performance  
+ * - Cache utilization for performance
  * - Real-time change listeners
  * - Browser API initialization verification
  * - Graceful fallbacks for offline scenarios
@@ -26,8 +26,8 @@ async function initializeExtension() {
     // Get critical settings efficiently (cached after first call)
     const config = await settings.getSettings([
       "feature_enabled",
-      "refresh_interval", 
-      "custom_css"
+      "refresh_interval",
+      "custom_css",
     ]);
 
     // Apply settings with null checks
@@ -38,19 +38,18 @@ async function initializeExtension() {
     // Set up real-time change listener (critical for user experience)
     settings.addChangeListener((event, changes) => {
       console.log(`Settings ${event}:`, changes);
-      
+
       // React to specific changes instantly
       if (changes.feature_enabled !== undefined) {
         changes.feature_enabled ? startMainFeature() : stopMainFeature();
       }
-      
+
       if (changes.custom_css !== undefined) {
         applyCustomCSS(changes.custom_css);
       }
     });
 
     console.log("✅ Extension initialized successfully");
-
   } catch (error) {
     console.error("❌ Settings initialization failed:", error);
     // Fallback to safe defaults - extension still works
@@ -72,14 +71,14 @@ async function updateUserSetting(key, value) {
 // Step 4: Your extension logic with settings integration
 async function startMainFeature(config = {}) {
   console.log("🎯 Starting main feature with config:", config);
-  
+
   // Use settings to configure your feature
   const interval = config.refresh_interval?.value || 60; // Default 60s
   const css = config.custom_css?.value;
-  
+
   if (css) applyCustomCSS(css);
   setupPeriodicRefresh(interval);
-  
+
   // Your feature implementation here
 }
 
@@ -89,7 +88,8 @@ function stopMainFeature() {
 }
 
 function applyCustomCSS(css) {
-  const styleEl = document.getElementById("extension-styles") || 
+  const styleEl =
+    document.getElementById("extension-styles") ||
     document.createElement("style");
   styleEl.id = "extension-styles";
   styleEl.textContent = css;
@@ -101,7 +101,7 @@ function setupPeriodicRefresh(interval) {
   if (window.extensionRefreshInterval) {
     clearInterval(window.extensionRefreshInterval);
   }
-  
+
   // Set new interval
   window.extensionRefreshInterval = setInterval(() => {
     console.log("🔄 Periodic refresh triggered");
@@ -117,9 +117,10 @@ if (document.readyState === "loading") {
 }
 
 // Example: Update theme preference with error handling
-settings.updateSetting("theme_preference", "dark")
+settings
+  .updateSetting("theme_preference", "dark")
   .then(() => console.log("✅ Theme updated"))
-  .catch(error => console.error("❌ Theme update failed:", error));
+  .catch((error) => console.error("❌ Theme update failed:", error));
 
 /**
  * USAGE SUMMARY:

@@ -17,9 +17,20 @@ updates:
     labels:
       - "dependencies"
       - "javascript"
-    # Allow both security and version updates
+    # Allow both security and version updates, but be selective about major versions
     allow:
-      - dependency-type: "all"
+      - dependency-type: "direct:production"
+      - dependency-type: "indirect"
+    # Ignore major version updates for complex tools (handle manually)
+    ignore:
+      - dependency-name: "eslint"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "jest"
+        update-types: ["version-update:semver-major"] 
+      - dependency-name: "lint-staged"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@types/node"
+        update-types: ["version-update:semver-major"]
     # Group updates to reduce noise
     groups:
       playwright:

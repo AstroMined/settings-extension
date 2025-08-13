@@ -35,17 +35,18 @@ class AdvancedSettingsPopup {
     this.config = {
       connectionTimeout: {
         initial: 2000,
-        progressive: (attempt) => Math.min(2000 * attempt, 8000)
+        progressive: (attempt) => Math.min(2000 * attempt, 8000),
       },
       settingsTimeout: {
         base: 5000,
-        increment: 2000
+        increment: 2000,
       },
       retryDelay: {
-        exponential: (attempt) => Math.min(500 * Math.pow(2, attempt - 1), 2000),
-        linear: (attempt) => 1000 * attempt
+        exponential: (attempt) =>
+          Math.min(500 * Math.pow(2, attempt - 1), 2000),
+        linear: (attempt) => 1000 * attempt,
       },
-      messageTimeout: 5000
+      messageTimeout: 5000,
     };
 
     // Small delay to ensure DOM is fully ready (fixes race conditions)
@@ -82,16 +83,22 @@ class AdvancedSettingsPopup {
       console.log("✅ Advanced popup initialized successfully");
     } catch (error) {
       console.error("❌ Failed to initialize popup:", error);
-      
+
       this.initializationRetries++;
       if (this.initializationRetries < this.maxInitRetries) {
-        console.log(`🔄 Retrying initialization (${this.initializationRetries}/${this.maxInitRetries})...`);
-        
+        console.log(
+          `🔄 Retrying initialization (${this.initializationRetries}/${this.maxInitRetries})...`,
+        );
+
         // Progressive delay before retry
-        const delay = this.config.retryDelay.exponential(this.initializationRetries);
+        const delay = this.config.retryDelay.exponential(
+          this.initializationRetries,
+        );
         setTimeout(() => this.initialize(), delay);
       } else {
-        this.showError("Failed to load settings after multiple attempts. Please reload the extension.");
+        this.showError(
+          "Failed to load settings after multiple attempts. Please reload the extension.",
+        );
         this.hideLoading();
       }
     }
@@ -106,12 +113,16 @@ class AdvancedSettingsPopup {
 
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
-        console.log(`🔗 Testing background script connection (attempt ${attempt}/${maxRetries})...`);
+        console.log(
+          `🔗 Testing background script connection (attempt ${attempt}/${maxRetries})...`,
+        );
 
         const response = await new Promise((resolve, reject) => {
           // Progressive timeout: 2s, 4s, 8s
           const timeout = setTimeout(() => {
-            reject(new Error(`Background script ping timeout (attempt ${attempt})`));
+            reject(
+              new Error(`Background script ping timeout (attempt ${attempt})`),
+            );
           }, this.config.connectionTimeout.progressive(attempt));
 
           browserAPI.runtime
@@ -133,7 +144,10 @@ class AdvancedSettingsPopup {
         console.log("✅ Background script ping response:", response);
         return; // Success - exit retry loop
       } catch (error) {
-        console.error(`❌ Background script connection test failed (attempt ${attempt}):`, error);
+        console.error(
+          `❌ Background script connection test failed (attempt ${attempt}):`,
+          error,
+        );
         lastError = error;
 
         if (attempt < maxRetries) {
@@ -147,7 +161,7 @@ class AdvancedSettingsPopup {
 
     // All retries failed
     throw new Error(
-      `Service worker not responding after ${maxRetries} attempts. ${lastError?.message || "Unknown error"}. Please reload the extension.`
+      `Service worker not responding after ${maxRetries} attempts. ${lastError?.message || "Unknown error"}. Please reload the extension.`,
     );
   }
 
@@ -160,13 +174,23 @@ class AdvancedSettingsPopup {
 
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
-        console.log(`📊 Loading settings (attempt ${attempt}/${maxRetries})...`);
+        console.log(
+          `📊 Loading settings (attempt ${attempt}/${maxRetries})...`,
+        );
 
         const response = await new Promise((resolve, reject) => {
           // Progressive timeout: 7s, 9s
-          const timeout = setTimeout(() => {
-            reject(new Error(`Settings load timeout after ${this.config.settingsTimeout.base + attempt * this.config.settingsTimeout.increment} ms (attempt ${attempt})`));
-          }, this.config.settingsTimeout.base + attempt * this.config.settingsTimeout.increment);
+          const timeout = setTimeout(
+            () => {
+              reject(
+                new Error(
+                  `Settings load timeout after ${this.config.settingsTimeout.base + attempt * this.config.settingsTimeout.increment} ms (attempt ${attempt})`,
+                ),
+              );
+            },
+            this.config.settingsTimeout.base +
+              attempt * this.config.settingsTimeout.increment,
+          );
 
           browserAPI.runtime
             .sendMessage({ type: "GET_ALL_SETTINGS" })
@@ -195,7 +219,11 @@ class AdvancedSettingsPopup {
 
         // Success - cache settings and exit retry loop
         this.currentSettings = new Map(Object.entries(response.settings));
-        console.log("✅ Settings loaded successfully:", this.currentSettings.size, "settings");
+        console.log(
+          "✅ Settings loaded successfully:",
+          this.currentSettings.size,
+          "settings",
+        );
         return;
       } catch (error) {
         console.error(`❌ Error loading settings (attempt ${attempt}):`, error);
@@ -212,7 +240,7 @@ class AdvancedSettingsPopup {
 
     // All retries failed
     throw new Error(
-      `Failed to load settings after ${maxRetries} attempts: ${lastError?.message || "Unknown error"}`
+      `Failed to load settings after ${maxRetries} attempts: ${lastError?.message || "Unknown error"}`,
     );
   }
 
@@ -231,9 +259,9 @@ class AdvancedSettingsPopup {
       // Define setting groups for better organization (matches production popup)
       const settingGroups = {
         "Quick Settings": ["feature_enabled", "refresh_interval"],
-        "Configuration": ["api_key", "advanced_config"],
-        "Appearance": ["custom_css"],
-        "Advanced": ["debug_mode", "performance_mode"]
+        Configuration: ["api_key", "advanced_config"],
+        Appearance: ["custom_css"],
+        Advanced: ["debug_mode", "performance_mode"],
       };
 
       // Render each group
@@ -257,7 +285,9 @@ class AdvancedSettingsPopup {
    * Create setting group with validation
    */
   createSettingGroup(groupName, settingKeys) {
-    const validSettings = settingKeys.filter((key) => this.currentSettings.has(key));
+    const validSettings = settingKeys.filter((key) =>
+      this.currentSettings.has(key),
+    );
 
     if (validSettings.length === 0) {
       console.log(`⚠️ No valid settings found for group: ${groupName}`);
@@ -338,7 +368,7 @@ class AdvancedSettingsPopup {
           input.type = "checkbox";
           input.checked = setting.value;
           input.addEventListener("change", () =>
-            this.handleSettingChange(key, input)
+            this.handleSettingChange(key, input),
           );
           break;
 
@@ -349,9 +379,11 @@ class AdvancedSettingsPopup {
           input.maxLength = setting.maxLength || 1000;
           input.placeholder = `Enter ${setting.description?.toLowerCase() || key}`;
           input.addEventListener("input", () =>
-            this.handleSettingChange(key, input)
+            this.handleSettingChange(key, input),
           );
-          input.addEventListener("blur", () => this.validateSetting(key, input));
+          input.addEventListener("blur", () =>
+            this.validateSetting(key, input),
+          );
           break;
 
         case "longtext":
@@ -361,9 +393,11 @@ class AdvancedSettingsPopup {
           input.rows = 3;
           input.placeholder = `Enter ${setting.description?.toLowerCase() || key}`;
           input.addEventListener("input", () =>
-            this.handleSettingChange(key, input)
+            this.handleSettingChange(key, input),
           );
-          input.addEventListener("blur", () => this.validateSetting(key, input));
+          input.addEventListener("blur", () =>
+            this.validateSetting(key, input),
+          );
           break;
 
         case "number":
@@ -374,9 +408,11 @@ class AdvancedSettingsPopup {
           if (setting.max !== undefined) input.max = setting.max;
           input.step = 1;
           input.addEventListener("input", () =>
-            this.handleSettingChange(key, input)
+            this.handleSettingChange(key, input),
           );
-          input.addEventListener("blur", () => this.validateSetting(key, input));
+          input.addEventListener("blur", () =>
+            this.validateSetting(key, input),
+          );
           break;
 
         case "json":
@@ -385,18 +421,22 @@ class AdvancedSettingsPopup {
           input.className = "json-input";
           input.rows = 4;
           input.addEventListener("input", () =>
-            this.handleSettingChange(key, input)
+            this.handleSettingChange(key, input),
           );
-          input.addEventListener("blur", () => this.validateSetting(key, input));
+          input.addEventListener("blur", () =>
+            this.validateSetting(key, input),
+          );
           break;
 
         default:
-          console.warn(`⚠️ Unknown setting type: ${setting.type} for key: ${key}`);
+          console.warn(
+            `⚠️ Unknown setting type: ${setting.type} for key: ${key}`,
+          );
           input = document.createElement("input");
           input.type = "text";
           input.value = setting.value || "";
           input.addEventListener("input", () =>
-            this.handleSettingChange(key, input)
+            this.handleSettingChange(key, input),
           );
           break;
       }
@@ -451,7 +491,7 @@ class AdvancedSettingsPopup {
 
       // Clear any validation errors on success
       this.clearValidationError(key);
-      
+
       console.log(`✅ Setting ${key} updated successfully to:`, value);
     } catch (error) {
       console.error(`❌ Error updating setting ${key}:`, error);
@@ -487,7 +527,7 @@ class AdvancedSettingsPopup {
 
       // Run value validation
       this.validateValue(setting, value);
-      
+
       // Clear errors on successful validation
       this.clearValidationError(key);
     } catch (error) {
@@ -633,15 +673,18 @@ class AdvancedSettingsPopup {
           reject(new Error("Export timeout"));
         }, this.config.messageTimeout);
 
-        browserAPI.runtime.sendMessage({
-          type: "EXPORT_SETTINGS",
-        }).then((response) => {
-          clearTimeout(timeout);
-          resolve(response);
-        }).catch((error) => {
-          clearTimeout(timeout);
-          reject(error);
-        });
+        browserAPI.runtime
+          .sendMessage({
+            type: "EXPORT_SETTINGS",
+          })
+          .then((response) => {
+            clearTimeout(timeout);
+            resolve(response);
+          })
+          .catch((error) => {
+            clearTimeout(timeout);
+            reject(error);
+          });
       });
 
       if (response.error) {
@@ -666,7 +709,7 @@ class AdvancedSettingsPopup {
 
       URL.revokeObjectURL(url);
       this.showSuccess("Settings exported successfully");
-      
+
       console.log("✅ Settings exported successfully");
     } catch (error) {
       console.error("❌ Export failed:", error);
@@ -719,16 +762,19 @@ class AdvancedSettingsPopup {
               reject(new Error("Import timeout"));
             }, this.config.messageTimeout * 2); // Double timeout for import
 
-            browserAPI.runtime.sendMessage({
-              type: "IMPORT_SETTINGS",
-              data: content,
-            }).then((response) => {
-              clearTimeout(timeout);
-              resolve(response);
-            }).catch((error) => {
-              clearTimeout(timeout);
-              reject(error);
-            });
+            browserAPI.runtime
+              .sendMessage({
+                type: "IMPORT_SETTINGS",
+                data: content,
+              })
+              .then((response) => {
+                clearTimeout(timeout);
+                resolve(response);
+              })
+              .catch((error) => {
+                clearTimeout(timeout);
+                reject(error);
+              });
           });
 
           if (response.error) {
@@ -739,7 +785,7 @@ class AdvancedSettingsPopup {
           await this.loadSettings();
           this.renderSettings();
           this.showSuccess("Settings imported successfully");
-          
+
           console.log("✅ Settings imported successfully");
         } catch (error) {
           console.error("❌ Import failed:", error);
@@ -761,9 +807,11 @@ class AdvancedSettingsPopup {
    * Reset settings to defaults with confirmation and error handling
    */
   async resetToDefaults() {
-    if (!confirm(
-      "Are you sure you want to reset all settings to defaults? This action cannot be undone."
-    )) {
+    if (
+      !confirm(
+        "Are you sure you want to reset all settings to defaults? This action cannot be undone.",
+      )
+    ) {
       return;
     }
 
@@ -796,10 +844,10 @@ class AdvancedSettingsPopup {
       // Reload settings and refresh UI
       await this.loadSettings();
       this.renderSettings();
-      
+
       // Clear any validation errors
       this.validationErrors.clear();
-      document.querySelectorAll(".setting-item.error").forEach(el => {
+      document.querySelectorAll(".setting-item.error").forEach((el) => {
         el.classList.remove("error");
         const errorEl = el.querySelector(".error-message");
         if (errorEl) {
@@ -826,7 +874,9 @@ class AdvancedSettingsPopup {
       // Use proper Manifest V3 options API
       if (chrome.runtime.openOptionsPage) {
         chrome.runtime.openOptionsPage();
-        console.log("✅ Options page opened using chrome.runtime.openOptionsPage()");
+        console.log(
+          "✅ Options page opened using chrome.runtime.openOptionsPage()",
+        );
       } else {
         // Fallback for older browsers or if openOptionsPage isn't available
         console.log("⚠️ Falling back to manual tab creation");
@@ -836,7 +886,7 @@ class AdvancedSettingsPopup {
       }
     } catch (error) {
       console.error("❌ Failed to open options page:", error);
-      
+
       // Final fallback - try manual tab creation
       try {
         browserAPI.tabs.create({
@@ -845,7 +895,7 @@ class AdvancedSettingsPopup {
       } catch (fallbackError) {
         console.error("❌ Fallback also failed:", fallbackError);
         this.showError(
-          "Unable to open advanced settings. Please try right-clicking the extension icon and selecting 'Options'."
+          "Unable to open advanced settings. Please try right-clicking the extension icon and selecting 'Options'.",
         );
       }
     }
@@ -857,16 +907,16 @@ class AdvancedSettingsPopup {
   getUIValues() {
     const values = {};
     const inputs = document.querySelectorAll(
-      "#settings-container input, #settings-container textarea"
+      "#settings-container input, #settings-container textarea",
     );
-    
+
     inputs.forEach((input) => {
       const key = input.id.replace("setting-", "");
       if (key) {
         values[key] = input.type === "checkbox" ? input.checked : input.value;
       }
     });
-    
+
     return values;
   }
 
@@ -917,9 +967,10 @@ class AdvancedSettingsPopup {
       box-shadow: 0 2px 8px rgba(0,0,0,0.15);
       pointer-events: auto;
       transition: all 0.3s ease;
-      ${type === "success" 
-        ? "background: #4CAF50; color: white; border: 1px solid #4CAF50;" 
-        : "background: #f44336; color: white; border: 1px solid #f44336;"
+      ${
+        type === "success"
+          ? "background: #4CAF50; color: white; border: 1px solid #4CAF50;"
+          : "background: #f44336; color: white; border: 1px solid #f44336;"
       }
     `;
 
@@ -1376,12 +1427,12 @@ if (typeof window !== "undefined") {
 
 /**
  * INTEGRATION INSTRUCTIONS:
- * 
+ *
  * 1. File Setup:
  *    - Save this file as popup-integration.js in your popup directory
  *    - Copy the HTML template above to popup.html
  *    - Ensure lib/browser-compat.js is accessible
- * 
+ *
  * 2. Manifest Configuration:
  *    {
  *      "action": {
@@ -1393,7 +1444,7 @@ if (typeof window !== "undefined") {
  *        }
  *      }
  *    }
- * 
+ *
  * 3. Background Script Integration:
  *    - Ensure background script handles these message types:
  *      - PING (for connection testing)
@@ -1402,30 +1453,30 @@ if (typeof window !== "undefined") {
  *      - EXPORT_SETTINGS
  *      - IMPORT_SETTINGS
  *      - RESET_SETTINGS
- * 
+ *
  * 4. Settings Schema:
  *    - Define settings in config/defaults.json with proper types and constraints
  *    - Supported types: boolean, text, longtext, number, json
  *    - Include validation constraints (min, max, maxLength, etc.)
- * 
+ *
  * 5. Customization:
  *    - Modify settingGroups object to organize your settings
  *    - Adjust timeouts and retry logic in config object
  *    - Customize styling in the HTML template
  *    - Add custom validation logic in validateValue method
- * 
+ *
  * 6. Error Handling:
  *    - All operations include comprehensive error handling
  *    - Connection failures are retried with exponential backoff
  *    - User-friendly error messages are displayed
  *    - Validation errors are shown inline with inputs
- * 
+ *
  * 7. Performance Features:
  *    - Settings are cached locally for quick access
  *    - Progressive timeouts for different operations
  *    - Memory cleanup on popup close
  *    - Efficient DOM updates and event handling
- * 
+ *
  * This implementation provides production-ready popup functionality with:
  * - Robust error handling and retry logic
  * - Comprehensive input validation

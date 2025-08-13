@@ -42,23 +42,24 @@ class AdvancedContentScript {
     // Configuration for robust operation
     this.config = {
       initRetryDelay: {
-        exponential: (attempt) => Math.min(1000 * Math.pow(2, attempt - 1), 10000)
+        exponential: (attempt) =>
+          Math.min(1000 * Math.pow(2, attempt - 1), 10000),
       },
       refreshInterval: {
         min: 1,
         max: 3600,
-        default: 60
+        default: 60,
       },
       apiTimeout: {
         default: 10000,
         settings: 5000,
-        content: 15000
+        content: 15000,
       },
       ui: {
         notificationTimeout: 5000,
         errorTimeout: 7000,
-        fadeTransition: 300
-      }
+        fadeTransition: 300,
+      },
     };
 
     this.init();
@@ -73,7 +74,9 @@ class AdvancedContentScript {
 
       // Test if ContentScriptSettings is properly loaded
       if (!this.settings) {
-        throw new Error("ContentScriptSettings not available - ensure lib/content-settings.js is loaded");
+        throw new Error(
+          "ContentScriptSettings not available - ensure lib/content-settings.js is loaded",
+        );
       }
 
       // Load initial settings with retry logic
@@ -99,15 +102,21 @@ class AdvancedContentScript {
       this.showSuccessNotification("Extension initialized successfully");
     } catch (error) {
       console.error("❌ Failed to initialize content script:", error);
-      
+
       this.initializationRetries++;
       if (this.initializationRetries < this.maxInitRetries) {
-        console.log(`🔄 Retrying initialization (${this.initializationRetries}/${this.maxInitRetries})...`);
-        
-        const delay = this.config.initRetryDelay.exponential(this.initializationRetries);
+        console.log(
+          `🔄 Retrying initialization (${this.initializationRetries}/${this.maxInitRetries})...`,
+        );
+
+        const delay = this.config.initRetryDelay.exponential(
+          this.initializationRetries,
+        );
         setTimeout(() => this.init(), delay);
       } else {
-        this.showErrorNotification("Failed to initialize extension after multiple attempts");
+        this.showErrorNotification(
+          "Failed to initialize extension after multiple attempts",
+        );
         this.setupFallbackMode();
       }
     }
@@ -124,22 +133,33 @@ class AdvancedContentScript {
       const criticalSettings = await Promise.race([
         this.settings.getSettings([
           "feature_enabled",
-          "refresh_interval", 
+          "refresh_interval",
           "api_key",
-          "advanced_config"
+          "advanced_config",
         ]),
-        new Promise((_, reject) => 
-          setTimeout(() => reject(new Error("Settings load timeout")), this.config.apiTimeout.settings)
-        )
+        new Promise((_, reject) =>
+          setTimeout(
+            () => reject(new Error("Settings load timeout")),
+            this.config.apiTimeout.settings,
+          ),
+        ),
       ]);
 
-      console.log("📋 Critical settings loaded:", Object.keys(criticalSettings).length, "settings");
+      console.log(
+        "📋 Critical settings loaded:",
+        Object.keys(criticalSettings).length,
+        "settings",
+      );
 
       // Cache values for quick synchronous access
       this.featureEnabled = criticalSettings.feature_enabled?.value ?? false;
-      this.refreshInterval = this.validateRefreshInterval(criticalSettings.refresh_interval?.value);
+      this.refreshInterval = this.validateRefreshInterval(
+        criticalSettings.refresh_interval?.value,
+      );
       this.apiKey = criticalSettings.api_key?.value ?? "";
-      this.apiConfig = this.validateApiConfig(criticalSettings.advanced_config?.value);
+      this.apiConfig = this.validateApiConfig(
+        criticalSettings.advanced_config?.value,
+      );
 
       // Load additional settings asynchronously for better performance
       this.loadAdditionalSettings();
@@ -147,7 +167,7 @@ class AdvancedContentScript {
       console.log("✅ Initial settings loaded successfully");
     } catch (error) {
       console.error("❌ Error loading initial settings:", error);
-      
+
       // Fallback to cached or default values
       this.loadFallbackSettings();
       throw error;
@@ -167,13 +187,14 @@ class AdvancedContentScript {
       const optionalSettings = await this.settings.getSettings([
         "debug_mode",
         "performance_mode",
-        "notification_settings"
+        "notification_settings",
       ]);
 
       // Apply optional settings
       this.debugMode = optionalSettings.debug_mode?.value ?? false;
       this.performanceMode = optionalSettings.performance_mode?.value ?? false;
-      this.notificationSettings = optionalSettings.notification_settings?.value ?? {};
+      this.notificationSettings =
+        optionalSettings.notification_settings?.value ?? {};
 
       if (this.debugMode) {
         console.log("🐛 Debug mode enabled");
@@ -191,28 +212,36 @@ class AdvancedContentScript {
    */
   loadFallbackSettings() {
     console.log("🔄 Loading fallback settings...");
-    
+
     // Use cached settings if available
     const cachedSettings = this.settings.getCachedSettings();
-    
+
     if (Object.keys(cachedSettings).length > 0) {
-      console.log("📦 Using cached settings:", Object.keys(cachedSettings).length, "settings");
-      
+      console.log(
+        "📦 Using cached settings:",
+        Object.keys(cachedSettings).length,
+        "settings",
+      );
+
       this.featureEnabled = cachedSettings.feature_enabled?.value ?? false;
-      this.refreshInterval = this.validateRefreshInterval(cachedSettings.refresh_interval?.value);
+      this.refreshInterval = this.validateRefreshInterval(
+        cachedSettings.refresh_interval?.value,
+      );
       this.apiKey = cachedSettings.api_key?.value ?? "";
-      this.apiConfig = this.validateApiConfig(cachedSettings.advanced_config?.value);
+      this.apiConfig = this.validateApiConfig(
+        cachedSettings.advanced_config?.value,
+      );
     } else {
       // Use hardcoded defaults as last resort
       console.log("🏭 Using default settings");
-      
+
       this.featureEnabled = false;
       this.refreshInterval = this.config.refreshInterval.default;
       this.apiKey = "";
       this.apiConfig = {
         endpoint: "https://api.example.com",
         timeout: 5000,
-        retries: 3
+        retries: 3,
       };
     }
   }
@@ -224,7 +253,7 @@ class AdvancedContentScript {
     const interval = parseInt(value) || this.config.refreshInterval.default;
     return Math.max(
       this.config.refreshInterval.min,
-      Math.min(interval, this.config.refreshInterval.max)
+      Math.min(interval, this.config.refreshInterval.max),
     );
   }
 
@@ -236,7 +265,7 @@ class AdvancedContentScript {
       return {
         endpoint: "https://api.example.com",
         timeout: 5000,
-        retries: 3
+        retries: 3,
       };
     }
 
@@ -244,7 +273,7 @@ class AdvancedContentScript {
       endpoint: config.endpoint || "https://api.example.com",
       timeout: Math.max(1000, Math.min(config.timeout || 5000, 30000)),
       retries: Math.max(0, Math.min(config.retries || 3, 10)),
-      ...config
+      ...config,
     };
   }
 
@@ -258,7 +287,11 @@ class AdvancedContentScript {
       // Main change listener with comprehensive error handling
       const changeListener = (event, data) => {
         try {
-          console.log(`🔄 Settings ${event}:`, Object.keys(data || {}).length, "changes");
+          console.log(
+            `🔄 Settings ${event}:`,
+            Object.keys(data || {}).length,
+            "changes",
+          );
 
           switch (event) {
             case "changed":
@@ -326,7 +359,7 @@ class AdvancedContentScript {
       performance_mode: (value) => {
         this.performanceMode = value;
         this.applyPerformanceOptimizations(value);
-      }
+      },
     };
 
     // Process each change
@@ -342,7 +375,9 @@ class AdvancedContentScript {
       }
     }
 
-    this.showInfoNotification(`Updated ${Object.keys(changes).length} setting(s)`);
+    this.showInfoNotification(
+      `Updated ${Object.keys(changes).length} setting(s)`,
+    );
   }
 
   /**
@@ -356,13 +391,15 @@ class AdvancedContentScript {
     this.cleanupCurrentState();
 
     // Reload all settings
-    this.loadInitialSettings().then(() => {
-      this.applySettings();
-      this.updatePageIndicators();
-    }).catch(error => {
-      console.error("❌ Error reloading after import:", error);
-      this.showErrorNotification("Failed to apply imported settings");
-    });
+    this.loadInitialSettings()
+      .then(() => {
+        this.applySettings();
+        this.updatePageIndicators();
+      })
+      .catch((error) => {
+        console.error("❌ Error reloading after import:", error);
+        this.showErrorNotification("Failed to apply imported settings");
+      });
   }
 
   /**
@@ -376,13 +413,15 @@ class AdvancedContentScript {
     this.cleanupCurrentState();
 
     // Reload with defaults
-    this.loadInitialSettings().then(() => {
-      this.applySettings();
-      this.updatePageIndicators();
-    }).catch(error => {
-      console.error("❌ Error reloading after reset:", error);
-      this.showErrorNotification("Failed to apply default settings");
-    });
+    this.loadInitialSettings()
+      .then(() => {
+        this.applySettings();
+        this.updatePageIndicators();
+      })
+      .catch((error) => {
+        console.error("❌ Error reloading after reset:", error);
+        this.showErrorNotification("Failed to apply default settings");
+      });
   }
 
   /**
@@ -414,7 +453,7 @@ class AdvancedContentScript {
         () => this.updateCustomCSS(this.customCSS),
         () => this.setupRefreshInterval(this.refreshInterval),
         () => this.updateAPIConfiguration(),
-        () => this.applyPerformanceOptimizations(this.performanceMode)
+        () => this.applyPerformanceOptimizations(this.performanceMode),
       ];
 
       // Apply settings with individual error handling
@@ -480,13 +519,13 @@ class AdvancedContentScript {
       style.id = "extension-custom-styles";
       style.type = "text/css";
       style.setAttribute("data-source", "settings-extension");
-      
+
       // Add CSS with error handling
       try {
         style.textContent = css;
         document.head.appendChild(style);
         this.styleSheets.add(style);
-        
+
         console.log("✅ Custom CSS applied successfully");
       } catch (error) {
         console.error("❌ Error applying CSS:", error);
@@ -502,7 +541,7 @@ class AdvancedContentScript {
    * Remove custom styles safely
    */
   removeCustomStyles() {
-    this.styleSheets.forEach(style => {
+    this.styleSheets.forEach((style) => {
       try {
         if (style.parentNode) {
           style.parentNode.removeChild(style);
@@ -559,7 +598,7 @@ class AdvancedContentScript {
     try {
       // Ensure apiConfig is properly validated
       this.apiConfig = this.validateApiConfig(this.apiConfig);
-      
+
       // Add API key to configuration
       if (this.apiKey) {
         this.apiConfig.apiKey = this.apiKey;
@@ -569,7 +608,7 @@ class AdvancedContentScript {
         endpoint: this.apiConfig.endpoint,
         timeout: this.apiConfig.timeout,
         retries: this.apiConfig.retries,
-        hasApiKey: !!this.apiKey
+        hasApiKey: !!this.apiKey,
       });
     } catch (error) {
       console.error("❌ Error updating API configuration:", error);
@@ -593,13 +632,13 @@ class AdvancedContentScript {
       const controller = new AbortController();
       const timeoutId = setTimeout(
         () => controller.abort(),
-        this.apiConfig.timeout || this.config.apiTimeout.content
+        this.apiConfig.timeout || this.config.apiTimeout.content,
       );
 
       // Prepare request headers
       const headers = {
         "Content-Type": "application/json",
-        "User-Agent": `SettingsExtension/1.0.0`
+        "User-Agent": `SettingsExtension/1.0.0`,
       };
 
       if (this.apiKey) {
@@ -610,7 +649,7 @@ class AdvancedContentScript {
       const response = await this.fetchWithRetry(this.apiConfig.endpoint, {
         signal: controller.signal,
         method: "GET",
-        headers
+        headers,
       });
 
       clearTimeout(timeoutId);
@@ -618,11 +657,11 @@ class AdvancedContentScript {
       if (response.ok) {
         const data = await response.json();
         const duration = Date.now() - startTime;
-        
+
         this.updateContentDisplay(data);
-        
+
         console.log(`✅ Content refreshed successfully in ${duration}ms`);
-        
+
         if (this.debugMode) {
           this.showSuccessNotification(`Content refreshed (${duration}ms)`);
         }
@@ -631,13 +670,16 @@ class AdvancedContentScript {
       }
     } catch (error) {
       const duration = Date.now() - startTime;
-      
+
       console.error(`❌ Content refresh failed after ${duration}ms:`, error);
-      
+
       // Handle different error types
       if (error.name === "AbortError") {
         this.showErrorNotification("Content refresh timed out");
-      } else if (error.name === "TypeError" && error.message.includes("fetch")) {
+      } else if (
+        error.name === "TypeError" &&
+        error.message.includes("fetch")
+      ) {
         this.showErrorNotification("Network error - check internet connection");
       } else {
         this.showErrorNotification(`Refresh failed: ${error.message}`);
@@ -650,7 +692,7 @@ class AdvancedContentScript {
    */
   async fetchWithRetry(url, options) {
     const maxRetries = this.apiConfig.retries || 3;
-    
+
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
         return await fetch(url, options);
@@ -658,12 +700,14 @@ class AdvancedContentScript {
         if (attempt === maxRetries || error.name === "AbortError") {
           throw error;
         }
-        
+
         // Wait before retry with exponential backoff
         const delay = Math.min(1000 * Math.pow(2, attempt - 1), 5000);
-        await new Promise(resolve => setTimeout(resolve, delay));
-        
-        console.log(`🔄 Retrying request (attempt ${attempt + 1}/${maxRetries})...`);
+        await new Promise((resolve) => setTimeout(resolve, delay));
+
+        console.log(
+          `🔄 Retrying request (attempt ${attempt + 1}/${maxRetries})...`,
+        );
       }
     }
   }
@@ -683,7 +727,7 @@ class AdvancedContentScript {
       try {
         const content = this.formatContentData(data);
         container.innerHTML = content;
-        
+
         // Track element for cleanup
         this.uiElements.add(container);
       } catch (error) {
@@ -707,7 +751,7 @@ class AdvancedContentScript {
     const container = document.createElement("div");
     container.id = "extension-content-container";
     container.setAttribute("data-extension", "settings-extension");
-    
+
     container.style.cssText = `
       position: fixed;
       top: 20px;
@@ -746,7 +790,7 @@ class AdvancedContentScript {
       align-items: center;
       justify-content: center;
     `;
-    
+
     closeButton.addEventListener("click", () => {
       container.remove();
       this.uiElements.delete(container);
@@ -848,7 +892,7 @@ class AdvancedContentScript {
         childList: true,
         subtree: true,
         attributes: true,
-        attributeFilter: ["class", "data-processed"]
+        attributeFilter: ["class", "data-processed"],
       });
 
       this.eventListeners.set("domObserver", observer);
@@ -866,9 +910,9 @@ class AdvancedContentScript {
 
     let processedElements = 0;
 
-    mutations.forEach(mutation => {
+    mutations.forEach((mutation) => {
       if (mutation.type === "childList") {
-        mutation.addedNodes.forEach(node => {
+        mutation.addedNodes.forEach((node) => {
           if (node.nodeType === Node.ELEMENT_NODE) {
             processedElements += this.processNewElement(node);
           }
@@ -896,8 +940,10 @@ class AdvancedContentScript {
       }
 
       // Process child elements recursively
-      const processableChildren = element.querySelectorAll(".processable:not(.extension-processed)");
-      processableChildren.forEach(child => {
+      const processableChildren = element.querySelectorAll(
+        ".processable:not(.extension-processed)",
+      );
+      processableChildren.forEach((child) => {
         child.classList.add("extension-processed");
         child.setAttribute("data-processed", new Date().toISOString());
         processed++;
@@ -917,7 +963,9 @@ class AdvancedContentScript {
       console.log("⚙️ Showing quick settings...");
 
       // Remove existing overlay
-      const existingOverlay = document.getElementById("extension-quick-settings");
+      const existingOverlay = document.getElementById(
+        "extension-quick-settings",
+      );
       if (existingOverlay) {
         existingOverlay.remove();
       }
@@ -927,7 +975,7 @@ class AdvancedContentScript {
         "feature_enabled",
         "refresh_interval",
         "api_key",
-        "debug_mode"
+        "debug_mode",
       ]);
 
       // Create overlay
@@ -952,7 +1000,7 @@ class AdvancedContentScript {
     const overlay = document.createElement("div");
     overlay.id = "extension-quick-settings";
     overlay.setAttribute("data-extension", "settings-extension");
-    
+
     overlay.style.cssText = `
       position: fixed;
       top: 0;
@@ -1017,9 +1065,11 @@ class AdvancedContentScript {
       try {
         const updates = {
           feature_enabled: overlay.querySelector("#feature-toggle").checked,
-          refresh_interval: parseInt(overlay.querySelector("#refresh-input").value),
+          refresh_interval: parseInt(
+            overlay.querySelector("#refresh-input").value,
+          ),
           api_key: overlay.querySelector("#api-key-input").value,
-          debug_mode: overlay.querySelector("#debug-toggle").checked
+          debug_mode: overlay.querySelector("#debug-toggle").checked,
         };
 
         await this.settings.updateSettings(updates);
@@ -1064,7 +1114,7 @@ class AdvancedContentScript {
       console.log("📤 Exporting settings...");
 
       const exportData = await this.settings.exportSettings();
-      
+
       // Create download
       const blob = new Blob([exportData], { type: "application/json" });
       const url = URL.createObjectURL(blob);
@@ -1091,7 +1141,9 @@ class AdvancedContentScript {
     try {
       const newValue = !this.featureEnabled;
       await this.settings.updateSetting("feature_enabled", newValue);
-      this.showInfoNotification(`Feature ${newValue ? "enabled" : "disabled"} via keyboard`);
+      this.showInfoNotification(
+        `Feature ${newValue ? "enabled" : "disabled"} via keyboard`,
+      );
     } catch (error) {
       console.error("❌ Error toggling feature:", error);
       this.showErrorNotification("Failed to toggle feature");
@@ -1105,7 +1157,9 @@ class AdvancedContentScript {
     try {
       const newValue = !this.debugMode;
       await this.settings.updateSetting("debug_mode", newValue);
-      this.showInfoNotification(`Debug mode ${newValue ? "enabled" : "disabled"}`);
+      this.showInfoNotification(
+        `Debug mode ${newValue ? "enabled" : "disabled"}`,
+      );
     } catch (error) {
       console.error("❌ Error toggling debug mode:", error);
       this.showErrorNotification("Failed to toggle debug mode");
@@ -1126,11 +1180,16 @@ class AdvancedContentScript {
       // Update indicator state
       const isActive = this.featureEnabled;
       const bgColor = isActive ? "#10b981" : "#f59e0b";
-      const textContent = isActive ? "🟢 Extension Active" : "🟡 Extension Inactive";
+      const textContent = isActive
+        ? "🟢 Extension Active"
+        : "🟡 Extension Inactive";
 
       indicator.style.background = bgColor;
       indicator.textContent = textContent;
-      indicator.setAttribute("title", `Extension is ${isActive ? "active" : "inactive"} - Click for settings`);
+      indicator.setAttribute(
+        "title",
+        `Extension is ${isActive ? "active" : "inactive"} - Click for settings`,
+      );
 
       // Add animation for state changes
       indicator.style.transform = "scale(1.1)";
@@ -1149,7 +1208,7 @@ class AdvancedContentScript {
     const indicator = document.createElement("div");
     indicator.id = "extension-indicator";
     indicator.setAttribute("data-extension", "settings-extension");
-    
+
     indicator.style.cssText = `
       position: fixed;
       bottom: 24px;
@@ -1192,7 +1251,10 @@ class AdvancedContentScript {
    * Setup feature-specific event listeners
    */
   setupFeatureListeners() {
-    if (this.eventListeners.has("featureClick") || this.eventListeners.has("featureSubmit")) {
+    if (
+      this.eventListeners.has("featureClick") ||
+      this.eventListeners.has("featureSubmit")
+    ) {
       return; // Already set up
     }
 
@@ -1244,10 +1306,13 @@ class AdvancedContentScript {
   handleFeatureClick(event) {
     try {
       // Process special elements
-      if (event.target.classList.contains("processable") && !event.target.classList.contains("extension-processed")) {
+      if (
+        event.target.classList.contains("processable") &&
+        !event.target.classList.contains("extension-processed")
+      ) {
         event.target.classList.add("extension-processed");
         event.target.setAttribute("data-processed", new Date().toISOString());
-        
+
         if (this.debugMode) {
           console.log("🖱️ Element processed:", event.target);
           event.target.style.outline = "2px solid #10b981";
@@ -1258,7 +1323,10 @@ class AdvancedContentScript {
       }
 
       // Handle links with special attributes
-      if (event.target.tagName === "A" && event.target.hasAttribute("data-enhance")) {
+      if (
+        event.target.tagName === "A" &&
+        event.target.hasAttribute("data-enhance")
+      ) {
         event.preventDefault();
         this.handleEnhancedLink(event.target);
       }
@@ -1274,14 +1342,14 @@ class AdvancedContentScript {
     try {
       const url = link.href;
       const enhancement = link.getAttribute("data-enhance");
-      
+
       console.log(`🔗 Enhanced link clicked: ${url} (${enhancement})`);
-      
+
       // Example enhancement logic
       if (enhancement === "analytics") {
         this.trackLinkClick(url);
       }
-      
+
       // Open link normally after processing
       window.open(url, link.target || "_self");
     } catch (error) {
@@ -1307,8 +1375,11 @@ class AdvancedContentScript {
   handleFormSubmit(event) {
     try {
       if (event.target.hasAttribute("data-enhance-form")) {
-        console.log("📝 Enhanced form submitted:", event.target.action || event.target.id);
-        
+        console.log(
+          "📝 Enhanced form submitted:",
+          event.target.action || event.target.id,
+        );
+
         // Example: Add extension metadata to form
         const hiddenInput = document.createElement("input");
         hiddenInput.type = "hidden";
@@ -1327,7 +1398,7 @@ class AdvancedContentScript {
   enableFeatureUI() {
     try {
       document.body.style.setProperty("--extension-enabled", "1");
-      
+
       // Add feature-specific styles
       if (!document.getElementById("extension-feature-styles")) {
         const style = document.createElement("style");
@@ -1366,7 +1437,7 @@ class AdvancedContentScript {
   disableFeatureUI() {
     try {
       document.body.style.removeProperty("--extension-enabled");
-      
+
       // Remove feature styles
       const featureStyles = document.getElementById("extension-feature-styles");
       if (featureStyles) {
@@ -1385,41 +1456,43 @@ class AdvancedContentScript {
     try {
       if (enabled) {
         console.log("⚡ Applying performance optimizations...");
-        
+
         // Reduce DOM observer frequency
         if (this.eventListeners.has("domObserver")) {
           const observer = this.eventListeners.get("domObserver");
           observer.disconnect();
-          
+
           // Reconnect with throttled observer
-          const throttledObserver = new MutationObserver(this.throttle((mutations) => {
-            this.handleDOMChanges(mutations);
-          }, 250));
-          
+          const throttledObserver = new MutationObserver(
+            this.throttle((mutations) => {
+              this.handleDOMChanges(mutations);
+            }, 250),
+          );
+
           throttledObserver.observe(document.body, {
             childList: true,
             subtree: true,
-            attributes: false // Reduce attribute watching
+            attributes: false, // Reduce attribute watching
           });
-          
+
           this.eventListeners.set("domObserver", throttledObserver);
         }
-        
+
         // Increase refresh interval
         if (this.refreshInterval < 30) {
           this.setupRefreshInterval(Math.max(this.refreshInterval * 2, 30));
         }
-        
+
         this.showInfoNotification("Performance mode enabled");
       } else {
         console.log("🔄 Reverting performance optimizations...");
-        
+
         // Restore normal DOM observer
         this.setupDOMObserver();
-        
+
         // Restore original refresh interval
         this.setupRefreshInterval(this.refreshInterval);
-        
+
         this.showInfoNotification("Performance mode disabled");
       }
     } catch (error) {
@@ -1447,17 +1520,20 @@ class AdvancedContentScript {
    */
   setupFallbackMode() {
     console.log("🆘 Setting up fallback mode...");
-    
+
     try {
       // Show fallback notification
-      this.showErrorNotification("Extension running in limited mode - some features may not work", 10000);
-      
+      this.showErrorNotification(
+        "Extension running in limited mode - some features may not work",
+        10000,
+      );
+
       // Setup minimal indicator
       this.createFallbackIndicator();
-      
+
       // Enable basic keyboard shortcuts
       this.setupBasicKeyboardShortcuts();
-      
+
       console.log("⚠️ Fallback mode active");
     } catch (error) {
       console.error("❌ Error setting up fallback mode:", error);
@@ -1484,12 +1560,16 @@ class AdvancedContentScript {
       cursor: pointer;
     `;
     indicator.textContent = "⚠️ Extension (Limited Mode)";
-    indicator.title = "Extension is running in limited mode due to initialization errors";
-    
+    indicator.title =
+      "Extension is running in limited mode due to initialization errors";
+
     indicator.addEventListener("click", () => {
-      this.showErrorNotification("Extension is in limited mode. Try reloading the page.", 5000);
+      this.showErrorNotification(
+        "Extension is in limited mode. Try reloading the page.",
+        5000,
+      );
     });
-    
+
     document.body.appendChild(indicator);
     this.uiElements.add(indicator);
   }
@@ -1504,7 +1584,7 @@ class AdvancedContentScript {
         location.reload();
       }
     };
-    
+
     document.addEventListener("keydown", handler);
     this.eventListeners.set("fallbackKeyboard", handler);
   }
@@ -1512,7 +1592,10 @@ class AdvancedContentScript {
   /**
    * Show success notification
    */
-  showSuccessNotification(message, duration = this.config.ui.notificationTimeout) {
+  showSuccessNotification(
+    message,
+    duration = this.config.ui.notificationTimeout,
+  ) {
     this.showNotification(message, "success", "✅", duration);
   }
 
@@ -1536,12 +1619,14 @@ class AdvancedContentScript {
   showNotification(message, type, icon, duration) {
     try {
       // Remove existing notifications of the same type
-      document.querySelectorAll(`.extension-notification.${type}`).forEach(el => el.remove());
+      document
+        .querySelectorAll(`.extension-notification.${type}`)
+        .forEach((el) => el.remove());
 
       const notification = document.createElement("div");
       notification.className = `extension-notification ${type}`;
       notification.setAttribute("data-extension", "settings-extension");
-      
+
       notification.style.cssText = `
         position: fixed;
         top: 24px;
@@ -1639,7 +1724,10 @@ class AdvancedContentScript {
           } else if (type === "settingsChange") {
             this.settings.removeChangeListener(handler);
           } else {
-            document.removeEventListener(type === "keyboard" ? "keydown" : type, handler);
+            document.removeEventListener(
+              type === "keyboard" ? "keydown" : type,
+              handler,
+            );
           }
         } catch (error) {
           console.warn(`⚠️ Error removing ${type} listener:`, error);
@@ -1648,7 +1736,7 @@ class AdvancedContentScript {
       this.eventListeners.clear();
 
       // Remove all UI elements
-      this.uiElements.forEach(element => {
+      this.uiElements.forEach((element) => {
         try {
           if (element.parentNode) {
             element.parentNode.removeChild(element);
@@ -1660,7 +1748,7 @@ class AdvancedContentScript {
       this.uiElements.clear();
 
       // Remove all stylesheets
-      this.styleSheets.forEach(style => {
+      this.styleSheets.forEach((style) => {
         try {
           if (style.parentNode) {
             style.parentNode.removeChild(style);
@@ -1699,7 +1787,9 @@ let advancedContentScript;
 try {
   // Ensure ContentScriptSettings is available
   if (typeof ContentScriptSettings === "undefined") {
-    throw new Error("ContentScriptSettings not found - ensure lib/content-settings.js is loaded first");
+    throw new Error(
+      "ContentScriptSettings not found - ensure lib/content-settings.js is loaded first",
+    );
   }
 
   advancedContentScript = new AdvancedContentScript();
@@ -1717,7 +1807,7 @@ try {
   console.log("🎯 Advanced Content Script loaded and initialized");
 } catch (error) {
   console.error("❌ Failed to initialize Advanced Content Script:", error);
-  
+
   // Show error notification to user
   const errorNotification = document.createElement("div");
   errorNotification.style.cssText = `
@@ -1733,9 +1823,10 @@ try {
     z-index: 250000;
     box-shadow: 0 4px 12px rgba(0,0,0,0.2);
   `;
-  errorNotification.textContent = "❌ Extension initialization failed - some features may not work";
+  errorNotification.textContent =
+    "❌ Extension initialization failed - some features may not work";
   document.body.appendChild(errorNotification);
-  
+
   setTimeout(() => {
     if (errorNotification.parentNode) {
       errorNotification.parentNode.removeChild(errorNotification);
@@ -1745,12 +1836,12 @@ try {
 
 /**
  * INTEGRATION INSTRUCTIONS:
- * 
+ *
  * 1. Dependencies:
  *    - Ensure lib/browser-compat.js is loaded first
  *    - Ensure lib/content-settings.js is loaded before this file
  *    - This file should be loaded in content scripts via manifest.json
- * 
+ *
  * 2. Manifest Configuration:
  *    {
  *      "content_scripts": [
@@ -1764,44 +1855,44 @@ try {
  *        }
  *      ]
  *    }
- * 
+ *
  * 3. Background Script Integration:
  *    - Ensure background script broadcasts setting changes via:
  *      - SETTINGS_CHANGED
- *      - SETTINGS_IMPORTED  
+ *      - SETTINGS_IMPORTED
  *      - SETTINGS_RESET
- * 
+ *
  * 4. Settings Schema:
  *    - Required settings: feature_enabled, refresh_interval, api_key, advanced_config
  *    - Optional settings: custom_css, debug_mode, performance_mode, notification_settings
  *    - Define in config/defaults.json with proper types
- * 
+ *
  * 5. Customization:
  *    - Modify processNewElement() for your specific DOM processing needs
  *    - Update handleFeatureClick() for custom click handling
  *    - Customize notification appearance via getNotificationColor()
  *    - Adjust performance thresholds in config object
- * 
+ *
  * 6. Error Handling:
  *    - All operations include comprehensive error boundaries
  *    - Initialization failures trigger fallback mode
  *    - Individual feature failures don't crash entire script
  *    - User-friendly error notifications are displayed
- * 
+ *
  * 7. Performance Features:
  *    - Intelligent caching with ContentScriptSettings
  *    - Throttled DOM observation in performance mode
  *    - Efficient event listener management
  *    - Memory cleanup and resource management
  *    - Batch API calls for better performance
- * 
+ *
  * 8. User Experience:
  *    - Visual indicators for extension status
  *    - Keyboard shortcuts for power users
  *    - Quick settings overlay for common adjustments
  *    - Accessibility support with proper ARIA attributes
  *    - Smooth animations and transitions
- * 
+ *
  * This implementation provides production-ready content script functionality with:
  * - Robust initialization with retry logic and fallback modes
  * - Current ContentScriptSettings API usage with caching

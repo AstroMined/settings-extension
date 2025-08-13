@@ -29,7 +29,10 @@ self.addEventListener("error", (error) => {
 });
 
 self.addEventListener("unhandledrejection", (event) => {
-  console.error("Unhandled promise rejection in background script:", event.reason);
+  console.error(
+    "Unhandled promise rejection in background script:",
+    event.reason,
+  );
 });
 
 // Core Chrome Extension API listeners (MUST be registered before imports)
@@ -101,8 +104,11 @@ async function initializeSettingsOnStartup() {
     await settingsManager.initialize();
     console.log("✅ Settings manager initialized successfully on startup");
   } catch (error) {
-    console.error("❌ Failed to initialize settings manager on startup:", error);
-    
+    console.error(
+      "❌ Failed to initialize settings manager on startup:",
+      error,
+    );
+
     // Advanced fallback recovery mechanism
     try {
       console.log("🔄 Attempting fallback initialization...");
@@ -118,13 +124,13 @@ async function initializeSettingsOnStartup() {
 
 /**
  * Handle messages from content scripts and popup
- * 
+ *
  * ⚠️ CRITICAL PATTERN: This function is NOT declared as async
  * Using async function handleMessage() causes "message port closed" errors
  * in Manifest V3 because async functions return Promise.resolve(true), not true
- * 
+ *
  * @param {Object} message - Message object
- * @param {Object} sender - Sender information  
+ * @param {Object} sender - Sender information
  * @param {Function} sendResponse - Response function
  * @returns {boolean} - Whether to keep message channel open
  */
@@ -144,14 +150,17 @@ function handleMessage(message, sender, sendResponse) {
 
   // Settings manager should be initialized at startup, but handle edge cases
   if (!settingsManager) {
-    console.warn("⚠️ Settings manager not available, attempting re-initialization...");
-    
+    console.warn(
+      "⚠️ Settings manager not available, attempting re-initialization...",
+    );
+
     // Handle re-initialization asynchronously
     initializeSettingsOnStartup()
       .then(() => {
         if (!settingsManager) {
           sendResponse({
-            error: "Settings manager not available. Service worker may need to be restarted.",
+            error:
+              "Settings manager not available. Service worker may need to be restarted.",
             fallback: true,
           });
           return;
@@ -162,7 +171,8 @@ function handleMessage(message, sender, sendResponse) {
       .catch((error) => {
         console.error("❌ Failed to re-initialize settings manager:", error);
         sendResponse({
-          error: "Settings manager not available. Service worker may need to be restarted.",
+          error:
+            "Settings manager not available. Service worker may need to be restarted.",
           fallback: true,
         });
       });
@@ -255,7 +265,10 @@ async function handleGetAllSettings(message, sendResponse) {
   console.log("🔍 Getting all settings...");
   try {
     const allSettings = await settingsManager.getAllSettings();
-    console.log("📤 Sending settings response:", Object.keys(allSettings || {}));
+    console.log(
+      "📤 Sending settings response:",
+      Object.keys(allSettings || {}),
+    );
     sendResponse({ settings: allSettings });
     console.log("✅ Settings response sent successfully");
   } catch (error) {
@@ -354,7 +367,10 @@ async function broadcastSettingsChange(changes, sender) {
           // This is expected for tabs without our content script
           return;
         }
-        console.debug(`Failed to send message to tab ${tab.id}:`, error.message);
+        console.debug(
+          `Failed to send message to tab ${tab.id}:`,
+          error.message,
+        );
       }
     });
 
@@ -397,7 +413,10 @@ async function broadcastSettingsImport(sender) {
         if (error.message.includes("Could not establish connection")) {
           return;
         }
-        console.debug(`Failed to send import message to tab ${tab.id}:`, error.message);
+        console.debug(
+          `Failed to send import message to tab ${tab.id}:`,
+          error.message,
+        );
       }
     });
 
@@ -440,7 +459,10 @@ async function broadcastSettingsReset(sender) {
         if (error.message.includes("Could not establish connection")) {
           return;
         }
-        console.debug(`Failed to send reset message to tab ${tab.id}:`, error.message);
+        console.debug(
+          `Failed to send reset message to tab ${tab.id}:`,
+          error.message,
+        );
       }
     });
 
@@ -506,7 +528,10 @@ function handleStorageChange(changes, areaName) {
           console.log("🔄 Settings reloaded due to storage change");
         }
       } catch (error) {
-        console.error("❌ Failed to reload settings after storage change:", error);
+        console.error(
+          "❌ Failed to reload settings after storage change:",
+          error,
+        );
       }
     }, 1000);
   }
@@ -518,12 +543,12 @@ function handleStorageChange(changes, areaName) {
 
 /**
  * COMPLETE SETUP INSTRUCTIONS:
- * 
+ *
  * 1. COPY FILES:
  *    - Copy this file as your background.js
  *    - Copy lib/browser-compat.js to lib/
  *    - Copy lib/settings-manager.js to lib/
- * 
+ *
  * 2. UPDATE MANIFEST.JSON:
  *    {
  *      "manifest_version": 3,
@@ -535,7 +560,7 @@ function handleStorageChange(changes, areaName) {
  *        "default_popup": "popup/popup.html"
  *      }
  *    }
- * 
+ *
  * 3. CREATE YOUR SETTINGS SCHEMA:
  *    Create config/defaults.json with your settings:
  *    {
@@ -545,12 +570,12 @@ function handleStorageChange(changes, areaName) {
  *        "description": "Enable my awesome feature"
  *      },
  *      "api_endpoint": {
- *        "type": "text", 
+ *        "type": "text",
  *        "value": "https://api.myservice.com",
  *        "description": "API endpoint URL"
  *      }
  *    }
- * 
+ *
  * 4. YOUR EXTENSION NOW HAS:
  *    ✅ Full CRUD settings management
  *    ✅ Real-time sync across all tabs
@@ -560,14 +585,14 @@ function handleStorageChange(changes, areaName) {
  *    ✅ Proper MV3 service worker patterns
  *    ✅ Keep-alive mechanisms
  *    ✅ Advanced error recovery
- * 
+ *
  * 5. ACCESS FROM CONTENT SCRIPTS:
  *    const settings = new ContentScriptSettings();
  *    const config = await settings.getAllSettings();
- * 
+ *
  * 6. ACCESS FROM POPUP/OPTIONS:
  *    Same ContentScriptSettings API works everywhere!
- * 
+ *
  * This background script handles all the complexity so your
  * extension can focus on its core functionality.
  */
