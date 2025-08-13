@@ -1,0 +1,112 @@
+name: Feature Request
+description: Suggest a new feature or enhancement
+title: "[Feature]: "
+labels: ["enhancement", "triage-needed"]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for suggesting a new feature! We appreciate your ideas for improving the Settings Extension.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem Statement
+      description: What problem does this feature solve? Is your feature request related to a problem?
+      placeholder: |
+        I'm frustrated when...
+        It would be helpful to have...
+        Currently, users cannot...
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed Solution
+      description: Describe the solution you'd like to see implemented
+      placeholder: |
+        I would like the extension to...
+        The feature should work by...
+        When users click X, it should do Y...
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: Have you considered any alternative solutions or workarounds?
+      placeholder: |
+        I considered...
+        An alternative could be...
+        Currently, I work around this by...
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority Level
+      description: How important is this feature to you?
+      options:
+        - "Low - Nice to have"
+        - "Medium - Would improve my workflow"
+        - "High - Critical for my use case"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: user-type
+    attributes:
+      label: User Type
+      description: Which best describes your use case?
+      options:
+        - "End user - I use the extension daily"
+        - "Developer - I integrate with the extension"
+        - "Contributor - I work on the extension"
+        - "Other (specify below)"
+
+  - type: textarea
+    id: use-cases
+    attributes:
+      label: Use Cases
+      description: Describe specific scenarios where this feature would be useful
+      placeholder: |
+        Use case 1: When managing settings for...
+        Use case 2: While configuring...
+        Use case 3: During development of...
+
+  - type: textarea
+    id: implementation
+    attributes:
+      label: Implementation Ideas
+      description: Do you have any ideas about how this could be implemented? (Optional)
+      placeholder: |
+        This could be implemented by...
+        It might work similar to...
+        Technical considerations might include...
+
+  - type: textarea
+    id: mockups
+    attributes:
+      label: Mockups or Examples
+      description: Any mockups, screenshots, or examples of similar features? (Optional)
+      placeholder: |
+        Attach images or describe examples:
+        - Extension X has a similar feature that...
+        - Here's a mockup of how it could look...
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Pre-submission Checklist
+      description: Please confirm the following
+      options:
+        - label: I have searched existing issues to ensure this feature hasn't been requested before
+          required: true
+        - label: I have clearly described the problem this feature would solve
+          required: true
+        - label: I have provided specific use cases for the feature
+          required: true
+        - label: This feature aligns with the extension's purpose of settings management
+          required: true

@@ -166,3 +166,5 @@ This project has **comprehensive documentation** organized in three complementar
 - Cross-browser testing (Chrome/Firefox)
 
 **Build System**: Simple file copying via `scripts/build.js` - no bundling or transpilation. Firefox build uses different manifest.
+
+- This extension will NEVER be deployed to the Chrome or FireFox stores. The ONLY distribution methods are the dist/ directory for developers and the ZIP/XPI packages for end-users. NEVER suggest anything that aims to get the extension ready for "store deployment"

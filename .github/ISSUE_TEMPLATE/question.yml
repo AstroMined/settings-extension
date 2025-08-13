@@ -1,0 +1,87 @@
+name: Question or Support
+description: Ask a question or request help with using the extension
+title: "[Question]: "
+labels: ["question", "support"]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Have a question about using the Settings Extension? We're here to help!
+        
+        **Before submitting:** Please check the [documentation](https://github.com/yourusername/settings-extension/tree/main/docs) first.
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: Question Category
+      description: What type of help do you need?
+      options:
+        - "Installation and Setup"
+        - "Configuration and Usage"
+        - "API Integration"
+        - "Troubleshooting"
+        - "Development and Contributing"
+        - "Other"
+    validations:
+      required: true
+
+  - type: textarea
+    id: question
+    attributes:
+      label: Your Question
+      description: What would you like to know?
+      placeholder: |
+        Please describe your question in detail...
+        
+        What are you trying to accomplish?
+        What specific help do you need?
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Context and Background
+      description: Provide context about your use case or what you've tried
+      placeholder: |
+        I'm trying to...
+        I've already tried...
+        My goal is to...
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment Details
+      description: If relevant, provide details about your setup
+      placeholder: |
+        Browser: Chrome 120.0.6099.62
+        Extension Version: 1.1.0
+        Operating System: Windows 11
+        Other relevant details...
+
+  - type: textarea
+    id: documentation-checked
+    attributes:
+      label: Documentation Checked
+      description: Which documentation have you already reviewed?
+      placeholder: |
+        I've checked:
+        - [ ] README.md
+        - [ ] Getting Started Guide
+        - [ ] API Documentation
+        - [ ] FAQ (if available)
+        - [ ] Other: ___
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Pre-submission Checklist
+      description: Please confirm the following
+      options:
+        - label: I have searched existing issues and discussions for similar questions
+          required: true
+        - label: I have reviewed the relevant documentation
+          required: true
+        - label: My question is clear and specific
+          required: true

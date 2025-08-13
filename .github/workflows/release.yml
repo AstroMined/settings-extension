@@ -1,0 +1,276 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'  # Trigger on version tags like v1.0.0
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release (e.g., 1.0.0)'
+        required: true
+        type: string
+
+jobs:
+  validate-release:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.get-version.outputs.version }}
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Get version
+      id: get-version
+      run: |
+        if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+          VERSION="${{ github.event.inputs.version }}"
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+        else
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+        fi
+        echo "Releasing version: ${VERSION}"
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 18
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Validate version
+      run: |
+        PACKAGE_VERSION=$(node -p "require('./package.json').version")
+        EXPECTED_VERSION="${{ steps.get-version.outputs.version }}"
+        
+        echo "Package.json version: ${PACKAGE_VERSION}"
+        echo "Expected version: ${EXPECTED_VERSION}"
+        
+        if [ "${PACKAGE_VERSION}" != "${EXPECTED_VERSION}" ]; then
+          echo "❌ Version mismatch! package.json has ${PACKAGE_VERSION}, expected ${EXPECTED_VERSION}"
+          exit 1
+        fi
+        
+        echo "✅ Version validation passed"
+
+  test-before-release:
+    runs-on: ubuntu-latest
+    needs: validate-release
+    
+    strategy:
+      matrix:
+        node-version: [18, 20]
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Run full test suite
+      run: |
+        npm run lint
+        npm test
+        npm run test:coverage
+        
+    - name: Build extension
+      run: npm run build
+      
+    - name: Validate build
+      run: npm run validate
+
+  create-release-packages:
+    runs-on: ubuntu-latest
+    needs: [validate-release, test-before-release]
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 18
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Create release packages
+      run: npm run dist
+      
+    - name: Verify packages exist
+      run: |
+        ls -la web-ext-artifacts/
+        echo "✅ Chrome package:" && ls -la web-ext-artifacts/settings-extension-chrome.zip
+        echo "✅ Firefox package:" && ls -la web-ext-artifacts/settings-extension-firefox.xpi
+        
+    - name: Generate checksums
+      run: |
+        cd web-ext-artifacts
+        sha256sum *.zip *.xpi > checksums.txt
+        cat checksums.txt
+        
+    - name: Upload packages as artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: extension-packages-v${{ needs.validate-release.outputs.version }}
+        path: |
+          web-ext-artifacts/
+          !web-ext-artifacts/.gitkeep
+        retention-days: 90
+
+  create-github-release:
+    runs-on: ubuntu-latest
+    needs: [validate-release, create-release-packages]
+    permissions:
+      contents: write
+      
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Download packages
+      uses: actions/download-artifact@v4
+      with:
+        name: extension-packages-v${{ needs.validate-release.outputs.version }}
+        path: web-ext-artifacts/
+        
+    - name: Generate release notes
+      id: release-notes
+      run: |
+        VERSION="${{ needs.validate-release.outputs.version }}"
+        
+        # Extract changelog entry for this version
+        if [ -f CHANGELOG.md ]; then
+          # Try to extract version-specific changes
+          sed -n "/## \[${VERSION}\]/,/## \[/p" CHANGELOG.md | sed '$d' | tail -n +2 > release-notes.md
+          
+          # If no specific version found, use a generic template
+          if [ ! -s release-notes.md ]; then
+            echo "## Changes in v${VERSION}" > release-notes.md
+            echo "" >> release-notes.md
+            echo "See the full [changelog](CHANGELOG.md) for details." >> release-notes.md
+          fi
+        else
+          echo "## Settings Extension v${VERSION}" > release-notes.md
+          echo "" >> release-notes.md
+          echo "This release includes bug fixes, improvements, and new features." >> release-notes.md
+          echo "" >> release-notes.md
+          echo "### Installation" >> release-notes.md
+          echo "- **Chrome/Edge**: Download \`settings-extension-chrome.zip\` and load it as an unpacked extension" >> release-notes.md
+          echo "- **Firefox**: Download \`settings-extension-firefox.xpi\` and install it" >> release-notes.md
+        fi
+        
+        echo "Release notes generated:"
+        cat release-notes.md
+        
+    - name: Create GitHub Release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: v${{ needs.validate-release.outputs.version }}
+        release_name: Settings Extension v${{ needs.validate-release.outputs.version }}
+        body_path: release-notes.md
+        draft: false
+        prerelease: ${{ contains(needs.validate-release.outputs.version, 'beta') || contains(needs.validate-release.outputs.version, 'alpha') }}
+        
+    - name: Upload Chrome package
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: web-ext-artifacts/settings-extension-chrome.zip
+        asset_name: settings-extension-chrome-v${{ needs.validate-release.outputs.version }}.zip
+        asset_content_type: application/zip
+        
+    - name: Upload Firefox package
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: web-ext-artifacts/settings-extension-firefox.xpi
+        asset_name: settings-extension-firefox-v${{ needs.validate-release.outputs.version }}.xpi
+        asset_content_type: application/x-xpinstall
+        
+    - name: Upload checksums
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: web-ext-artifacts/checksums.txt
+        asset_name: checksums.txt
+        asset_content_type: text/plain
+
+  post-release:
+    runs-on: ubuntu-latest
+    needs: [validate-release, create-github-release]
+    if: always() && needs.create-github-release.result == 'success'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Release summary
+      run: |
+        VERSION="${{ needs.validate-release.outputs.version }}"
+        
+        echo "🎉 Settings Extension v${VERSION} released successfully!"
+        echo ""
+        echo "📦 Packages created:"
+        echo "  - Chrome/Edge: settings-extension-chrome-v${VERSION}.zip"
+        echo "  - Firefox: settings-extension-firefox-v${VERSION}.xpi"
+        echo ""
+        echo "🔗 Release URL: https://github.com/${{ github.repository }}/releases/tag/v${VERSION}"
+        echo ""
+        echo "📋 Next steps:"
+        echo "  1. Verify the release assets are correct"
+        echo "  2. Update documentation if needed"
+        echo "  3. Announce the release to users"
+        
+    - name: Create deployment summary
+      run: |
+        VERSION="${{ needs.validate-release.outputs.version }}"
+        
+        cat > deployment-summary.md << EOF
+        # 🚀 Release v${VERSION} Deployment Summary
+        
+        ## ✅ Completed Tasks
+        - Version validation passed
+        - All tests passed (Node.js 18, 20)
+        - Extension packages built successfully
+        - GitHub release created
+        - Release assets uploaded
+        
+        ## 📦 Release Assets
+        - \`settings-extension-chrome-v${VERSION}.zip\` - Chrome/Edge package
+        - \`settings-extension-firefox-v${VERSION}.xpi\` - Firefox package  
+        - \`checksums.txt\` - SHA256 checksums for verification
+        
+        ## 🔗 Links
+        - [Release Page](https://github.com/${{ github.repository }}/releases/tag/v${VERSION})
+        - [Installation Guide](https://github.com/${{ github.repository }}/tree/main/docs/user/tutorials/getting-started.md)
+        
+        ## 📋 Post-Release Checklist
+        - [ ] Verify release assets download correctly
+        - [ ] Test installation in both browsers
+        - [ ] Update any external documentation
+        - [ ] Communicate release to stakeholders
+        EOF
+        
+        cat deployment-summary.md
