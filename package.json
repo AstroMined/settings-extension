@@ -22,9 +22,10 @@
     "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,css,md}\"",
     "format:check": "prettier --check \"**/*.{js,jsx,ts,tsx,json,css,md}\"",
     "clean": "rimraf dist web-ext-artifacts",
+    "dist": "npm run build && npm run package:chrome && npm run package:firefox",
     "package": "npm run build && web-ext build --source-dir=dist",
-    "package:chrome": "npm run build && web-ext build --source-dir=dist --filename=settings-extension-chrome.zip",
-    "package:firefox": "npm run build:firefox && web-ext build --source-dir=dist --filename=settings-extension-firefox.xpi",
+    "package:chrome": "npm run build && web-ext build --source-dir=dist --filename=settings-extension-chrome.zip --overwrite-dest",
+    "package:firefox": "npm run build:firefox && web-ext build --source-dir=dist --filename=settings-extension-firefox.xpi --overwrite-dest",
     "validate": "web-ext lint --source-dir=dist",
     "icons": "node scripts/generate-icons.js",
     "precommit": "lint-staged"

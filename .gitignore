@@ -120,7 +120,7 @@ dist
 
 # Build directories
 build/
-dist/
+# dist/ - Now tracked for downstream integration
 bundle/
 
 # Extension packaging
