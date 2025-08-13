@@ -4,56 +4,20 @@
  * to prevent regressions in the event listener setup
  */
 
-const { test, expect, chromium } = require("@playwright/test");
-const path = require("path");
+const { test, expect } = require("@playwright/test");
+const BrowserFactory = require("./utils/browser-factory");
 
 test.describe("Popup Button Functionality", () => {
   let context;
   let extensionId;
+  let serviceWorker;
 
-  test.beforeAll(async () => {
-    const extensionPath = path.resolve(__dirname, "../../dist");
-    const userDataDir = path.resolve(__dirname, "../../test-user-data-popup");
-
-    console.log(`Loading extension from: ${extensionPath}`);
-
-    // Verify dist folder exists
-    const fs = require("fs");
-    if (!fs.existsSync(extensionPath)) {
-      throw new Error(
-        `Extension build not found at ${extensionPath}. Run 'npm run build' first.`,
-      );
-    }
-
-    // Launch browser with extension
-    context = await chromium.launchPersistentContext(userDataDir, {
-      headless: false,
-      args: [
-        `--disable-extensions-except=${extensionPath}`,
-        `--load-extension=${extensionPath}`,
-        "--no-sandbox",
-        "--disable-dev-shm-usage",
-      ],
-    });
-
-    // Get extension ID
-    console.log("Waiting for extension to load...");
-    await new Promise((resolve) => setTimeout(resolve, 3000));
-
-    let [serviceWorker] = context.serviceWorkers();
-    if (!serviceWorker) {
-      serviceWorker = await context.waitForEvent("serviceworker", {
-        timeout: 10000,
-      });
-    }
-
-    if (serviceWorker) {
-      const workerUrl = serviceWorker.url();
-      extensionId = workerUrl.split("/")[2];
-      console.log(`Extension loaded successfully! ID: ${extensionId}`);
-    } else {
-      throw new Error("Extension service worker not found");
-    }
+  test.beforeAll(async ({}, testInfo) => {
+    // Use dynamic browser factory for cross-browser support
+    const extensionSetup = await BrowserFactory.setupExtension(testInfo);
+    context = extensionSetup.context;
+    serviceWorker = extensionSetup.serviceWorker;
+    extensionId = extensionSetup.extensionId;
   });
 
   test.afterAll(async () => {

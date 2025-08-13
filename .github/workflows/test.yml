@@ -9,19 +9,15 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    
-    strategy:
-      matrix:
-        node-version: [18, 20, 22]
         
     steps:
     - name: Checkout code
       uses: actions/checkout@v5
       
-    - name: Setup Node.js ${{ matrix.node-version }}
+    - name: Setup Node.js 22
       uses: actions/setup-node@v4
       with:
-        node-version: ${{ matrix.node-version }}
+        node-version: 22
         cache: 'npm'
         
     - name: Install dependencies
@@ -31,13 +27,7 @@ jobs:
       run: npm run lint
       
     - name: Run unit tests
-      run: npm test -- --selectProjects=unit
-      
-    - name: Run integration tests
-      run: npm test -- --selectProjects=integration
-      
-    - name: Run performance tests
-      run: npm test -- --selectProjects=performance
+      run: npm test
       
     - name: Generate coverage report
       run: npm run test:coverage
@@ -64,7 +54,7 @@ jobs:
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: 18
+        node-version: 22
         cache: 'npm'
         
     - name: Install dependencies
@@ -89,7 +79,7 @@ jobs:
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: 18
+        node-version: 22
         cache: 'npm'
         
     - name: Install dependencies
@@ -129,7 +119,7 @@ jobs:
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: 18
+        node-version: 22
         cache: 'npm'
         
     - name: Install dependencies

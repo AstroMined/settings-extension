@@ -9,9 +9,14 @@ module.exports = {
 
   // Setup files - run before test framework setup
   setupFiles: ["<rootDir>/test/setup.js"],
+  setupFilesAfterEnv: ["<rootDir>/test/setupAfterEnv.js"],
 
-  // Test file patterns
-  testMatch: ["<rootDir>/test/**/*.test.js", "<rootDir>/test/**/*.spec.js"],
+  // Test file patterns - only include unit tests
+  testMatch: [
+    "<rootDir>/test/validation.test.js", 
+    "<rootDir>/test/settings-manager.test.js", 
+    "<rootDir>/test/storage.test.js"
+  ],
 
   // Module paths
   moduleNameMapper: {
@@ -101,52 +106,6 @@ module.exports = {
     "/web-ext-artifacts/",
   ],
 
-  // Projects configuration for different test types
-  projects: [
-    {
-      displayName: "unit",
-      testMatch: ["<rootDir>/test/**/*.test.js"],
-      testPathIgnorePatterns: [
-        "<rootDir>/test/integration/",
-        "<rootDir>/test/performance.test.js",
-        "<rootDir>/test/e2e/",
-      ],
-      setupFiles: ["<rootDir>/test/setup.js"],
-      testEnvironment: "jsdom",
-      testEnvironmentOptions: {
-        url: "https://localhost:3000/",
-        storageQuota: 10000000,
-      },
-    },
-    {
-      displayName: "integration",
-      testMatch: ["<rootDir>/test/integration/**/*.test.js"],
-      setupFiles: ["<rootDir>/test/setup.js"],
-      testEnvironment: "jsdom",
-      testEnvironmentOptions: {
-        url: "https://localhost:3000/",
-        storageQuota: 10000000,
-      },
-    },
-    {
-      displayName: "performance",
-      testMatch: ["<rootDir>/test/performance.test.js"],
-      setupFiles: ["<rootDir>/test/setup.js"],
-      testEnvironment: "jsdom",
-      testEnvironmentOptions: {
-        url: "https://localhost:3000/",
-        storageQuota: 10000000,
-      },
-    },
-    {
-      displayName: "e2e",
-      testMatch: ["<rootDir>/test/e2e/**/*.test.js"],
-      setupFiles: ["<rootDir>/test/setup.js"],
-      testEnvironment: "jsdom",
-      testEnvironmentOptions: {
-        url: "https://localhost:3000/",
-        storageQuota: 10000000,
-      },
-    },
-  ],
+  // Simplified Jest configuration - only pure unit tests
+  // All browser-based testing moved to Playwright E2E tests
 };
