@@ -9,6 +9,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 npm run dev              # Start development with file watching and serving
 npm run build            # Build extension for Chrome/Edge (copies files to dist/)
 npm run build:firefox    # Build extension for Firefox (uses Firefox-specific manifest)
+npm run dist             # Build dist/ + create both web-ext-artifacts (recommended for releases)
 npm run serve            # Serve built extension for testing
 
 # Testing
@@ -74,12 +75,14 @@ This is a **Manifest V3 browser extension framework** for cross-browser settings
 **Problem**: Using `async function handleMessage()` in Manifest V3 service workers causes "message port closed before response received" errors, even when returning `true` and calling `sendResponse()` correctly.
 
 **Why This Happens**:
+
 - `async function` returns `Promise.resolve(true)`, not `true`
 - Chrome message ports don't stay open for Promise-based returns
 - Async operations complete after the port closes
 - Service worker logs show success, but responses never reach sender
 
 **❌ WRONG Pattern**:
+
 ```javascript
 // This will cause "message port closed" errors
 async function handleMessage(message, sender, sendResponse) {
@@ -90,6 +93,7 @@ async function handleMessage(message, sender, sendResponse) {
 ```
 
 **✅ CORRECT Pattern**:
+
 ```javascript
 // Split sync and async handling
 function handleMessage(message, sender, sendResponse) {
@@ -98,7 +102,7 @@ function handleMessage(message, sender, sendResponse) {
     sendResponse({ pong: true });
     return false; // Don't keep port open for sync
   }
-  
+
   // Delegate async operations
   processAsyncMessage(message, sender, sendResponse);
   return true; // Keep port open for async response
@@ -115,6 +119,7 @@ async function processAsyncMessage(message, sender, sendResponse) {
 ```
 
 **Debugging This Issue**:
+
 - Service worker logs show successful message handling
 - But popup/content scripts get "port closed" errors
 - This mismatch is the key diagnostic sign

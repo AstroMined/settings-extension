@@ -75,6 +75,52 @@ Distribution packages are included in this repository for convenience and intern
 
 **Note**: These packages are updated with each release and maintained in the repository for internal distribution purposes. For external distribution, packages will be available through official browser extension stores.
 
+## 🔧 Integration with Other Extensions
+
+This Settings Extension is designed as a **drop-in library/framework** for other browser extensions. You have two integration methods:
+
+### Method 1: Drop-in Integration (Recommended)
+
+**Best for**: Teams integrating this into existing extension projects
+
+1. **Copy the distribution files**:
+   ```bash
+   # Copy all files from the dist/ directory to your project
+   cp -r dist/* your-extension-project/
+   ```
+
+2. **Your build system handles browser differences**:
+   - Use `manifest.json` for Chrome/Edge builds
+   - Use `manifest.firefox.json` for Firefox builds (rename to `manifest.json`)
+   - Your existing cross-platform build system manages the rest
+
+3. **No build dependencies required** - just copy and integrate!
+
+**Benefits**:
+- ✅ No Node.js/npm dependencies for integration
+- ✅ Works with any build system
+- ✅ Your existing cross-platform workflow remains unchanged
+- ✅ True drop-in experience
+
+### Method 2: Package Installation
+
+**Best for**: End-user distribution or standalone testing
+
+- **Chrome/Edge**: Use `web-ext-artifacts/settings-extension-chrome.zip`
+- **Firefox**: Use `web-ext-artifacts/settings-extension-firefox.xpi`
+
+**Use cases**:
+- ✅ Direct installation for testing
+- ✅ Distribution to technical end-users
+- ✅ QA team validation
+
+### Integration Examples
+
+The `examples/` directory contains integration patterns:
+- [`minimal-integration.js`](examples/minimal-integration.js) - Basic integration
+- [`background-integration.js`](examples/background-integration.js) - Service worker integration  
+- [`content-script-example.js`](examples/content-script-example.js) - Content script usage
+
 ## 📦 Development Installation
 
 ### For Development
