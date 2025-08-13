@@ -13,9 +13,9 @@ module.exports = {
 
   // Test file patterns - only include unit tests
   testMatch: [
-    "<rootDir>/test/validation.test.js", 
-    "<rootDir>/test/settings-manager.test.js", 
-    "<rootDir>/test/storage.test.js"
+    "<rootDir>/test/validation.test.js",
+    "<rootDir>/test/settings-manager.test.js",
+    "<rootDir>/test/storage.test.js",
   ],
 
   // Module paths

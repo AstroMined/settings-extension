@@ -13,7 +13,7 @@ test.describe("End-to-End User Workflows", () => {
   let extensionId;
   let serviceWorker;
 
-  test.beforeAll(async ({}, testInfo) => {
+  test.beforeAll(async (testInfo) => {
     // Use dynamic browser factory for cross-browser support
     const extensionSetup = await BrowserFactory.setupExtension(testInfo);
     context = extensionSetup.context;

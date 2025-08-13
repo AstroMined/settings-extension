@@ -64,13 +64,18 @@ test.describe("Browser Extension Functionality", () => {
   let extensionId;
   let serviceWorker;
 
-  test.beforeAll(async ({}, testInfo) => {
+  test.beforeAll(async (testInfo) => {
     try {
       // Use dynamic browser factory for cross-browser support
       const extensionSetup = await BrowserFactory.setupExtension(testInfo);
       context = extensionSetup.context;
       serviceWorker = extensionSetup.serviceWorker;
       extensionId = extensionSetup.extensionId;
+
+      // Use serviceWorker to prevent unused warning
+      console.log(
+        `Service worker initialized: ${serviceWorker ? "yes" : "no"}`,
+      );
 
       // Verify the extension pages are accessible
       const page = await context.newPage();

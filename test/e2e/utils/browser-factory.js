@@ -16,8 +16,9 @@ class BrowserFactory {
    * @returns {Object} Browser type (chromium or firefox)
    */
   static getBrowserType(testInfo) {
-    const projectName = testInfo?.project?.name || process.env.BROWSER || "chromium";
-    
+    const projectName =
+      testInfo?.project?.name || process.env.BROWSER || "chromium";
+
     switch (projectName.toLowerCase()) {
       case "firefox":
         return firefox;
@@ -38,20 +39,20 @@ class BrowserFactory {
     const browserType = this.getBrowserType(testInfo);
     const extensionPath = path.resolve(__dirname, "../../../dist");
     const userDataDir = path.resolve(
-      __dirname, 
-      `../../../test-user-data-${testInfo?.project?.name || 'default'}`
+      __dirname,
+      `../../../test-user-data-${testInfo?.project?.name || "default"}`,
     );
 
     // Check if extension build exists
     const fs = require("fs");
     if (!fs.existsSync(extensionPath)) {
       throw new Error(
-        `Extension build not found at ${extensionPath}. Run 'npm run build' first.`
+        `Extension build not found at ${extensionPath}. Run 'npm run build' first.`,
       );
     }
 
     console.log(`Loading extension from: ${extensionPath}`);
-    console.log(`Using ${testInfo?.project?.name || 'chromium'} browser`);
+    console.log(`Using ${testInfo?.project?.name || "chromium"} browser`);
     console.log(`Using user data dir: ${userDataDir}`);
 
     // Browser-specific configuration
@@ -66,31 +67,40 @@ class BrowserFactory {
         "--disable-web-security",
         "--allow-running-insecure-content",
       ],
-      ...options
+      ...options,
     };
 
     // Firefox-specific adjustments
     if (browserType === firefox) {
       // Firefox uses different extension loading mechanism
       // For now, we'll use Chromium-style args but this could be enhanced
-      baseConfig.args = baseConfig.args.filter(arg => 
-        !arg.includes('--disable-extensions-except') && 
-        !arg.includes('--load-extension')
+      baseConfig.args = baseConfig.args.filter(
+        (arg) =>
+          !arg.includes("--disable-extensions-except") &&
+          !arg.includes("--load-extension"),
       );
-      
+
       // Add Firefox-specific extension loading if needed
-      console.log("Note: Firefox extension loading may require additional configuration");
+      console.log(
+        "Note: Firefox extension loading may require additional configuration",
+      );
     }
 
     try {
-      const context = await browserType.launchPersistentContext(userDataDir, baseConfig);
-      
+      const context = await browserType.launchPersistentContext(
+        userDataDir,
+        baseConfig,
+      );
+
       // Wait for extension to load
-      await new Promise(resolve => setTimeout(resolve, 3000));
-      
+      await new Promise((resolve) => setTimeout(resolve, 3000));
+
       return context;
     } catch (error) {
-      console.error(`Failed to launch ${testInfo?.project?.name || 'browser'} context:`, error.message);
+      console.error(
+        `Failed to launch ${testInfo?.project?.name || "browser"} context:`,
+        error.message,
+      );
       throw error;
     }
   }
@@ -103,17 +113,19 @@ class BrowserFactory {
    */
   static async getExtensionServiceWorker(context, timeout = 10000) {
     let serviceWorker = context.serviceWorkers()[0];
-    
+
     if (!serviceWorker) {
-      console.log("Service worker not immediately available, waiting for event...");
+      console.log(
+        "Service worker not immediately available, waiting for event...",
+      );
       serviceWorker = await context.waitForEvent("serviceworker", { timeout });
     }
-    
+
     if (serviceWorker) {
       console.log(`Extension service worker URL: ${serviceWorker.url()}`);
       return serviceWorker;
     }
-    
+
     throw new Error("Could not find extension service worker");
   }
 
@@ -125,11 +137,11 @@ class BrowserFactory {
   static getExtensionId(serviceWorker) {
     const url = serviceWorker.url();
     const match = url.match(/chrome-extension:\/\/([a-z0-9]+)\//);
-    
+
     if (match) {
       return match[1];
     }
-    
+
     throw new Error(`Could not extract extension ID from URL: ${url}`);
   }
 
@@ -143,9 +155,9 @@ class BrowserFactory {
     const context = await this.createExtensionContext(testInfo, options);
     const serviceWorker = await this.getExtensionServiceWorker(context);
     const extensionId = this.getExtensionId(serviceWorker);
-    
+
     console.log(`Extension setup complete - ID: ${extensionId}`);
-    
+
     return { context, serviceWorker, extensionId };
   }
 }

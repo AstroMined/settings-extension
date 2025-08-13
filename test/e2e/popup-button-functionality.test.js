@@ -12,12 +12,15 @@ test.describe("Popup Button Functionality", () => {
   let extensionId;
   let serviceWorker;
 
-  test.beforeAll(async ({}, testInfo) => {
+  test.beforeAll(async (testInfo) => {
     // Use dynamic browser factory for cross-browser support
     const extensionSetup = await BrowserFactory.setupExtension(testInfo);
     context = extensionSetup.context;
     serviceWorker = extensionSetup.serviceWorker;
     extensionId = extensionSetup.extensionId;
+
+    // Use serviceWorker to prevent unused warning
+    console.log(`Service worker initialized: ${serviceWorker ? "yes" : "no"}`);
   });
 
   test.afterAll(async () => {
