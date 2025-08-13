@@ -12,7 +12,12 @@ test.describe("Popup Button Functionality", () => {
   let extensionId;
   let serviceWorker;
 
-  test.beforeAll(async (testInfo) => {
+  test.beforeAll(async ({ page: _page }, testInfo) => {
+    // Note: page parameter required by Playwright destructuring pattern
+    console.log(
+      `Test setup for project: ${testInfo?.project?.name || "default"}`,
+    );
+
     // Use dynamic browser factory for cross-browser support
     const extensionSetup = await BrowserFactory.setupExtension(testInfo);
     context = extensionSetup.context;
