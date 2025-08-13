@@ -383,7 +383,7 @@ class AdvancedContentScript {
   /**
    * Handle settings import with full reinitialization
    */
-  handleSettingsImported(settings) {
+  handleSettingsImported(_settings) {
     console.log("📥 Settings imported, performing full reload...");
     this.showSuccessNotification("Settings imported successfully");
 
@@ -405,7 +405,7 @@ class AdvancedContentScript {
   /**
    * Handle settings reset with state cleanup
    */
-  handleSettingsReset(settings) {
+  handleSettingsReset(_settings) {
     console.log("🔄 Settings reset to defaults, reinitializing...");
     this.showInfoNotification("Settings reset to defaults");
 
@@ -1057,7 +1057,7 @@ class AdvancedContentScript {
   /**
    * Setup event listeners for quick settings
    */
-  setupQuickSettingsListeners(overlay, originalSettings) {
+  setupQuickSettingsListeners(overlay, _originalSettings) {
     const saveButton = overlay.querySelector("#quick-settings-save");
     const cancelButton = overlay.querySelector("#quick-settings-cancel");
 

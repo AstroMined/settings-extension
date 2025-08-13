@@ -322,7 +322,7 @@ class SettingsPopup {
       } else if (setting.type === "json") {
         try {
           value = JSON.parse(value);
-        } catch (e) {
+        } catch {
           throw new Error("Invalid JSON format");
         }
       }
@@ -353,7 +353,7 @@ class SettingsPopup {
       } else if (setting.type === "json") {
         try {
           value = JSON.parse(value);
-        } catch (e) {
+        } catch {
           throw new Error("Invalid JSON format");
         }
       }

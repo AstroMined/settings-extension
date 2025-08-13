@@ -79,7 +79,7 @@ out
 
 # Nuxt.js build / generate output
 .nuxt
-dist
+# dist - Now tracked for downstream team integration
 
 # Gatsby files
 .cache/
