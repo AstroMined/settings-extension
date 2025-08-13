@@ -1,67 +1,51 @@
 version: 2
 updates:
-  # Enable version updates for npm
+  # Enable version updates for npm  
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
       interval: "weekly"
       day: "monday"
       time: "06:00"
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 5  # Reduced to be less overwhelming
     commit-message:
       prefix: "chore"
       prefix-development: "chore"
       include: "scope"
-    reviewers:
-      - "settings-extension-team"
     labels:
       - "dependencies"
       - "javascript"
-    # Allow both security and version updates, but be selective about major versions
-    allow:
-      - dependency-type: "direct:production"
-      - dependency-type: "indirect"
-    # Ignore major version updates for complex tools (handle manually)
-    ignore:
-      - dependency-name: "eslint"
-        update-types: ["version-update:semver-major"]
-      - dependency-name: "jest"
-        update-types: ["version-update:semver-major"] 
-      - dependency-name: "lint-staged"
-        update-types: ["version-update:semver-major"]
-      - dependency-name: "@types/node"
-        update-types: ["version-update:semver-major"]
-    # Group updates to reduce noise
+    # Group updates to reduce noise - now that we're on modern versions
     groups:
-      playwright:
+      dev-tooling:
         patterns:
-          - "@playwright/*"
-          - "playwright*"
-      jest-testing:
+          - "prettier"
+          - "eslint*"
+          - "@eslint/*"
+          - "lint-staged"
+      testing:
         patterns:
           - "jest*"
+          - "@playwright/test" 
           - "@types/jest"
-          - "babel-*"
-      eslint-tooling:
-        patterns:
-          - "eslint*"
-          - "@typescript-eslint/*"
-          - "prettier"
       build-tools:
         patterns:
           - "rimraf"
           - "concurrently"
           - "web-ext"
           - "sharp"
+      types:
+        patterns:
+          - "@types/*"
 
   # Enable version updates for GitHub Actions
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"
-      day: "monday"
+      day: "monday"  
       time: "06:00"
-    open-pull-requests-limit: 5
+    open-pull-requests-limit: 3  # GitHub Actions updates are usually safe
     commit-message:
       prefix: "ci"
       include: "scope"
