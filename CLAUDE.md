@@ -33,6 +33,11 @@ npm run lint             # Check code with ESLint
 npm run lint:fix         # Auto-fix ESLint issues
 npm run format           # Format code with Prettier
 
+# ⚠️ CRITICAL BUILD DEPENDENCIES FOR E2E TESTS
+# ALWAYS use npm scripts (test:e2e:chrome, test:e2e:firefox) instead of direct npx playwright commands
+# Direct npx commands may fail with "service worker timeout" if dist/ folder is missing or stale
+# The npm scripts include the essential "npm run build &&" step that ensures fresh extension artifacts
+
 # CRITICAL: Before making message handling changes, see "Critical Manifest V3 Patterns" section below!
 # IMPORTANT: For reliable extension testing, use npm run test:e2e instead of manual browser testing
 
@@ -167,6 +172,23 @@ This project has **comprehensive documentation** organized in three complementar
 - **Enforcement**: Failing tests indicate either bad tests or bugs - no third option
 
 **→ See [Testing Guide](docs/developer/workflows/testing-guide.md) for complete standards**
+
+**Build System**: Simple file copying via `scripts/build.js` - no bundling or transpilation. Firefox build uses different manifest.
+
+## Common Issues & Troubleshooting
+
+### ❌ "Service Worker Timeout" in Chromium E2E Tests
+
+**Symptom**: `TimeoutError: browserContext.waitForEvent: Timeout exceeded while waiting for event "serviceworker"`
+
+**Root Cause**: Running direct `npx playwright test --project=chromium` commands without ensuring fresh build artifacts in `dist/` folder.
+
+**Solutions**:
+1. **ALWAYS use npm scripts**: `npm run test:e2e:chrome` instead of `npx playwright test --project=chromium`
+2. **Manual fix**: Run `npm run build` before any direct `npx playwright test` commands
+3. **CI environments**: Use npm scripts in workflows, not direct npx commands
+
+**Why this happens**: npm scripts include `npm run build &&` which ensures fresh extension artifacts are available for browser extension loading.
 
 **Build System**: Simple file copying via `scripts/build.js` - no bundling or transpilation. Firefox build uses different manifest.
 

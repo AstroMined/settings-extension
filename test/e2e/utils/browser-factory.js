@@ -172,7 +172,7 @@ class BrowserFactory {
    */
   static async getExtensionServiceWorker(
     context,
-    timeout = 10000,
+    timeout = 15000,
     isFirefox = false,
   ) {
     if (isFirefox) {
@@ -234,16 +234,40 @@ class BrowserFactory {
         page: null,
       };
     } else {
-      // Chromium uses service workers
+      // Chromium uses service workers with enhanced retry logic
+      console.log(`Chromium service worker detection - timeout: ${timeout}ms`);
       let serviceWorker = context.serviceWorkers()[0];
 
       if (!serviceWorker) {
         console.log(
           "Service worker not immediately available, waiting for event...",
         );
-        serviceWorker = await context.waitForEvent("serviceworker", {
-          timeout,
-        });
+        console.log(`Current service workers count: ${context.serviceWorkers().length}`);
+        
+        try {
+          serviceWorker = await context.waitForEvent("serviceworker", {
+            timeout,
+          });
+          console.log("✅ Service worker event received successfully");
+        } catch (error) {
+          console.error("❌ Service worker timeout - attempting retry...");
+          console.log(`Available service workers after timeout: ${context.serviceWorkers().length}`);
+          
+          // Retry with shorter timeout
+          try {
+            await new Promise((resolve) => setTimeout(resolve, 2000));
+            serviceWorker = context.serviceWorkers()[0] || await context.waitForEvent("serviceworker", {
+              timeout: 5000,
+            });
+            console.log("✅ Service worker found on retry");
+          } catch (retryError) {
+            console.error("❌ Service worker retry also failed");
+            console.log("Available contexts:", context.pages().map(p => p.url()));
+            throw new Error(`Could not find extension service worker after ${timeout + 5000}ms. This may indicate missing build artifacts in dist/ folder. Ensure 'npm run build' was executed before running tests.`);
+          }
+        }
+      } else {
+        console.log("✅ Service worker immediately available");
       }
 
       if (serviceWorker) {
@@ -291,7 +315,7 @@ class BrowserFactory {
     const context = await this.createExtensionContext(testInfo, options);
     const serviceWorker = await this.getExtensionServiceWorker(
       context,
-      10000,
+      15000,
       isFirefox,
     );
     const extensionId = this.getExtensionId(serviceWorker);
