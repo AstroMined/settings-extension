@@ -38,17 +38,20 @@ class BrowserFactory {
   static async createExtensionContext(testInfo, options = {}) {
     const projectName = testInfo?.project?.name || "chromium";
     // Enhanced Firefox detection - check multiple patterns
-    const isFirefox = projectName.toLowerCase() === "firefox" || 
-                     projectName.toLowerCase().includes("firefox") ||
-                     projectName.toLowerCase().includes("ff");
+    const isFirefox =
+      projectName.toLowerCase() === "firefox" ||
+      projectName.toLowerCase().includes("firefox") ||
+      projectName.toLowerCase().includes("ff");
     const extensionPath = path.resolve(__dirname, "../../../dist");
     const userDataDir = path.resolve(
       __dirname,
       `../../../test-user-data-${projectName}`,
     );
 
-    // Log browser selection for transparency  
-    console.log(`Browser Factory: ${projectName} → ${isFirefox ? 'Firefox smoke testing' : 'Chromium extension testing'}`);
+    // Log browser selection for transparency
+    console.log(
+      `Browser Factory: ${projectName} → ${isFirefox ? "Firefox smoke testing" : "Chromium extension testing"}`,
+    );
 
     // Check if extension build exists
     const fs = require("fs");
@@ -109,10 +112,12 @@ class BrowserFactory {
     } else {
       // Use standard Chromium extension loading
       // CRITICAL: Defensive check to prevent Firefox tests from hitting Chromium code
-      if (projectName.toLowerCase().includes('firefox')) {
-        throw new Error(`CRITICAL ERROR: Firefox project "${projectName}" incorrectly routed to Chromium code path. This should never happen!`);
+      if (projectName.toLowerCase().includes("firefox")) {
+        throw new Error(
+          `CRITICAL ERROR: Firefox project "${projectName}" incorrectly routed to Chromium code path. This should never happen!`,
+        );
       }
-      
+
       const browserType = this.getBrowserType(testInfo);
       const baseConfig = {
         // Use headed mode in CI with Xvfb virtual display for extension support
