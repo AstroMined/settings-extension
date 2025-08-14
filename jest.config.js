@@ -27,11 +27,11 @@ module.exports = {
   // Coverage configuration - ONLY pure function modules
   collectCoverageFrom: [
     "lib/validation.js",
-    "lib/utils.js", 
+    "lib/utils.js",
     "lib/formatters.js",
     // EXCLUDE browser integration files (tested via E2E):
     // "lib/settings-manager.js" - uses chrome.storage
-    // "lib/content-settings.js" - uses DOM/browser APIs  
+    // "lib/content-settings.js" - uses DOM/browser APIs
     // "lib/browser-compat.js" - browser API abstraction
     // "background.js" - service worker
     // "content-script.js" - DOM manipulation

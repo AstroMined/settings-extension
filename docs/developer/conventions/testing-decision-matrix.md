@@ -15,7 +15,7 @@ Clear decision matrix for determining the correct test type (unit vs E2E) based 
 ```
 Does the code have ANY of these characteristics?
 ├─ Uses browser APIs (chrome.*, browser.*)      → E2E Test
-├─ Manipulates DOM (document.*)                 → E2E Test  
+├─ Manipulates DOM (document.*)                 → E2E Test
 ├─ Uses async operations                        → E2E Test
 ├─ Accesses storage (localStorage, etc)         → E2E Test
 ├─ Makes network requests                       → E2E Test
@@ -25,24 +25,24 @@ Does the code have ANY of these characteristics?
 
 ## Detailed Classification Matrix
 
-| Code Pattern | Test Type | Why | Example |
-|--------------|-----------|-----|---------|
-| **Pure Functions** |
-| `validateEmail(email)` | Unit | No dependencies, deterministic | `expect(validateEmail("test@example.com")).toBe(true)` |
-| `formatFileSize(bytes)` | Unit | Pure calculation | `expect(formatFileSize(1024)).toBe("1 KB")` |
-| `sanitizeInput(text)` | Unit | String processing | `expect(sanitizeInput("<script>")).toBe("")` |
-| `mergeObjects(a, b)` | Unit | Pure data transformation | `expect(mergeObjects({a:1}, {b:2})).toEqual({a:1,b:2})` |
-| **Browser Integration** |
-| `settingsManager.save()` | E2E | Uses chrome.storage APIs | Test with real browser instance |
-| `popup.updateDisplay()` | E2E | Manipulates DOM | Test with real extension popup |
-| `background.handleMessage()` | E2E | Uses chrome.runtime APIs | Test with real message passing |
-| `contentScript.injectCSS()` | E2E | Modifies page DOM | Test with real web page |
-| **Async Operations** |
-| `loadSettingsFromAPI()` | E2E | Network request + storage | Test with real browser/network |
-| `saveAndValidateSettings()` | E2E | Storage + validation chain | Test with real persistence |
-| **Data Processing** |
-| `parseSettingsJSON(json)` | Unit | Pure JSON parsing | `expect(parseSettingsJSON('{"a":1}')).toEqual({a:1})` |
-| `calculateChecksum(data)` | Unit | Pure computation | `expect(calculateChecksum("test")).toBe("a94a8f...")` |
+| Code Pattern                 | Test Type | Why                            | Example                                                 |
+| ---------------------------- | --------- | ------------------------------ | ------------------------------------------------------- |
+| **Pure Functions**           |
+| `validateEmail(email)`       | Unit      | No dependencies, deterministic | `expect(validateEmail("test@example.com")).toBe(true)`  |
+| `formatFileSize(bytes)`      | Unit      | Pure calculation               | `expect(formatFileSize(1024)).toBe("1 KB")`             |
+| `sanitizeInput(text)`        | Unit      | String processing              | `expect(sanitizeInput("<script>")).toBe("")`            |
+| `mergeObjects(a, b)`         | Unit      | Pure data transformation       | `expect(mergeObjects({a:1}, {b:2})).toEqual({a:1,b:2})` |
+| **Browser Integration**      |
+| `settingsManager.save()`     | E2E       | Uses chrome.storage APIs       | Test with real browser instance                         |
+| `popup.updateDisplay()`      | E2E       | Manipulates DOM                | Test with real extension popup                          |
+| `background.handleMessage()` | E2E       | Uses chrome.runtime APIs       | Test with real message passing                          |
+| `contentScript.injectCSS()`  | E2E       | Modifies page DOM              | Test with real web page                                 |
+| **Async Operations**         |
+| `loadSettingsFromAPI()`      | E2E       | Network request + storage      | Test with real browser/network                          |
+| `saveAndValidateSettings()`  | E2E       | Storage + validation chain     | Test with real persistence                              |
+| **Data Processing**          |
+| `parseSettingsJSON(json)`    | Unit      | Pure JSON parsing              | `expect(parseSettingsJSON('{"a":1}')).toEqual({a:1})`   |
+| `calculateChecksum(data)`    | Unit      | Pure computation               | `expect(calculateChecksum("test")).toBe("a94a8f...")`   |
 
 ## Decision Process
 
@@ -66,7 +66,7 @@ function calculateTotal(items, taxRate) {
   return items.reduce((sum, item) => sum + item.price, 0) * (1 + taxRate);
 }
 
-// ❌ Not pure (uses chrome.storage) - E2E test  
+// ❌ Not pure (uses chrome.storage) - E2E test
 async function saveUserPreferences(prefs) {
   await chrome.storage.local.set({ preferences: prefs });
 }
@@ -90,10 +90,10 @@ async function saveUserPreferences(prefs) {
 test("settings integration", async () => {
   const mockStorage = { get: jest.fn(), set: jest.fn() };
   global.chrome = { storage: { local: mockStorage } };
-  
+
   const manager = new SettingsManager();
   await manager.save({ theme: "dark" });
-  
+
   expect(mockStorage.set).toHaveBeenCalled(); // Testing mocks!
 });
 ```
@@ -110,12 +110,12 @@ test("validates setting values", () => {
 // GOOD: Real browser E2E test
 test("settings persist across sessions", async ({ page, context }) => {
   await page.goto(`chrome-extension://${extensionId}/popup.html`);
-  await page.fill('input[name="theme"]', 'dark');
-  
+  await page.fill('input[name="theme"]', "dark");
+
   // Real browser persistence test
   const newPage = await context.newPage();
   await newPage.goto(`chrome-extension://${extensionId}/popup.html`);
-  await expect(newPage.locator('input[name="theme"]')).toHaveValue('dark');
+  await expect(newPage.locator('input[name="theme"]')).toHaveValue("dark");
 });
 ```
 
@@ -142,9 +142,9 @@ function validateNewSetting(newValue, currentSettings) {
 // Function that formats data for UI display
 function formatSettingsForDisplay(settings) {
   return Object.entries(settings).map(([key, value]) => ({
-    label: key.replace(/_/g, ' ').toUpperCase(),
+    label: key.replace(/_/g, " ").toUpperCase(),
     value: value.toString(),
-    type: typeof value
+    type: typeof value,
   }));
 }
 ```
@@ -187,7 +187,9 @@ test("user preference is preserved", async ({ page }) => {
 ```javascript
 // ❌ BAD: Mocking the storage you're testing
 test("storage integration", () => {
-  const mockStorage = { /* fake implementation */ };
+  const mockStorage = {
+    /* fake implementation */
+  };
   // Not testing real storage integration!
 });
 
@@ -221,7 +223,7 @@ test("validates email format", () => {
 ```
 test/unit/
 ├── validation.test.js      # Pure validation functions
-├── utils.test.js          # Utility functions  
+├── utils.test.js          # Utility functions
 ├── formatters.test.js     # Data formatting functions
 └── calculations.test.js   # Mathematical operations
 ```
@@ -248,14 +250,14 @@ Before writing any test, ask:
 
 ## Quick Reference
 
-| Want to Test | Use | Don't Use |
-|--------------|-----|-----------|
-| Email validation | Unit test | E2E with mocked DOM |
-| Settings persistence | E2E test | Unit test with mocked storage |
-| Data transformation | Unit test | E2E with browser |
-| User workflows | E2E test | Unit test with mocked everything |
-| Calculations | Unit test | E2E test |
-| UI interactions | E2E test | Unit test with mocked DOM |
+| Want to Test         | Use       | Don't Use                        |
+| -------------------- | --------- | -------------------------------- |
+| Email validation     | Unit test | E2E with mocked DOM              |
+| Settings persistence | E2E test  | Unit test with mocked storage    |
+| Data transformation  | Unit test | E2E with browser                 |
+| User workflows       | E2E test  | Unit test with mocked everything |
+| Calculations         | Unit test | E2E test                         |
+| UI interactions      | E2E test  | Unit test with mocked DOM        |
 
 ## References
 
@@ -265,6 +267,6 @@ Before writing any test, ask:
 
 ## Revision History
 
-| Date       | Author         | Changes                           |
-| ---------- | -------------- | --------------------------------- |
-| 2025-08-13 | Developer Team | Initial testing decision matrix   |
+| Date       | Author         | Changes                         |
+| ---------- | -------------- | ------------------------------- |
+| 2025-08-13 | Developer Team | Initial testing decision matrix |

@@ -11,6 +11,7 @@ This guide provides systematic troubleshooting for the most common issues develo
 ### 1. "Message Port Closed Before Response Received" Error
 
 **Symptoms:**
+
 - Error appears in popup or content script console
 - Settings operations fail silently
 - Background script logs show successful operations
@@ -20,6 +21,7 @@ This guide provides systematic troubleshooting for the most common issues develo
 Using `async function handleMessage()` in the background script. This returns `Promise.resolve(true)` instead of `true`, causing Chrome to close the message port before async operations complete.
 
 **Diagnostic Code:**
+
 ```javascript
 // Test if this is the issue
 chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
@@ -31,6 +33,7 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
 ```
 
 **Solution - Use Sync/Async Separation Pattern:**
+
 ```javascript
 // ✅ Correct pattern (from production background.js)
 chrome.runtime.onMessage.addListener(handleMessage);
@@ -63,6 +66,7 @@ async function processAsyncMessage(message, sender, sendResponse) {
 ```
 
 **Prevention:**
+
 - Never use `async function` directly with `chrome.runtime.onMessage.addListener()`
 - Always separate synchronous and asynchronous message handling
 - Use the exact patterns from the production `background.js`
@@ -70,23 +74,27 @@ async function processAsyncMessage(message, sender, sendResponse) {
 ### 2. Service Worker Terminated/Not Responding
 
 **Symptoms:**
+
 - Settings operations timeout
 - Background script console shows "Service Worker terminated"
 - Popup fails to load settings
 - Extension appears non-functional
 
 **Root Causes:**
+
 - Service worker idle timeout (30 seconds default)
 - No keep-alive mechanism
 - Heavy initialization blocking event loop
 - Unregistered event listeners
 
 **Diagnostic Commands:**
+
 ```javascript
 // Test service worker status
-chrome.runtime.sendMessage({ type: "PING" })
-  .then(response => console.log("SW alive:", response))
-  .catch(error => console.error("SW dead:", error));
+chrome.runtime
+  .sendMessage({ type: "PING" })
+  .then((response) => console.log("SW alive:", response))
+  .catch((error) => console.error("SW dead:", error));
 
 // Check if SW is running
 chrome.management.get(chrome.runtime.id, (info) => {
@@ -95,6 +103,7 @@ chrome.management.get(chrome.runtime.id, (info) => {
 ```
 
 **Solution - Implement Keep-Alive Management:**
+
 ```javascript
 // From production background.js
 // CRITICAL: Register listeners at TOP LEVEL before any imports
@@ -121,6 +130,7 @@ initializeSettingsOnStartup();
 ```
 
 **Advanced Diagnostics:**
+
 ```javascript
 // Monitor service worker lifecycle
 setInterval(() => {
@@ -137,43 +147,45 @@ console.log("3. Settings manager initializing...");
 ### 3. Settings Manager Initialization Failures
 
 **Symptoms:**
+
 - "Settings manager not available" errors
 - Fallback initialization triggered repeatedly
 - Settings operations return null/undefined
 - Extension works intermittently
 
 **Root Causes:**
+
 - Race conditions during initialization
 - Storage permissions missing
 - Corrupt settings data
 - Browser compatibility issues
 
 **Diagnostic Code:**
+
 ```javascript
 // Test initialization sequence
 async function diagnoseInitialization() {
   console.log("=== Settings Manager Diagnostics ===");
-  
+
   try {
     // Check storage permissions
     const permissions = await chrome.permissions.contains({
-      permissions: ["storage"]
+      permissions: ["storage"],
     });
     console.log("Storage permission:", permissions);
-    
+
     // Test storage access
     await chrome.storage.local.set({ test: "value" });
     const result = await chrome.storage.local.get("test");
     console.log("Storage test:", result);
-    
+
     // Test settings manager
     const manager = new SettingsManager();
     await manager.initialize();
     console.log("Settings manager initialized successfully");
-    
+
     const settings = await manager.getAllSettings();
     console.log("Settings loaded:", Object.keys(settings).length);
-    
   } catch (error) {
     console.error("Initialization diagnostic failed:", error);
     console.error("Stack trace:", error.stack);
@@ -185,6 +197,7 @@ diagnoseInitialization();
 ```
 
 **Solution - Robust Initialization Pattern:**
+
 ```javascript
 // From production background.js
 async function initializeSettingsOnStartup() {
@@ -195,7 +208,7 @@ async function initializeSettingsOnStartup() {
     console.log("Settings manager initialized successfully");
   } catch (error) {
     console.error("Failed to initialize settings manager:", error);
-    
+
     // Multi-level fallback system
     try {
       // Fallback 1: Embedded defaults
@@ -204,7 +217,7 @@ async function initializeSettingsOnStartup() {
       console.log("Settings manager initialized with fallback defaults");
     } catch (fallbackError) {
       console.error("Even fallback initialization failed:", fallbackError);
-      
+
       // Fallback 2: Clear corrupt data and retry
       try {
         await chrome.storage.local.clear();
@@ -225,25 +238,28 @@ async function initializeSettingsOnStartup() {
 ### 4. Connection Timeouts and Retry Logic
 
 **Symptoms:**
+
 - "Timeout getting setting" errors
 - Intermittent failures in content scripts
 - Slow response times
 - Settings not loading on some pages
 
 **Root Causes:**
+
 - Network latency affecting message passing
 - Service worker startup delay
 - Heavy page blocking message processing
 - Default timeout too short
 
 **Diagnostic Code:**
+
 ```javascript
 // Test connection latency
 async function testConnectionLatency() {
   const settings = new ContentScriptSettings();
   const iterations = 5;
   const results = [];
-  
+
   for (let i = 0; i < iterations; i++) {
     const start = performance.now();
     try {
@@ -255,16 +271,18 @@ async function testConnectionLatency() {
       console.error(`Iteration ${i + 1} failed:`, error);
       results.push(null);
     }
-    
+
     // Wait between tests
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise((resolve) => setTimeout(resolve, 1000));
   }
-  
-  const successful = results.filter(r => r !== null);
+
+  const successful = results.filter((r) => r !== null);
   if (successful.length > 0) {
     const avg = successful.reduce((a, b) => a + b) / successful.length;
     console.log(`Average latency: ${avg.toFixed(2)}ms`);
-    console.log(`Success rate: ${(successful.length / iterations * 100).toFixed(1)}%`);
+    console.log(
+      `Success rate: ${((successful.length / iterations) * 100).toFixed(1)}%`,
+    );
   }
 }
 
@@ -272,6 +290,7 @@ testConnectionLatency();
 ```
 
 **Solution - Implement Robust Retry Logic:**
+
 ```javascript
 // Production content script pattern with retry logic
 class RobustSettingsClient {
@@ -287,18 +306,25 @@ class RobustSettingsClient {
     try {
       return await this.settings.getSetting(key);
     } catch (error) {
-      console.warn(`Attempt ${attempt} failed for setting '${key}':`, error.message);
-      
+      console.warn(
+        `Attempt ${attempt} failed for setting '${key}':`,
+        error.message,
+      );
+
       if (attempt >= this.maxRetries) {
-        console.error(`All ${this.maxRetries} attempts failed for setting '${key}'`);
-        throw new Error(`Failed to get setting '${key}' after ${this.maxRetries} attempts: ${error.message}`);
+        console.error(
+          `All ${this.maxRetries} attempts failed for setting '${key}'`,
+        );
+        throw new Error(
+          `Failed to get setting '${key}' after ${this.maxRetries} attempts: ${error.message}`,
+        );
       }
-      
+
       // Exponential backoff
       const delay = this.baseDelay * Math.pow(2, attempt - 1);
       console.log(`Retrying in ${delay}ms...`);
-      
-      await new Promise(resolve => setTimeout(resolve, delay));
+
+      await new Promise((resolve) => setTimeout(resolve, delay));
       return this.getSettingWithRetry(key, attempt + 1);
     }
   }
@@ -321,47 +347,53 @@ class RobustSettingsClient {
 ### 5. Cache Inconsistency Issues
 
 **Symptoms:**
+
 - Settings UI shows wrong values
 - Changes not reflected immediately
 - Stale data displayed
 - Inconsistent behavior across tabs
 
 **Root Causes:**
+
 - Cache not invalidated properly
 - Race conditions during updates
 - Missing change listeners
 - Manual cache manipulation
 
 **Diagnostic Code:**
+
 ```javascript
 // Cache consistency checker
 function diagnoseCacheConsistency() {
   const settings = new ContentScriptSettings();
-  
+
   console.log("=== Cache Consistency Diagnostic ===");
-  
+
   // Get cached settings
   const cached = settings.getCachedSettings();
   console.log("Cached settings:", Object.keys(cached));
-  
+
   // Compare with fresh data
-  settings.getAllSettings()
-    .then(fresh => {
+  settings
+    .getAllSettings()
+    .then((fresh) => {
       console.log("Fresh settings:", Object.keys(fresh));
-      
+
       // Check for discrepancies
       for (const [key, cachedSetting] of Object.entries(cached)) {
         const freshSetting = fresh[key];
         if (!freshSetting) {
           console.warn(`Setting '${key}' in cache but not in fresh data`);
-        } else if (JSON.stringify(cachedSetting) !== JSON.stringify(freshSetting)) {
+        } else if (
+          JSON.stringify(cachedSetting) !== JSON.stringify(freshSetting)
+        ) {
           console.warn(`Setting '${key}' cache mismatch:`, {
             cached: cachedSetting,
-            fresh: freshSetting
+            fresh: freshSetting,
           });
         }
       }
-      
+
       // Check for missing cached settings
       for (const key of Object.keys(fresh)) {
         if (!cached[key]) {
@@ -369,7 +401,7 @@ function diagnoseCacheConsistency() {
         }
       }
     })
-    .catch(error => {
+    .catch((error) => {
       console.error("Failed to get fresh settings for comparison:", error);
     });
 }
@@ -379,6 +411,7 @@ diagnoseCacheConsistency();
 ```
 
 **Solution - Proper Cache Management:**
+
 ```javascript
 // Proper cache usage pattern
 class CacheAwareSettingsClient {
@@ -386,17 +419,17 @@ class CacheAwareSettingsClient {
     this.settings = new ContentScriptSettings();
     this.setupChangeListeners();
   }
-  
+
   setupChangeListeners() {
     this.settings.addChangeListener((event, data) => {
       console.log(`Cache invalidation - ${event}:`, data);
-      
+
       switch (event) {
         case "changed":
           // Cache automatically updated by ContentScriptSettings
           this.handleIndividualChanges(data);
           break;
-          
+
         case "imported":
         case "reset":
           // Force full cache refresh for bulk operations
@@ -405,7 +438,7 @@ class CacheAwareSettingsClient {
       }
     });
   }
-  
+
   // Use cached data for performance-critical operations
   getFeatureEnabledSync() {
     const cached = this.settings.getCachedSetting("feature_enabled");
@@ -417,12 +450,16 @@ class CacheAwareSettingsClient {
       return null; // or default value
     }
   }
-  
+
   // Force cache refresh when needed
   async refreshCache() {
     this.settings.clearCache();
     const settings = await this.settings.getAllSettings();
-    console.log("Cache refreshed with", Object.keys(settings).length, "settings");
+    console.log(
+      "Cache refreshed with",
+      Object.keys(settings).length,
+      "settings",
+    );
     return settings;
   }
 }
@@ -433,46 +470,55 @@ class CacheAwareSettingsClient {
 ### 6. Storage Quota Exceeded
 
 **Symptoms:**
+
 - "Storage quota exceeded" errors
 - Settings fail to save
 - Extension becomes non-functional
 - Browser storage warnings
 
 **Diagnostic Code:**
+
 ```javascript
 // Storage quota diagnostic
 async function diagnoseStorageQuota() {
   console.log("=== Storage Quota Diagnostic ===");
-  
+
   try {
     const settingsManager = new SettingsManager();
-    
+
     // Get storage statistics
     const stats = await settingsManager.getStorageStats();
     console.log("Storage Statistics:", stats);
-    
+
     // Check quota
     const quota = await settingsManager.checkStorageQuota();
     console.log("Storage Quota:", quota);
-    
+
     if (quota.percentUsed > 80) {
-      console.warn("⚠️ Storage usage high:", `${quota.percentUsed.toFixed(1)}%`);
+      console.warn(
+        "⚠️ Storage usage high:",
+        `${quota.percentUsed.toFixed(1)}%`,
+      );
     }
-    
+
     if (quota.percentUsed > 95) {
-      console.error("❌ Storage quota critically high:", `${quota.percentUsed.toFixed(1)}%`);
+      console.error(
+        "❌ Storage quota critically high:",
+        `${quota.percentUsed.toFixed(1)}%`,
+      );
     }
-    
+
     // List all stored items by size
     const storage = await chrome.storage.local.get();
-    const sizes = Object.entries(storage).map(([key, value]) => ({
-      key,
-      size: JSON.stringify(value).length,
-      sizeKB: (JSON.stringify(value).length / 1024).toFixed(2)
-    })).sort((a, b) => b.size - a.size);
-    
+    const sizes = Object.entries(storage)
+      .map(([key, value]) => ({
+        key,
+        size: JSON.stringify(value).length,
+        sizeKB: (JSON.stringify(value).length / 1024).toFixed(2),
+      }))
+      .sort((a, b) => b.size - a.size);
+
     console.log("Storage items by size:", sizes);
-    
   } catch (error) {
     console.error("Storage quota diagnostic failed:", error);
   }
@@ -482,6 +528,7 @@ diagnoseStorageQuota();
 ```
 
 **Solution - Storage Management:**
+
 ```javascript
 // Storage quota monitoring and management
 class StorageManager {
@@ -489,53 +536,54 @@ class StorageManager {
     this.settingsManager = settingsManager;
     this.quotaThreshold = 0.8; // 80%
   }
-  
+
   async monitorQuotaUsage() {
     try {
       const quota = await this.settingsManager.checkStorageQuota();
-      
+
       if (quota.percentUsed > this.quotaThreshold * 100) {
         console.warn("Storage quota threshold exceeded:", quota);
         await this.handleHighUsage(quota);
       }
-      
+
       return quota;
     } catch (error) {
       console.error("Quota monitoring failed:", error);
       return null;
     }
   }
-  
+
   async handleHighUsage(quota) {
     console.log("Handling high storage usage...");
-    
+
     // Strategy 1: Clean up old/unused data
     await this.cleanupStorage();
-    
+
     // Strategy 2: Compress large settings
     await this.compressLargeSettings();
-    
+
     // Strategy 3: Move to sync storage if available
     if (this.settingsManager.getBrowserAPI().storage.sync) {
       await this.migrateSyncableData();
     }
-    
+
     // Re-check quota
     const newQuota = await this.settingsManager.checkStorageQuota();
     console.log("Storage usage after cleanup:", newQuota);
-    
+
     return newQuota;
   }
-  
+
   async cleanupStorage() {
     // Remove old export files, temporary data, etc.
     const storage = await chrome.storage.local.get();
-    const keysToRemove = Object.keys(storage).filter(key => 
-      key.startsWith('temp_') || 
-      key.startsWith('cache_') ||
-      key.includes('_export_')
+    const keysToRemove = Object.keys(storage).filter(
+      (key) =>
+        key.startsWith("temp_") ||
+        key.startsWith("cache_") ||
+        key.includes("_export_"),
     );
-    
+
     if (keysToRemove.length > 0) {
       await chrome.storage.local.remove(keysToRemove);
       console.log("Cleaned up", keysToRemove.length, "temporary items");
@@ -547,40 +595,56 @@ class StorageManager {
 ### 7. Performance Degradation
 
 **Symptoms:**
+
 - Slow settings operations
 - UI lag when changing settings
 - High CPU usage in background script
 - Extension impacts browser performance
 
 **Performance Diagnostic:**
+
 ```javascript
 // Performance profiler for settings operations
 class SettingsPerformanceProfiler {
   constructor() {
     this.metrics = [];
   }
-  
+
   async profileSettingsOperations() {
     const settings = new ContentScriptSettings();
     const operations = [
       { name: "getSetting", fn: () => settings.getSetting("feature_enabled") },
-      { name: "getMultipleSettings", fn: () => settings.getSettings(["feature_enabled", "api_key", "refresh_interval"]) },
+      {
+        name: "getMultipleSettings",
+        fn: () =>
+          settings.getSettings([
+            "feature_enabled",
+            "api_key",
+            "refresh_interval",
+          ]),
+      },
       { name: "getAllSettings", fn: () => settings.getAllSettings() },
-      { name: "updateSetting", fn: () => settings.updateSetting("feature_enabled", true) },
-      { name: "getCachedSetting", fn: () => settings.getCachedSetting("feature_enabled") }
+      {
+        name: "updateSetting",
+        fn: () => settings.updateSetting("feature_enabled", true),
+      },
+      {
+        name: "getCachedSetting",
+        fn: () => settings.getCachedSetting("feature_enabled"),
+      },
     ];
-    
+
     for (const operation of operations) {
       const metrics = await this.profileOperation(operation.name, operation.fn);
       this.metrics.push(metrics);
     }
-    
+
     this.reportResults();
   }
-  
+
   async profileOperation(name, operation, iterations = 5) {
     const results = [];
-    
+
     for (let i = 0; i < iterations; i++) {
       const start = performance.now();
       try {
@@ -591,37 +655,45 @@ class SettingsPerformanceProfiler {
         const duration = performance.now() - start;
         results.push({ success: false, duration, error: error.message });
       }
-      
+
       // Prevent overwhelming the system
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise((resolve) => setTimeout(resolve, 100));
     }
-    
-    const successful = results.filter(r => r.success);
-    const avgDuration = successful.length > 0 
-      ? successful.reduce((sum, r) => sum + r.duration, 0) / successful.length 
-      : 0;
-    
+
+    const successful = results.filter((r) => r.success);
+    const avgDuration =
+      successful.length > 0
+        ? successful.reduce((sum, r) => sum + r.duration, 0) / successful.length
+        : 0;
+
     return {
       name,
       iterations,
       successRate: (successful.length / iterations) * 100,
       avgDuration: avgDuration.toFixed(2),
-      results
+      results,
     };
   }
-  
+
   reportResults() {
     console.log("=== Settings Performance Report ===");
-    console.table(this.metrics.map(m => ({
-      Operation: m.name,
-      "Success Rate": `${m.successRate.toFixed(1)}%`,
-      "Avg Duration": `${m.avgDuration}ms`
-    })));
-    
+    console.table(
+      this.metrics.map((m) => ({
+        Operation: m.name,
+        "Success Rate": `${m.successRate.toFixed(1)}%`,
+        "Avg Duration": `${m.avgDuration}ms`,
+      })),
+    );
+
     // Identify performance issues
-    const slowOperations = this.metrics.filter(m => parseFloat(m.avgDuration) > 100);
+    const slowOperations = this.metrics.filter(
+      (m) => parseFloat(m.avgDuration) > 100,
+    );
     if (slowOperations.length > 0) {
-      console.warn("⚠️ Slow operations detected:", slowOperations.map(m => m.name));
+      console.warn(
+        "⚠️ Slow operations detected:",
+        slowOperations.map((m) => m.name),
+      );
     }
   }
 }
@@ -632,6 +704,7 @@ profiler.profileSettingsOperations();
 ```
 
 **Performance Optimization Solutions:**
+
 ```javascript
 // Optimized settings client for high-performance scenarios
 class OptimizedSettingsClient {
@@ -643,12 +716,12 @@ class OptimizedSettingsClient {
     this.cache = new Map();
     this.cacheMaxAge = 30000; // 30 seconds
   }
-  
+
   // Batch multiple operations together
   async batchOperation(operation) {
     return new Promise((resolve, reject) => {
       this.batchQueue.push({ operation, resolve, reject });
-      
+
       if (!this.batchTimer) {
         this.batchTimer = setTimeout(() => {
           this.processBatch();
@@ -656,64 +729,65 @@ class OptimizedSettingsClient {
       }
     });
   }
-  
+
   async processBatch() {
     const batch = this.batchQueue.splice(0);
     this.batchTimer = null;
-    
+
     if (batch.length === 0) return;
-    
+
     try {
       // Group operations by type
-      const getOperations = batch.filter(b => b.operation.type === 'get');
-      const updateOperations = batch.filter(b => b.operation.type === 'update');
-      
+      const getOperations = batch.filter((b) => b.operation.type === "get");
+      const updateOperations = batch.filter(
+        (b) => b.operation.type === "update",
+      );
+
       // Batch get operations
       if (getOperations.length > 0) {
-        const keys = getOperations.map(op => op.operation.key);
+        const keys = getOperations.map((op) => op.operation.key);
         const results = await this.settings.getSettings(keys);
-        
-        getOperations.forEach(op => {
+
+        getOperations.forEach((op) => {
           op.resolve(results[op.operation.key]);
         });
       }
-      
-      // Batch update operations  
+
+      // Batch update operations
       if (updateOperations.length > 0) {
         const updates = {};
-        updateOperations.forEach(op => {
+        updateOperations.forEach((op) => {
           updates[op.operation.key] = op.operation.value;
         });
-        
+
         await this.settings.updateSettings(updates);
-        updateOperations.forEach(op => op.resolve(true));
+        updateOperations.forEach((op) => op.resolve(true));
       }
-      
     } catch (error) {
-      batch.forEach(op => op.reject(error));
+      batch.forEach((op) => op.reject(error));
     }
   }
-  
+
   // Intelligent caching with TTL
   async getSettingCached(key, maxAge = this.cacheMaxAge) {
     const cached = this.cache.get(key);
     const now = Date.now();
-    
-    if (cached && (now - cached.timestamp) < maxAge) {
+
+    if (cached && now - cached.timestamp < maxAge) {
       return cached.value;
     }
-    
+
     // Cache miss or expired - fetch fresh data
     const value = await this.batchOperation({
-      type: 'get',
-      key: key
+      type: "get",
+      key: key,
     });
-    
+
     this.cache.set(key, {
       value,
-      timestamp: now
+      timestamp: now,
     });
-    
+
     return value;
   }
 }
@@ -724,64 +798,73 @@ class OptimizedSettingsClient {
 ### 8. Firefox/Edge Compatibility Problems
 
 **Symptoms:**
+
 - Extension works in Chrome but fails in Firefox/Edge
 - API differences causing errors
 - Different storage behaviors
 - Permission handling variations
 
 **Diagnostic Code:**
+
 ```javascript
 // Browser compatibility diagnostic
 function diagnoseBrowserCompatibility() {
   console.log("=== Browser Compatibility Diagnostic ===");
-  
+
   const browserAPI = window.browserAPI || self.browserAPI;
   if (!browserAPI) {
-    console.error("❌ browserAPI not available - browser-compat.js not loaded?");
+    console.error(
+      "❌ browserAPI not available - browser-compat.js not loaded?",
+    );
     return;
   }
-  
+
   const env = browserAPI.environment;
   console.log("Browser Environment:", env);
   console.log("Browser Info:", browserAPI.getBrowserInfo());
-  
+
   // Test API availability
   const apis = [
     "storage.local",
-    "storage.sync", 
+    "storage.sync",
     "runtime.sendMessage",
     "runtime.onMessage",
     "tabs.query",
-    "tabs.sendMessage"
+    "tabs.sendMessage",
   ];
-  
-  apis.forEach(apiPath => {
+
+  apis.forEach((apiPath) => {
     const available = browserAPI.utils.isAPIAvailable(apiPath);
-    console.log(`${apiPath}: ${available ? '✅' : '❌'}`);
+    console.log(`${apiPath}: ${available ? "✅" : "❌"}`);
   });
-  
+
   // Test storage operations
   testStorageCompatibility();
 }
 
 async function testStorageCompatibility() {
   const browserAPI = window.browserAPI || self.browserAPI;
-  
+
   try {
     // Test local storage
     await browserAPI.storage.local.set({ test_local: "value" });
     const localResult = await browserAPI.storage.local.get("test_local");
-    console.log("Local storage test:", localResult.test_local === "value" ? "✅" : "❌");
-    
+    console.log(
+      "Local storage test:",
+      localResult.test_local === "value" ? "✅" : "❌",
+    );
+
     // Test sync storage (may not be available)
     if (browserAPI.storage.sync) {
       await browserAPI.storage.sync.set({ test_sync: "value" });
       const syncResult = await browserAPI.storage.sync.get("test_sync");
-      console.log("Sync storage test:", syncResult.test_sync === "value" ? "✅" : "❌");
+      console.log(
+        "Sync storage test:",
+        syncResult.test_sync === "value" ? "✅" : "❌",
+      );
     } else {
       console.log("Sync storage: ❌ Not available");
     }
-    
   } catch (error) {
     console.error("Storage compatibility test failed:", error);
   }
@@ -791,6 +874,7 @@ diagnoseBrowserCompatibility();
 ```
 
 **Solution - Use Browser Compatibility Layer:**
+
 ```javascript
 // Proper browser compatibility usage
 class CrossBrowserSettingsClient {
@@ -799,36 +883,38 @@ class CrossBrowserSettingsClient {
     if (!this.getBrowserAPI()) {
       throw new Error("Browser compatibility layer not available");
     }
-    
+
     this.settings = new ContentScriptSettings();
     this.browserInfo = this.getBrowserAPI().getBrowserInfo();
-    
+
     // Adjust behavior based on browser
     this.adjustForBrowser();
   }
-  
+
   getBrowserAPI() {
-    return (typeof window !== "undefined" && window.browserAPI) ||
-           (typeof self !== "undefined" && self.browserAPI) ||
-           (typeof global !== "undefined" && global.browserAPI);
+    return (
+      (typeof window !== "undefined" && window.browserAPI) ||
+      (typeof self !== "undefined" && self.browserAPI) ||
+      (typeof global !== "undefined" && global.browserAPI)
+    );
   }
-  
+
   adjustForBrowser() {
     const { name } = this.browserInfo;
-    
+
     switch (name) {
       case "firefox":
         // Firefox-specific adjustments
         this.settings.setMessageTimeout(8000); // Firefox can be slower
         console.log("Firefox compatibility mode enabled");
         break;
-        
+
       case "edge":
         // Edge-specific adjustments
         this.settings.setMessageTimeout(6000);
         console.log("Edge compatibility mode enabled");
         break;
-        
+
       case "chrome":
       default:
         // Chrome optimizations
@@ -837,10 +923,10 @@ class CrossBrowserSettingsClient {
         break;
     }
   }
-  
+
   async getPreferredStorageArea() {
     const browserAPI = this.getBrowserAPI();
-    
+
     // Use sync storage if available and not Firefox (Firefox sync has limitations)
     if (browserAPI.storage.sync && this.browserInfo.name !== "firefox") {
       try {
@@ -849,10 +935,13 @@ class CrossBrowserSettingsClient {
         await browserAPI.storage.sync.remove("test");
         return "sync";
       } catch (error) {
-        console.warn("Sync storage not working, falling back to local:", error.message);
+        console.warn(
+          "Sync storage not working, falling back to local:",
+          error.message,
+        );
       }
     }
-    
+
     return "local";
   }
 }
@@ -863,6 +952,7 @@ class CrossBrowserSettingsClient {
 ### 9. Advanced Debugging Setup
 
 **Debug Console Commands:**
+
 ```javascript
 // Global debug helpers (add to your extension for debugging)
 window.SettingsDebug = {
@@ -877,78 +967,92 @@ window.SettingsDebug = {
       return false;
     }
   },
-  
+
   // Settings overview
   async getSettingsOverview() {
     const settings = new ContentScriptSettings();
     try {
       const all = await settings.getAllSettings();
       const cached = settings.getCachedSettings();
-      
+
       console.log("=== Settings Overview ===");
       console.log("Total settings:", Object.keys(all).length);
       console.log("Cached settings:", Object.keys(cached).length);
       console.log("Settings:", all);
-      
+
       return { all, cached };
     } catch (error) {
       console.error("Failed to get settings overview:", error);
     }
   },
-  
+
   // Performance benchmark
   async benchmarkPerformance() {
     const settings = new ContentScriptSettings();
-    
+
     console.log("=== Performance Benchmark ===");
-    
+
     // Test individual operations
     const start1 = performance.now();
     await settings.getSetting("feature_enabled");
     console.log("getSetting:", (performance.now() - start1).toFixed(2) + "ms");
-    
+
     const start2 = performance.now();
-    await settings.getSettings(["feature_enabled", "api_key", "refresh_interval"]);
-    console.log("getSettings (3):", (performance.now() - start2).toFixed(2) + "ms");
-    
+    await settings.getSettings([
+      "feature_enabled",
+      "api_key",
+      "refresh_interval",
+    ]);
+    console.log(
+      "getSettings (3):",
+      (performance.now() - start2).toFixed(2) + "ms",
+    );
+
     const start3 = performance.now();
     await settings.getAllSettings();
-    console.log("getAllSettings:", (performance.now() - start3).toFixed(2) + "ms");
+    console.log(
+      "getAllSettings:",
+      (performance.now() - start3).toFixed(2) + "ms",
+    );
   },
-  
+
   // Cache analysis
   analyzeCacheState() {
     const settings = new ContentScriptSettings();
     const cached = settings.getCachedSettings();
-    
+
     console.log("=== Cache Analysis ===");
     console.log("Cache size:", Object.keys(cached).length);
-    
+
     Object.entries(cached).forEach(([key, setting]) => {
-      console.log(`${key}: ${typeof setting.value} (${JSON.stringify(setting.value).length} chars)`);
+      console.log(
+        `${key}: ${typeof setting.value} (${JSON.stringify(setting.value).length} chars)`,
+      );
     });
   },
-  
+
   // Storage analysis
   async analyzeStorageUsage() {
     try {
       const storage = await chrome.storage.local.get();
-      const sizes = Object.entries(storage).map(([key, value]) => ({
-        key,
-        type: typeof value,
-        size: JSON.stringify(value).length,
-        sizeKB: (JSON.stringify(value).length / 1024).toFixed(2)
-      })).sort((a, b) => b.size - a.size);
-      
+      const sizes = Object.entries(storage)
+        .map(([key, value]) => ({
+          key,
+          type: typeof value,
+          size: JSON.stringify(value).length,
+          sizeKB: (JSON.stringify(value).length / 1024).toFixed(2),
+        }))
+        .sort((a, b) => b.size - a.size);
+
       console.log("=== Storage Analysis ===");
       console.table(sizes);
-      
+
       const total = sizes.reduce((sum, item) => sum + item.size, 0);
       console.log("Total size:", (total / 1024).toFixed(2) + " KB");
     } catch (error) {
       console.error("Storage analysis failed:", error);
     }
-  }
+  },
 };
 
 // Usage examples:
@@ -962,16 +1066,17 @@ window.SettingsDebug = {
 ### 10. Logging and Monitoring
 
 **Production Logging Setup:**
+
 ```javascript
 // Enhanced logging system for production debugging
 class SettingsLogger {
-  constructor(level = 'info') {
+  constructor(level = "info") {
     this.level = level;
     this.levels = { error: 0, warn: 1, info: 2, debug: 3 };
     this.logs = [];
     this.maxLogs = 1000; // Keep last 1000 log entries
   }
-  
+
   log(level, message, data = null) {
     if (this.levels[level] <= this.levels[this.level]) {
       const entry = {
@@ -980,26 +1085,26 @@ class SettingsLogger {
         message,
         data,
         url: window.location.href,
-        userAgent: navigator.userAgent.substring(0, 100)
+        userAgent: navigator.userAgent.substring(0, 100),
       };
-      
+
       this.logs.push(entry);
-      
+
       // Keep only recent logs
       if (this.logs.length > this.maxLogs) {
         this.logs = this.logs.slice(-this.maxLogs);
       }
-      
+
       // Console output with formatting
       const prefix = `[${entry.timestamp}] [${level.toUpperCase()}]`;
       switch (level) {
-        case 'error':
+        case "error":
           console.error(prefix, message, data);
           break;
-        case 'warn':
+        case "warn":
           console.warn(prefix, message, data);
           break;
-        case 'debug':
+        case "debug":
           console.debug(prefix, message, data);
           break;
         default:
@@ -1007,45 +1112,52 @@ class SettingsLogger {
       }
     }
   }
-  
-  error(message, data) { this.log('error', message, data); }
-  warn(message, data) { this.log('warn', message, data); }
-  info(message, data) { this.log('info', message, data); }
-  debug(message, data) { this.log('debug', message, data); }
-  
+
+  error(message, data) {
+    this.log("error", message, data);
+  }
+  warn(message, data) {
+    this.log("warn", message, data);
+  }
+  info(message, data) {
+    this.log("info", message, data);
+  }
+  debug(message, data) {
+    this.log("debug", message, data);
+  }
+
   // Export logs for analysis
   exportLogs() {
     const logData = {
       exportTime: new Date().toISOString(),
       extensionId: chrome.runtime.id,
-      logs: this.logs
+      logs: this.logs,
     };
-    
-    const blob = new Blob([JSON.stringify(logData, null, 2)], { 
-      type: 'application/json' 
+
+    const blob = new Blob([JSON.stringify(logData, null, 2)], {
+      type: "application/json",
     });
     const url = URL.createObjectURL(blob);
-    
-    const a = document.createElement('a');
+
+    const a = document.createElement("a");
     a.href = url;
     a.download = `settings-debug-${Date.now()}.json`;
     a.click();
-    
+
     URL.revokeObjectURL(url);
   }
-  
+
   // Get recent errors for quick analysis
   getRecentErrors(hours = 1) {
     const cutoff = new Date(Date.now() - hours * 60 * 60 * 1000);
-    return this.logs.filter(log => 
-      log.level === 'error' && 
-      new Date(log.timestamp) > cutoff
+    return this.logs.filter(
+      (log) => log.level === "error" && new Date(log.timestamp) > cutoff,
     );
   }
 }
 
 // Global logger instance
-window.SettingsLogger = new SettingsLogger('info');
+window.SettingsLogger = new SettingsLogger("info");
 
 // Integrate with settings operations
 class LoggingSettingsClient {
@@ -1054,20 +1166,23 @@ class LoggingSettingsClient {
     this.logger = window.SettingsLogger;
     this.setupLogging();
   }
-  
+
   setupLogging() {
     // Log all settings operations
     const originalMethods = [
-      'getSetting', 'getSettings', 'getAllSettings',
-      'updateSetting', 'updateSettings'
+      "getSetting",
+      "getSettings",
+      "getAllSettings",
+      "updateSetting",
+      "updateSettings",
     ];
-    
-    originalMethods.forEach(method => {
+
+    originalMethods.forEach((method) => {
       const original = this.settings[method].bind(this.settings);
       this.settings[method] = async (...args) => {
         const start = performance.now();
         this.logger.debug(`${method} called`, args);
-        
+
         try {
           const result = await original(...args);
           const duration = performance.now() - start;
@@ -1078,13 +1193,13 @@ class LoggingSettingsClient {
           this.logger.error(`${method} failed after ${duration.toFixed(2)}ms`, {
             args,
             error: error.message,
-            stack: error.stack
+            stack: error.stack,
           });
           throw error;
         }
       };
     });
-    
+
     // Log change events
     this.settings.addChangeListener((event, data) => {
       this.logger.info(`Settings ${event}`, data);
@@ -1097,19 +1212,20 @@ class LoggingSettingsClient {
 
 ### Quick Reference Table
 
-| Error Message | Likely Cause | Immediate Solution |
-|---------------|--------------|-------------------|
-| "Message port closed before response received" | `async function handleMessage()` | Use sync/async separation pattern |
-| "Settings manager not available" | Service worker initialization failure | Check background script event listeners |
-| "Timeout getting setting" | Connection latency or SW termination | Increase timeout, implement retry logic |
-| "Storage quota exceeded" | Too much data stored | Implement quota monitoring and cleanup |
-| "Could not establish connection" | Content script not injected | Check manifest content_scripts configuration |
-| "Invalid JSON format" | Malformed JSON setting | Validate JSON before saving |
-| "Validation failed" | Setting value doesn't match schema | Check setting type and constraints |
+| Error Message                                  | Likely Cause                          | Immediate Solution                           |
+| ---------------------------------------------- | ------------------------------------- | -------------------------------------------- |
+| "Message port closed before response received" | `async function handleMessage()`      | Use sync/async separation pattern            |
+| "Settings manager not available"               | Service worker initialization failure | Check background script event listeners      |
+| "Timeout getting setting"                      | Connection latency or SW termination  | Increase timeout, implement retry logic      |
+| "Storage quota exceeded"                       | Too much data stored                  | Implement quota monitoring and cleanup       |
+| "Could not establish connection"               | Content script not injected           | Check manifest content_scripts configuration |
+| "Invalid JSON format"                          | Malformed JSON setting                | Validate JSON before saving                  |
+| "Validation failed"                            | Setting value doesn't match schema    | Check setting type and constraints           |
 
 ### Prevention Checklist
 
 **Before Deployment:**
+
 - [ ] Use production background.js pattern with proper event registration
 - [ ] Implement keep-alive mechanism
 - [ ] Add comprehensive error handling and fallbacks
@@ -1120,6 +1236,7 @@ class LoggingSettingsClient {
 - [ ] Validate all setting schemas
 
 **Monitoring in Production:**
+
 - [ ] Implement error logging and reporting
 - [ ] Monitor storage usage trends
 - [ ] Track performance metrics

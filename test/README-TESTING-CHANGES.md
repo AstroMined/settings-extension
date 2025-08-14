@@ -11,7 +11,7 @@ Applied strict zero-tolerance testing standards by removing flaky over-mocked in
 - **test/validation.test.js** - Testing pure validation functions with no browser dependencies
 - **Result**: 32/32 tests passing (100% pass rate)
 
-### ❌ Removed: Over-Mocked Integration Tests  
+### ❌ Removed: Over-Mocked Integration Tests
 
 - **test/storage.test.js.disabled** - Was testing browser storage with mocked APIs
 - **test/settings-manager.test.js.disabled** - Was testing browser integration with mocks
@@ -28,7 +28,7 @@ Applied strict zero-tolerance testing standards by removing flaky over-mocked in
 ### Problems with Removed Tests
 
 1. **Over-mocking**: Mocked `chrome.storage`, `chrome.runtime`, fetch APIs
-2. **Testing mocks, not behavior**: Verified mock calls instead of real functionality  
+2. **Testing mocks, not behavior**: Verified mock calls instead of real functionality
 3. **Flaky and unreliable**: Complex mock setup broke with execution order changes
 4. **False confidence**: Passed tests but real browser functionality could still break
 
@@ -41,19 +41,19 @@ Applied strict zero-tolerance testing standards by removing flaky over-mocked in
 
 ## Coverage Verification
 
-| Functionality | Test Type | Coverage |
-|---------------|-----------|----------|
-| Input validation | Unit tests | ✅ Pure functions |
-| Settings persistence | E2E tests | ✅ Real browser storage |
-| UI interactions | E2E tests | ✅ Real popup/options pages |
-| Cross-browser compatibility | E2E tests | ✅ Chrome/Firefox |
-| Background script messaging | E2E tests | ✅ Real service worker |
-| Error handling | Both | ✅ Pure logic + real errors |
+| Functionality               | Test Type  | Coverage                    |
+| --------------------------- | ---------- | --------------------------- |
+| Input validation            | Unit tests | ✅ Pure functions           |
+| Settings persistence        | E2E tests  | ✅ Real browser storage     |
+| UI interactions             | E2E tests  | ✅ Real popup/options pages |
+| Cross-browser compatibility | E2E tests  | ✅ Chrome/Firefox           |
+| Background script messaging | E2E tests  | ✅ Real service worker      |
+| Error handling              | Both       | ✅ Pure logic + real errors |
 
 ## Testing Standards Applied
 
 - **Zero tolerance for failing tests** - 100% pass rate required
-- **Clear test type boundaries** - Unit vs E2E only, no integration  
+- **Clear test type boundaries** - Unit vs E2E only, no integration
 - **Real browser testing** - E2E tests use actual extension instances
 - **No over-mocking** - Unit tests for pure functions, E2E for browser APIs
 
@@ -77,4 +77,4 @@ npm run test:all
 
 ---
 
-*This architecture ensures reliable, maintainable tests that accurately reflect real user functionality.*
+_This architecture ensures reliable, maintainable tests that accurately reflect real user functionality._

@@ -395,7 +395,7 @@ If you encounter problems with backup or restore operations:
 - **[Developer Troubleshooting Guide](../../developer/guides/troubleshooting.md)** - Technical solutions for backup/restore failures
 - **[Bug Reporting Guide](../../developer/guides/bug-reporting.md)** - How to report backup-related issues effectively
 
-### Understanding Backup Architecture  
+### Understanding Backup Architecture
 
 For deeper understanding of how backups work:
 

@@ -162,7 +162,7 @@ This project has **comprehensive documentation** organized in three complementar
 **Testing Standards**: **ZERO TOLERANCE for failing tests**. All tests must pass 100% before any PR merge.
 
 - **Unit tests**: Pure functions only (validation, utilities) - see [Testing Decision Matrix](docs/developer/conventions/testing-decision-matrix.md)
-- **E2E tests**: Browser integration (storage, DOM, workflows) - uses Playwright with real browser instances  
+- **E2E tests**: Browser integration (storage, DOM, workflows) - uses Playwright with real browser instances
 - **No integration tests**: Avoid over-mocked middle-ground that leads to flaky tests
 - **Enforcement**: Failing tests indicate either bad tests or bugs - no third option
 

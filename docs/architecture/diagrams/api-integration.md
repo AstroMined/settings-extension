@@ -162,6 +162,6 @@ This diagram will complement:
 
 ## Revision History
 
-| Date       | Author            | Changes                                      |
-| ---------- | ----------------- | -------------------------------------------- |
+| Date       | Author             | Changes                                         |
+| ---------- | ------------------ | ----------------------------------------------- |
 | 2025-08-13 | Documentation Team | Created placeholder for API integration diagram |
