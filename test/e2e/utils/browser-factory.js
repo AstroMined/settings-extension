@@ -242,28 +242,39 @@ class BrowserFactory {
         console.log(
           "Service worker not immediately available, waiting for event...",
         );
-        console.log(`Current service workers count: ${context.serviceWorkers().length}`);
-        
+        console.log(
+          `Current service workers count: ${context.serviceWorkers().length}`,
+        );
+
         try {
           serviceWorker = await context.waitForEvent("serviceworker", {
             timeout,
           });
           console.log("✅ Service worker event received successfully");
-        } catch (error) {
+        } catch {
           console.error("❌ Service worker timeout - attempting retry...");
-          console.log(`Available service workers after timeout: ${context.serviceWorkers().length}`);
-          
+          console.log(
+            `Available service workers after timeout: ${context.serviceWorkers().length}`,
+          );
+
           // Retry with shorter timeout
           try {
             await new Promise((resolve) => setTimeout(resolve, 2000));
-            serviceWorker = context.serviceWorkers()[0] || await context.waitForEvent("serviceworker", {
-              timeout: 5000,
-            });
+            serviceWorker =
+              context.serviceWorkers()[0] ||
+              (await context.waitForEvent("serviceworker", {
+                timeout: 5000,
+              }));
             console.log("✅ Service worker found on retry");
-          } catch (retryError) {
+          } catch {
             console.error("❌ Service worker retry also failed");
-            console.log("Available contexts:", context.pages().map(p => p.url()));
-            throw new Error(`Could not find extension service worker after ${timeout + 5000}ms. This may indicate missing build artifacts in dist/ folder. Ensure 'npm run build' was executed before running tests.`);
+            console.log(
+              "Available contexts:",
+              context.pages().map((p) => p.url()),
+            );
+            throw new Error(
+              `Could not find extension service worker after ${timeout + 5000}ms. This may indicate missing build artifacts in dist/ folder. Ensure 'npm run build' was executed before running tests.`,
+            );
           }
         }
       } else {

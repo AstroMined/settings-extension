@@ -138,42 +138,74 @@ The Settings Extension currently suffers from fundamental architectural problems
 ### Story 1: Configuration Management Consolidation
 
 **Priority**: Highest - Foundation for all other work  
-**Effort**: 2 sprints  
+**Effort**: 2 sprints (Sprints 1-2)  
 **Dependencies**: None
 
 Eliminate configuration duplication by creating single source of truth in defaults.json with display names, categories, and UI metadata.
 
-### Story 2: Missing UI Components and Features
+### Story 2: File Organization and Developer Experience
 
-**Priority**: High - Critical user-facing features  
-**Effort**: 2 sprints  
+**Priority**: Medium - Developer productivity  
+**Effort**: 1 sprint (Sprint 2)  
+**Dependencies**: Story 1 (clean configuration loading)
+
+Reorganize file structure, fix browser API references, and improve integration documentation.
+
+### Story 3: Data Persistence and Bulk Operations Fix
+
+**Priority**: High - Data integrity critical  
+**Effort**: 1.5 sprints (Sprints 2-3)  
+**Dependencies**: Story 1 (consistent configuration)
+
+Fix confirmed race condition in bulk operations and implement robust error handling with user feedback.
+
+### Story 4: Service Worker and Storage Reliability
+
+**Priority**: High - Production reliability critical  
+**Effort**: 1.5 sprints (Sprints 3-4)  
+**Dependencies**: Story 3 (persistence foundation)
+
+Address service worker lifecycle issues, storage quota management, and cross-browser storage reliability.
+
+### Story 5: UI Components and Features Enhancement
+
+**Priority**: High - User experience gaps  
+**Effort**: 1.5 sprints (Sprints 3-4)  
 **Dependencies**: Story 1 (centralized configuration)
 
 Implement enum dropdowns, expiration functionality, dirty indicators, and advanced config UI components.
 
-### Story 3: File Organization and Developer Experience
+### Story 6: Testing Architecture and Module Decomposition
 
-**Priority**: Medium - Developer productivity  
-**Effort**: 1 sprint  
-**Dependencies**: Story 1 (for clean configuration loading)
+**Priority**: Medium - Technical debt and testing infrastructure  
+**Effort**: 1.5 sprints (Sprints 4-5)  
+**Dependencies**: Story 2 (file organization)
 
-Reorganize file structure, fix browser API references, and improve integration documentation.
+Decompose monolithic modules into testable pure functions for better unit test coverage distribution.
 
-### Story 4: Data Persistence and Bulk Operations
+### Story 7: Component Registry and Dynamic Loading
 
-**Priority**: High - Data integrity critical  
-**Effort**: 1.5 sprints  
-**Dependencies**: Story 1 (for consistent configuration loading)
+**Priority**: Medium - Foundation for extensibility  
+**Effort**: 1 sprint (Sprint 5)  
+**Dependencies**: Stories 1, 5 (configuration and UI foundation)
 
-Fix bulk operations race conditions and implement robust error handling with user feedback.
+Create dynamic component registry enabling custom setting types without core modifications.
 
-### Story 5: Extensibility and Component Architecture
+### Story 8: Plugin System Infrastructure
 
-**Priority**: Medium - Long-term maintainability  
-**Effort**: 2 sprints  
-**Dependencies**: Stories 1, 2 (foundation and components)
+**Priority**: Medium - Advanced extensibility  
+**Effort**: 1 sprint (Sprint 6)  
+**Dependencies**: Story 7 (component registry)
 
-Create modular architecture that allows new setting types and UI components without core modifications.
+Complete plugin system with packaging, lifecycle management, and development tools.
+
+### Story 9: Hook System and Theme Support
+
+**Priority**: Medium - Advanced customization  
+**Effort**: 0.5 sprints (Sprints 6-7)  
+**Dependencies**: Story 8 (plugin infrastructure)
+
+Implement hooks for business logic integration and theme system for visual customization.
 
 ## Risk Assessment
 

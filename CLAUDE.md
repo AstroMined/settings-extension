@@ -184,6 +184,7 @@ This project has **comprehensive documentation** organized in three complementar
 **Root Cause**: Running direct `npx playwright test --project=chromium` commands without ensuring fresh build artifacts in `dist/` folder.
 
 **Solutions**:
+
 1. **ALWAYS use npm scripts**: `npm run test:e2e:chrome` instead of `npx playwright test --project=chromium`
 2. **Manual fix**: Run `npm run build` before any direct `npx playwright test` commands
 3. **CI environments**: Use npm scripts in workflows, not direct npx commands

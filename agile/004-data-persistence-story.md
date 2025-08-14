@@ -30,36 +30,50 @@ Fix critical data persistence bugs in bulk operations and implement robust error
 - **Expected**: The bulk value should persist
 - **Actual**: Previous test values persist instead
 
-### Root Cause Analysis
+### Root Cause Analysis - CONFIRMED
 
-Based on investigation in [Bulk Operations Investigation](bulk-operations-investigation.md), potential causes include:
+**✅ PRIMARY CAUSE IDENTIFIED**: Race condition in immediate persistence
 
-#### 1. Race Condition in Storage Operations
+**Evidence from Code Investigation**:
+
+- `popup.js:334`: Every input change calls `updateSetting()` immediately
+- `settings-manager.js:294`: `updateSetting()` calls `persistSetting()` synchronously
+- `settings-manager.js:536`: `persistSetting()` calls `storage.set()` without queuing
+- E2E test accommodates bug (lines 259-268) rather than asserting correctness
+
+**Confirmed Race Condition Pattern**:
 
 ```javascript
-// Possible problematic pattern
-chrome.storage.local.set({ key1: value1 }); // Call 1
-chrome.storage.local.set({ key2: value2 }); // Call 2 - might overwrite Call 1
+// ACTUAL problematic pattern in settings-manager.js
+async updateSetting(key, value) {
+  // ... validation
+  await this.persistSetting(key, updatedSetting); // Immediate storage call
+}
+
+async persistSetting(key, setting) {
+  await storage.set({ [key]: setting }); // No queuing - race condition!
+}
 ```
 
-#### 2. Aggressive Auto-Save Debouncing
+**Additional Contributing Factors**:
 
-```javascript
-// Possible issue in settings-manager.js
-const DEBOUNCE_DELAY = 1000; // Too long for rapid changes?
-```
+#### 1. Service Worker Context Invalidation (HIGH PRIORITY)
 
-#### 3. Service Worker Context Issues
+- Background script has keep-alive (25 seconds) but insufficient for bulk operations
+- Storage operations fail silently when service worker context invalidated
+- No detection or recovery for context invalidation during operations
 
-- Background script reloads during bulk operations
-- Storage contexts become stale
-- Event handling breaks down under load
+#### 2. Storage Quota Management Gap (MEDIUM PRIORITY)
 
-#### 4. Browser Storage API Throttling
+- No monitoring of storage usage approaching limits
+- No graceful handling of quota exceeded errors
+- Cross-browser quota differences not managed
 
-- Chrome/Firefox internal rate limiting
-- Storage quotas triggering failures
-- API calls being silently dropped
+#### 3. Browser Storage API Throttling (MEDIUM PRIORITY)
+
+- Chrome/Firefox internal rate limiting varies
+- No accommodation for browser-specific throttling behaviors
+- API calls may be silently dropped under load
 
 ### Impact Assessment
 
@@ -87,11 +101,12 @@ const DEBOUNCE_DELAY = 1000; // Too long for rapid changes?
 
 ### Technical Acceptance Criteria
 
-- [ ] **Operation Queuing**: Serialize storage operations to prevent conflicts
-- [ ] **Debounce Optimization**: Tuned debouncing that doesn't cause data loss
+- [ ] **Operation Queuing**: Serialize storage operations to prevent race conditions (PRIMARY FIX)
+- [ ] **Service Worker Integration**: Handle context invalidation during storage operations
 - [ ] **Error Handling**: Comprehensive error detection and user notification
-- [ ] **Retry Logic**: Automatic retry for failed storage operations
+- [ ] **Retry Logic**: Automatic retry for failed storage operations with exponential backoff
 - [ ] **Performance Monitoring**: Logging and metrics for storage operation success
+- [ ] **Cross-Browser Reliability**: Consistent behavior across Chrome, Edge, Firefox storage APIs
 
 ### Quality Acceptance Criteria
 
@@ -903,6 +918,7 @@ describe("Bulk Operations Data Integrity", () => {
 
 - [Framework Maturity Epic](001-framework-maturity-epic.md) - Parent epic context
 - [Bulk Operations Investigation](bulk-operations-investigation.md) - Root cause analysis
+- [Service Worker & Storage Reliability Story](005-service-worker-storage-reliability-story.md) - Related reliability concerns
 - [Chrome Storage API Documentation](https://developer.chrome.com/docs/extensions/reference/storage/) - API behavior
 
 ## Revision History
