@@ -7,6 +7,9 @@ const compat = new FlatCompat({
 });
 
 module.exports = [
+  {
+    ignores: ["test-user-data-*/**", "coverage/**", "web-ext-artifacts/**"],
+  },
   ...compat.config({
     env: {
       browser: true,
