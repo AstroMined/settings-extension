@@ -57,7 +57,8 @@ class BrowserFactory {
 
     // Browser-specific configuration
     const baseConfig = {
-      headless: process.env.CI ? true : false, // Headless in CI, headed locally for debugging
+      // Use headed mode in CI with Xvfb virtual display for extension support
+      headless: false,
       ignoreHTTPSErrors: true,
       args: [
         `--disable-extensions-except=${extensionPath}`,
@@ -66,6 +67,15 @@ class BrowserFactory {
         "--disable-dev-shm-usage",
         "--disable-web-security",
         "--allow-running-insecure-content",
+        // Optimize for extension loading
+        "--disable-background-timer-throttling",
+        "--disable-backgrounding-occluded-windows",
+        "--disable-renderer-backgrounding",
+        "--disable-features=TranslateUI",
+        "--disable-ipc-flooding-protection",
+        "--disable-component-extensions-with-background-pages=false",
+        "--enable-automation",
+        "--disable-blink-features=AutomationControlled",
       ],
       ...options,
     };

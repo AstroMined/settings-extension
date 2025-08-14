@@ -59,7 +59,7 @@ jobs:
       run: npx playwright install --with-deps ${{ matrix.browser }}
       
     - name: Run E2E tests for ${{ matrix.browser }}
-      run: npm run test:e2e -- --project=${{ matrix.browser }}
+      run: xvfb-run --auto-servernum --server-args='-screen 0, 1920x1080x24' npm run test:e2e -- --project=${{ matrix.browser }}
 
   performance-benchmark:
     runs-on: ubuntu-latest

@@ -109,11 +109,9 @@ Add images here:
 Any additional information, considerations, or notes for reviewers:
 
 -
--
+- ***
 
----
-
-**By submitting this PR, I confirm that:**
+  **By submitting this PR, I confirm that:**
 
 - [ ] I have read and agree to follow the [Contributing Guidelines](CONTRIBUTING.md)
 - [ ] My code follows the project's coding standards

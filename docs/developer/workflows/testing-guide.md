@@ -186,6 +186,7 @@ npm run test:coverage
    ```
 
 2. **Real Browser E2E Tests**
+
    ```javascript
    // ✅ GOOD: Testing real browser behavior
    test("settings persist across browser sessions", async () => {
