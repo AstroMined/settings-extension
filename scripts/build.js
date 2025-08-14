@@ -4,16 +4,16 @@ const fs = require("fs");
 const path = require("path");
 
 const isWatch = process.argv.includes("--watch");
-const isFirefox = process.argv.includes("--firefox");
 const projectRoot = path.resolve(__dirname, "..");
 const distDir = path.join(projectRoot, "dist");
 
-// Files and directories to copy
+// Files and directories to copy - now includes both manifests for universal build
 const filesToCopy = [
-  isFirefox ? "manifest.firefox.json" : "manifest.json",
+  "manifest.json",        // Chrome/Chromium manifest (default)
+  "manifest.firefox.json", // Firefox manifest (alternate)
   "background.js",
-  "content-script.js",
-  ...(isFirefox ? ["background.html"] : []),
+  "content-script.js", 
+  "background.html",      // Needed for Firefox background pages
 ];
 
 const dirsToRecursiveCopy = ["lib", "popup", "options", "config", "icons"];
@@ -29,17 +29,8 @@ function setupDistDirectory() {
 // Copy a single file
 function copyFile(src, dest) {
   const srcPath = path.join(projectRoot, src);
-  let destPath;
-  let displayDest;
-
-  // Handle manifest renaming for Firefox
-  if (src === "manifest.firefox.json") {
-    destPath = path.join(distDir, "manifest.json");
-    displayDest = "manifest.json";
-  } else {
-    destPath = path.join(distDir, dest || src);
-    displayDest = dest || src;
-  }
+  const destPath = path.join(distDir, dest || src);
+  const displayDest = dest || src;
 
   if (fs.existsSync(srcPath)) {
     // Ensure destination directory exists
@@ -83,8 +74,7 @@ function copyDirectory(srcRelative, destRelative = srcRelative) {
 
 // Main build function
 function build() {
-  const targetBrowser = isFirefox ? "Firefox" : "Chrome/Edge";
-  console.log(`🏗️  Building extension for ${targetBrowser}...`);
+  console.log(`🏗️  Building universal extension (Chrome + Firefox)...`);
   console.log(`📁 Project root: ${projectRoot}`);
   console.log(`📦 Output directory: ${distDir}`);
 

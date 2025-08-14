@@ -52,7 +52,7 @@ jobs:
     - name: Install dependencies
       run: npm ci
       
-    - name: Build extension
+    - name: Build universal extension
       run: npm run build
       
     - name: Install Playwright browsers
