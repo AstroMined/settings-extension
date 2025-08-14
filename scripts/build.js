@@ -9,11 +9,11 @@ const distDir = path.join(projectRoot, "dist");
 
 // Files and directories to copy - now includes both manifests for universal build
 const filesToCopy = [
-  "manifest.json",        // Chrome/Chromium manifest (default)
+  "manifest.json", // Chrome/Chromium manifest (default)
   "manifest.firefox.json", // Firefox manifest (alternate)
   "background.js",
-  "content-script.js", 
-  "background.html",      // Needed for Firefox background pages
+  "content-script.js",
+  "background.html", // Needed for Firefox background pages
 ];
 
 const dirsToRecursiveCopy = ["lib", "popup", "options", "config", "icons"];

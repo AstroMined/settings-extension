@@ -83,8 +83,9 @@ test.describe("Browser Extension Functionality", () => {
       );
 
       // Verify the extension pages are accessible (skip for Firefox smoke tests)
-      const isFirefoxSmokeTest = extensionId === "smoke-test" || testInfo?.project?.name === "firefox";
-      
+      const isFirefoxSmokeTest =
+        extensionId === "smoke-test" || testInfo?.project?.name === "firefox";
+
       if (!isFirefoxSmokeTest) {
         const page = await context.newPage();
         try {
@@ -96,7 +97,9 @@ test.describe("Browser Extension Functionality", () => {
           await page.close();
         }
       } else {
-        console.log("Skipping extension page access test for Firefox smoke testing");
+        console.log(
+          "Skipping extension page access test for Firefox smoke testing",
+        );
       }
     } catch (error) {
       console.error("Failed to setup extension context:", error);
@@ -144,8 +147,12 @@ test.describe("Browser Extension Functionality", () => {
     try {
       if (isFirefoxSmokeTest) {
         // Firefox smoke test - just verify browser functionality
-        console.log("Running Firefox smoke test - verifying basic browser functionality");
-        await page.goto("data:text/html,<h1>Firefox E2E Test</h1><p>Browser launched successfully</p>");
+        console.log(
+          "Running Firefox smoke test - verifying basic browser functionality",
+        );
+        await page.goto(
+          "data:text/html,<h1>Firefox E2E Test</h1><p>Browser launched successfully</p>",
+        );
         await page.waitForSelector("h1", { timeout: 5000 });
         console.log("Firefox smoke test passed - browser is functional");
         return;

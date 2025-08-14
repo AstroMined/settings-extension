@@ -12,7 +12,7 @@
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "test:e2e": "npm run build && playwright test --project=chromium",
-    "test:e2e:chrome": "npm run build && playwright test --project=chromium", 
+    "test:e2e:chrome": "npm run build && playwright test --project=chromium",
     "test:e2e:firefox": "npm run build && playwright test --project=firefox",
     "test:e2e:all": "npm run test:e2e:chrome && npm run test:e2e:firefox",
     "test:e2e:ui": "npm run build && playwright test --ui --project=chromium",

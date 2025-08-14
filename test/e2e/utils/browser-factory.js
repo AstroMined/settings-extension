@@ -4,7 +4,6 @@
  */
 
 const { chromium, firefox } = require("@playwright/test");
-const { withExtension } = require("playwright-webextext");
 const path = require("path");
 
 /**
@@ -57,7 +56,7 @@ class BrowserFactory {
     if (isFirefox) {
       const firefoxManifest = path.join(extensionPath, "manifest.firefox.json");
       const mainManifest = path.join(extensionPath, "manifest.json");
-      
+
       if (fs.existsSync(firefoxManifest)) {
         console.log("Copying Firefox manifest for testing");
         fs.copyFileSync(firefoxManifest, mainManifest);
@@ -76,16 +75,15 @@ class BrowserFactory {
       // This provides basic browser testing to verify Firefox compatibility
       try {
         console.log("Using Firefox smoke testing approach");
-        console.log("Note: Firefox extension loading skipped - using Chrome for comprehensive E2E tests");
-        
+        console.log(
+          "Note: Firefox extension loading skipped - using Chrome for comprehensive E2E tests",
+        );
+
         const baseConfig = {
           // Use headed mode in CI with Xvfb virtual display for extension support
           headless: false,
           ignoreHTTPSErrors: true,
-          args: [
-            "--no-sandbox", 
-            "--disable-dev-shm-usage",
-          ],
+          args: ["--no-sandbox", "--disable-dev-shm-usage"],
           ...options,
         };
 
@@ -156,57 +154,68 @@ class BrowserFactory {
    * @param {boolean} isFirefox - Whether this is Firefox (uses background pages instead of service workers)
    * @returns {Promise<Object>} Service worker or background page instance
    */
-  static async getExtensionServiceWorker(context, timeout = 10000, isFirefox = false) {
+  static async getExtensionServiceWorker(
+    context,
+    timeout = 10000,
+    isFirefox = false,
+  ) {
     if (isFirefox) {
       // Firefox uses background pages, not service workers
       // Try to find the background page by looking for extension pages
       console.log("Looking for Firefox background page...");
-      
+
       // Wait a bit for the extension to load
       await new Promise((resolve) => setTimeout(resolve, 2000));
-      
+
       const pages = context.pages();
       console.log(`Found ${pages.length} pages in Firefox context`);
-      
+
       for (const page of pages) {
         const url = page.url();
         console.log(`Page URL: ${url}`);
-        if (url.includes('moz-extension://') && url.includes('background.html')) {
+        if (
+          url.includes("moz-extension://") &&
+          url.includes("background.html")
+        ) {
           console.log(`Extension background page URL: ${url}`);
           // Return a service worker-like object that has the url() method
           return {
             url: () => url,
-            page: page
+            page: page,
           };
         }
       }
-      
+
       // If no background page found, create a dummy extension worker reference
       // This might be needed for some Firefox extension configurations
-      console.log("No background page found, checking for extension context...");
+      console.log(
+        "No background page found, checking for extension context...",
+      );
       const allPages = context.pages();
       console.log(`Checking all ${allPages.length} pages for extension URLs`);
-      
+
       if (allPages.length > 0) {
         for (const page of allPages) {
           const url = page.url();
           console.log(`Checking page: ${url}`);
-          if (url.includes('moz-extension://')) {
+          if (url.includes("moz-extension://")) {
             console.log(`Using extension page as background: ${url}`);
             return {
               url: () => url,
-              page: page
+              page: page,
             };
           }
         }
       }
-      
+
       // For Firefox smoke testing, create a dummy service worker since no extension is loaded
       // This allows basic browser compatibility testing to proceed
-      console.log("Creating dummy service worker for Firefox smoke testing (no extension loaded)");
+      console.log(
+        "Creating dummy service worker for Firefox smoke testing (no extension loaded)",
+      );
       return {
         url: () => "moz-extension://smoke-test/background",
-        page: null
+        page: null,
       };
     } else {
       // Chromium uses service workers
@@ -216,7 +225,9 @@ class BrowserFactory {
         console.log(
           "Service worker not immediately available, waiting for event...",
         );
-        serviceWorker = await context.waitForEvent("serviceworker", { timeout });
+        serviceWorker = await context.waitForEvent("serviceworker", {
+          timeout,
+        });
       }
 
       if (serviceWorker) {
@@ -235,7 +246,7 @@ class BrowserFactory {
    */
   static getExtensionId(serviceWorker) {
     const url = serviceWorker.url();
-    
+
     // Handle both Chrome and Firefox extension URLs
     const chromeMatch = url.match(/chrome-extension:\/\/([a-z0-9]+)\//);
     const firefoxMatch = url.match(/moz-extension:\/\/([a-z0-9-]+)\//);
@@ -243,7 +254,7 @@ class BrowserFactory {
     if (chromeMatch) {
       return chromeMatch[1];
     }
-    
+
     if (firefoxMatch) {
       return firefoxMatch[1];
     }
@@ -260,9 +271,13 @@ class BrowserFactory {
   static async setupExtension(testInfo, options = {}) {
     const projectName = testInfo?.project?.name || "chromium";
     const isFirefox = projectName.toLowerCase() === "firefox";
-    
+
     const context = await this.createExtensionContext(testInfo, options);
-    const serviceWorker = await this.getExtensionServiceWorker(context, 10000, isFirefox);
+    const serviceWorker = await this.getExtensionServiceWorker(
+      context,
+      10000,
+      isFirefox,
+    );
     const extensionId = this.getExtensionId(serviceWorker);
 
     console.log(`Extension setup complete - ID: ${extensionId}`);
