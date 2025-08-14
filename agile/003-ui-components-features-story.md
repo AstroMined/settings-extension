@@ -7,7 +7,7 @@ Implement critical missing UI components and features that prevent the Settings 
 **Status**: Ready for Implementation  
 **Priority**: High - Critical User-Facing Features  
 **Story Points**: 21 (X-Large)  
-**Sprint**: 3-4  
+**Sprint**: 3-4
 
 ## User Story
 
@@ -26,30 +26,35 @@ Implement critical missing UI components and features that prevent the Settings 
 Based on downstream developer feedback (Christian's analysis):
 
 #### 1. Enum/Dropdown Support
+
 > "So it didnt consider that we might want a dropdown box... so new option type: enum. it will also need a way to map 'real' names to values in the dropdown for the settings"
 
 **Current State**: Only boolean, text, longtext, number, json types supported  
 **Required**: Enum type with display name mapping for dropdown options
 
 #### 2. Expiration Functionality
+
 > "Also for drafts & schedules I will need to expire them so it doesnt keep adding forever. would be nice if it could handle expiration based on a settable timestamp & use a different user-settable option for how long to keep them. maybe add 'expiration' to the setting object and default to 0"
 
 **Current State**: No time-based setting management  
 **Required**: Expiration timestamps with configurable retention periods
 
-#### 3. Dirty State Indicators  
+#### 3. Dirty State Indicators
+
 > "Options UI tracks changes, but doesn't show which ones have changed -- needs some kind of dirty indicator"
 
 **Current State**: Changes tracked but no visual feedback  
 **Required**: Visual indicators showing unsaved changes
 
 #### 4. Advanced Config UI
+
 > "obviously we generally wont want people editing json directly... so for example in SFA I have it do a textarea then hide it and create separate options in the UI (based on some manual mappings I created) and any change to any of the sub-items re-writes the json in the hidden textarea"
 
 **Current State**: Raw JSON textarea for complex settings  
 **Required**: Generated form controls for JSON object properties
 
 #### 5. JSON Enhancement
+
 > "Also if we do ever think a json box is needed then I would like to see it also add a prettifier/syntax check"
 
 **Current State**: Basic textarea with no validation  
@@ -87,6 +92,7 @@ Based on downstream developer feedback (Christian's analysis):
 ### 1. Enum/Dropdown Component
 
 #### Enhanced Configuration Schema
+
 ```json
 {
   "refresh_interval": {
@@ -98,7 +104,7 @@ Based on downstream developer feedback (Christian's analysis):
     "options": {
       "30": "30 seconds",
       "60": "1 minute",
-      "300": "5 minutes", 
+      "300": "5 minutes",
       "900": "15 minutes",
       "3600": "1 hour"
     },
@@ -112,7 +118,7 @@ Based on downstream developer feedback (Christian's analysis):
     "category": "appearance",
     "options": {
       "light": "Light Mode",
-      "dark": "Dark Mode", 
+      "dark": "Dark Mode",
       "system": "Follow System"
     }
   }
@@ -120,22 +126,23 @@ Based on downstream developer feedback (Christian's analysis):
 ```
 
 #### Component Implementation
+
 ```javascript
 // components/enum-setting.js
 class EnumSettingComponent {
   render(key, setting, currentValue) {
-    const select = document.createElement('select');
+    const select = document.createElement("select");
     select.id = `setting-${key}`;
-    select.className = 'setting-input enum-setting';
-    
+    select.className = "setting-input enum-setting";
+
     for (const [value, displayName] of Object.entries(setting.options)) {
-      const option = document.createElement('option');
+      const option = document.createElement("option");
       option.value = value;
       option.textContent = displayName;
       option.selected = value === currentValue;
       select.appendChild(option);
     }
-    
+
     return select;
   }
 
@@ -148,6 +155,7 @@ class EnumSettingComponent {
 ### 2. Expiration System
 
 #### Configuration Schema Extension
+
 ```json
 {
   "draft_content": {
@@ -176,6 +184,7 @@ class EnumSettingComponent {
 ```
 
 #### Expiration Management System
+
 ```javascript
 // lib/expiration-manager.js
 class ExpirationManager {
@@ -186,7 +195,7 @@ class ExpirationManager {
 
   async initialize() {
     const config = await this.settingsManager.getConfiguration();
-    
+
     for (const [key, setting] of Object.entries(config)) {
       if (setting.expiration?.enabled) {
         this.scheduleCleanup(key, setting.expiration);
@@ -197,13 +206,13 @@ class ExpirationManager {
   async addExpiringItem(settingKey, item) {
     const setting = await this.settingsManager.getSetting(settingKey);
     const currentItems = setting.value || [];
-    
+
     const itemWithTimestamp = {
       ...item,
       created: Date.now(),
-      expires: Date.now() + this.getTTL(settingKey)
+      expires: Date.now() + this.getTTL(settingKey),
     };
-    
+
     currentItems.push(itemWithTimestamp);
     await this.settingsManager.setSetting(settingKey, currentItems);
   }
@@ -212,14 +221,16 @@ class ExpirationManager {
     const setting = await this.settingsManager.getSetting(settingKey);
     const items = setting.value || [];
     const now = Date.now();
-    
-    const validItems = items.filter(item => 
-      !item.expires || item.expires > now
+
+    const validItems = items.filter(
+      (item) => !item.expires || item.expires > now,
     );
-    
+
     if (validItems.length !== items.length) {
       await this.settingsManager.setSetting(settingKey, validItems);
-      console.log(`Cleaned up ${items.length - validItems.length} expired items from ${settingKey}`);
+      console.log(
+        `Cleaned up ${items.length - validItems.length} expired items from ${settingKey}`,
+      );
     }
   }
 }
@@ -228,6 +239,7 @@ class ExpirationManager {
 ### 3. Dirty State Indicators
 
 #### State Management System
+
 ```javascript
 // lib/dirty-state-manager.js
 class DirtyStateManager {
@@ -241,14 +253,14 @@ class DirtyStateManager {
     if (!this.originalValues.has(key)) {
       this.originalValues.set(key, originalValue);
     }
-    
+
     const original = this.originalValues.get(key);
     if (this.valuesEqual(original, currentValue)) {
       this.dirtySettings.delete(key);
     } else {
       this.dirtySettings.add(key);
     }
-    
+
     this.notifyListeners();
   }
 
@@ -267,6 +279,7 @@ class DirtyStateManager {
 ```
 
 #### Visual Indicators
+
 ```css
 /* styles/dirty-indicators.css */
 .setting-row.dirty {
@@ -314,77 +327,78 @@ class DirtyStateManager {
 ### 4. Advanced Config UI Generator
 
 #### JSON Object Form Generator
+
 ```javascript
 // components/advanced-config-generator.js
 class AdvancedConfigGenerator {
   generateFormControls(key, setting, currentValue) {
-    const container = document.createElement('div');
-    container.className = 'advanced-config-container';
-    
+    const container = document.createElement("div");
+    container.className = "advanced-config-container";
+
     // Create hidden textarea for the actual JSON value
-    const hiddenTextarea = document.createElement('textarea');
+    const hiddenTextarea = document.createElement("textarea");
     hiddenTextarea.id = `setting-${key}`;
-    hiddenTextarea.style.display = 'none';
+    hiddenTextarea.style.display = "none";
     hiddenTextarea.value = JSON.stringify(currentValue, null, 2);
     container.appendChild(hiddenTextarea);
-    
+
     // Generate form controls based on JSON structure
-    const formContainer = document.createElement('div');
-    formContainer.className = 'json-form-controls';
-    
-    this.generateControlsRecursive(currentValue, formContainer, key, '');
+    const formContainer = document.createElement("div");
+    formContainer.className = "json-form-controls";
+
+    this.generateControlsRecursive(currentValue, formContainer, key, "");
     container.appendChild(formContainer);
-    
+
     // Add JSON view toggle
-    const toggleButton = document.createElement('button');
-    toggleButton.type = 'button';
-    toggleButton.textContent = 'Show Raw JSON';
-    toggleButton.className = 'json-toggle-btn';
+    const toggleButton = document.createElement("button");
+    toggleButton.type = "button";
+    toggleButton.textContent = "Show Raw JSON";
+    toggleButton.className = "json-toggle-btn";
     toggleButton.onclick = () => this.toggleJSONView(container);
     container.appendChild(toggleButton);
-    
+
     return container;
   }
 
   generateControlsRecursive(obj, container, rootKey, path) {
     for (const [key, value] of Object.entries(obj)) {
       const fullPath = path ? `${path}.${key}` : key;
-      const controlGroup = document.createElement('div');
-      controlGroup.className = 'config-control-group';
-      
-      const label = document.createElement('label');
+      const controlGroup = document.createElement("div");
+      controlGroup.className = "config-control-group";
+
+      const label = document.createElement("label");
       label.textContent = this.formatLabel(key);
-      label.className = 'config-control-label';
+      label.className = "config-control-label";
       controlGroup.appendChild(label);
-      
+
       const input = this.createInputForValue(value, rootKey, fullPath);
       controlGroup.appendChild(input);
-      
+
       container.appendChild(controlGroup);
     }
   }
 
   createInputForValue(value, rootKey, path) {
-    const input = document.createElement('input');
-    input.className = 'config-control-input';
+    const input = document.createElement("input");
+    input.className = "config-control-input";
     input.dataset.path = path;
     input.dataset.rootKey = rootKey;
-    
-    if (typeof value === 'boolean') {
-      input.type = 'checkbox';
+
+    if (typeof value === "boolean") {
+      input.type = "checkbox";
       input.checked = value;
-    } else if (typeof value === 'number') {
-      input.type = 'number';
+    } else if (typeof value === "number") {
+      input.type = "number";
       input.value = value;
     } else {
-      input.type = 'text';
+      input.type = "text";
       input.value = String(value);
     }
-    
-    input.addEventListener('change', (e) => {
+
+    input.addEventListener("change", (e) => {
       this.updateJSONFromControl(e.target);
     });
-    
+
     return input;
   }
 }
@@ -393,6 +407,7 @@ class AdvancedConfigGenerator {
 ### 5. Enhanced JSON Editor
 
 #### Syntax Highlighting and Validation
+
 ```javascript
 // components/json-editor.js
 class EnhancedJSONEditor {
@@ -404,39 +419,39 @@ class EnhancedJSONEditor {
 
   setupEditor() {
     // Create wrapper for enhanced features
-    const wrapper = document.createElement('div');
-    wrapper.className = 'json-editor-wrapper';
+    const wrapper = document.createElement("div");
+    wrapper.className = "json-editor-wrapper";
     this.textarea.parentNode.insertBefore(wrapper, this.textarea);
     wrapper.appendChild(this.textarea);
-    
+
     // Add validation indicator
-    this.validationIndicator = document.createElement('div');
-    this.validationIndicator.className = 'json-validation-indicator';
+    this.validationIndicator = document.createElement("div");
+    this.validationIndicator.className = "json-validation-indicator";
     wrapper.appendChild(this.validationIndicator);
-    
+
     // Add format button
-    const formatBtn = document.createElement('button');
-    formatBtn.type = 'button';
-    formatBtn.textContent = 'Format JSON';
-    formatBtn.className = 'json-format-btn';
+    const formatBtn = document.createElement("button");
+    formatBtn.type = "button";
+    formatBtn.textContent = "Format JSON";
+    formatBtn.className = "json-format-btn";
     formatBtn.onclick = () => this.formatJSON();
     wrapper.appendChild(formatBtn);
-    
+
     // Setup real-time validation
-    this.textarea.addEventListener('input', () => this.validateJSON());
+    this.textarea.addEventListener("input", () => this.validateJSON());
     this.validateJSON();
   }
 
   validateJSON() {
     const value = this.textarea.value.trim();
     if (!value) {
-      this.showValidation(null, '');
+      this.showValidation(null, "");
       return true;
     }
 
     try {
       JSON.parse(value);
-      this.showValidation(true, 'Valid JSON');
+      this.showValidation(true, "Valid JSON");
       return true;
     } catch (error) {
       this.showValidation(false, `Invalid JSON: ${error.message}`);
@@ -448,15 +463,15 @@ class EnhancedJSONEditor {
     try {
       const parsed = JSON.parse(this.textarea.value);
       this.textarea.value = JSON.stringify(parsed, null, 2);
-      this.showValidation(true, 'JSON formatted successfully');
+      this.showValidation(true, "JSON formatted successfully");
     } catch (error) {
-      this.showValidation(false, 'Cannot format invalid JSON');
+      this.showValidation(false, "Cannot format invalid JSON");
     }
   }
 
   showValidation(isValid, message) {
     this.validationIndicator.className = `json-validation-indicator ${
-      isValid === null ? '' : isValid ? 'valid' : 'invalid'
+      isValid === null ? "" : isValid ? "valid" : "invalid"
     }`;
     this.validationIndicator.textContent = message;
   }
@@ -468,13 +483,15 @@ class EnhancedJSONEditor {
 ### Sprint 3: Core Components
 
 #### Week 1: Enum Component and Expiration System
+
 - [ ] Implement `EnumSettingComponent` with dropdown UI
 - [ ] Add enum type support to settings manager
 - [ ] Create `ExpirationManager` class with TTL support
 - [ ] Add expiration configuration schema
 - [ ] Unit tests for enum validation and expiration logic
 
-#### Week 2: Dirty State Management  
+#### Week 2: Dirty State Management
+
 - [ ] Implement `DirtyStateManager` class
 - [ ] Add dirty state tracking to all input components
 - [ ] Create visual indicators and CSS styling
@@ -484,6 +501,7 @@ class EnhancedJSONEditor {
 ### Sprint 4: Advanced UI Features
 
 #### Week 1: Advanced Config Generator
+
 - [ ] Build `AdvancedConfigGenerator` for JSON objects
 - [ ] Implement recursive form control generation
 - [ ] Add JSON/form toggle functionality
@@ -491,6 +509,7 @@ class EnhancedJSONEditor {
 - [ ] Integration tests for complex JSON scenarios
 
 #### Week 2: Enhanced JSON Editor and Polish
+
 - [ ] Implement `EnhancedJSONEditor` with validation
 - [ ] Add JSON syntax highlighting and formatting
 - [ ] Complete accessibility improvements
@@ -502,50 +521,52 @@ class EnhancedJSONEditor {
 ### Component Unit Testing
 
 #### Enum Component Testing
+
 ```javascript
 // test/components/enum-setting.test.js
-describe('EnumSettingComponent', () => {
-  test('renders dropdown with correct options', () => {
+describe("EnumSettingComponent", () => {
+  test("renders dropdown with correct options", () => {
     const setting = {
-      type: 'enum',
-      options: { '30': '30 seconds', '60': '1 minute' }
+      type: "enum",
+      options: { 30: "30 seconds", 60: "1 minute" },
     };
     const component = new EnumSettingComponent();
-    const element = component.render('test', setting, '60');
-    
-    expect(element.tagName).toBe('SELECT');
+    const element = component.render("test", setting, "60");
+
+    expect(element.tagName).toBe("SELECT");
     expect(element.options.length).toBe(2);
-    expect(element.value).toBe('60');
+    expect(element.value).toBe("60");
   });
 
-  test('validates enum values correctly', () => {
-    const setting = { options: { 'a': 'A', 'b': 'B' } };
+  test("validates enum values correctly", () => {
+    const setting = { options: { a: "A", b: "B" } };
     const component = new EnumSettingComponent();
-    
-    expect(component.validate('a', setting)).toBe(true);
-    expect(component.validate('c', setting)).toBe(false);
+
+    expect(component.validate("a", setting)).toBe(true);
+    expect(component.validate("c", setting)).toBe(false);
   });
 });
 ```
 
 #### Dirty State Testing
+
 ```javascript
 // test/lib/dirty-state-manager.test.js
-describe('DirtyStateManager', () => {
-  test('marks settings dirty when values change', () => {
+describe("DirtyStateManager", () => {
+  test("marks settings dirty when values change", () => {
     const manager = new DirtyStateManager();
-    manager.markDirty('test', 'original', 'changed');
-    
-    expect(manager.isDirty('test')).toBe(true);
+    manager.markDirty("test", "original", "changed");
+
+    expect(manager.isDirty("test")).toBe(true);
     expect(manager.hasUnsavedChanges()).toBe(true);
   });
 
-  test('clears dirty state when value reverts', () => {
+  test("clears dirty state when value reverts", () => {
     const manager = new DirtyStateManager();
-    manager.markDirty('test', 'original', 'changed');
-    manager.markDirty('test', 'original', 'original');
-    
-    expect(manager.isDirty('test')).toBe(false);
+    manager.markDirty("test", "original", "changed");
+    manager.markDirty("test", "original", "original");
+
+    expect(manager.isDirty("test")).toBe(false);
   });
 });
 ```
@@ -553,6 +574,7 @@ describe('DirtyStateManager', () => {
 ### E2E Testing
 
 #### User Workflow Testing
+
 - [ ] Complete enum dropdown selection workflow
 - [ ] Dirty state indicators during form editing
 - [ ] Advanced config form generation and validation
@@ -560,12 +582,14 @@ describe('DirtyStateManager', () => {
 - [ ] Expiration cleanup verification
 
 #### Cross-Browser Testing
+
 - [ ] All components render correctly in Chrome, Edge, Firefox
 - [ ] Dropdown behavior consistent across browsers
 - [ ] JSON editor functionality cross-browser
 - [ ] Accessibility compliance testing
 
 ### Visual Regression Testing
+
 - [ ] Automated screenshots of all new components
 - [ ] Dirty state indicator appearance validation
 - [ ] JSON editor layout and styling verification
@@ -577,7 +601,8 @@ describe('DirtyStateManager', () => {
 
 **Probability**: Medium  
 **Impact**: Medium  
-**Mitigation**: 
+**Mitigation**:
+
 - Progressive enhancement approach
 - Fallback to simple inputs for unsupported features
 - Performance monitoring and optimization
@@ -588,6 +613,7 @@ describe('DirtyStateManager', () => {
 **Probability**: Medium  
 **Impact**: High  
 **Mitigation**:
+
 - Comprehensive cross-browser testing from start
 - Use of standard HTML form controls where possible
 - Feature detection and graceful degradation
@@ -598,6 +624,7 @@ describe('DirtyStateManager', () => {
 **Probability**: Low  
 **Impact**: High  
 **Mitigation**:
+
 - User testing with real-world scenarios
 - Progressive disclosure of advanced features
 - Clear help text and validation messages
@@ -606,24 +633,28 @@ describe('DirtyStateManager', () => {
 ## Definition of Done
 
 ### Component Requirements
+
 - [ ] All 5 new component types implemented and functional
 - [ ] Components work identically across Chrome, Edge, Firefox
 - [ ] Accessibility compliance (WCAG 2.1 AA) verified
 - [ ] Performance benchmarks met (<200ms render time)
 
 ### Testing Requirements
-- [ ] >95% unit test coverage on all new components
+
+- [ ] > 95% unit test coverage on all new components
 - [ ] E2E tests cover all user workflows
 - [ ] Visual regression tests prevent UI breakage
 - [ ] Cross-browser automated testing passes
 
 ### Integration Requirements
+
 - [ ] Components integrate seamlessly with existing settings manager
 - [ ] Configuration schema supports all new features
 - [ ] Backward compatibility maintained with existing settings
 - [ ] No breaking changes to public APIs
 
 ### Documentation Requirements
+
 - [ ] Complete component API documentation
 - [ ] Configuration schema documentation updated
 - [ ] Migration guide for new features
@@ -632,17 +663,20 @@ describe('DirtyStateManager', () => {
 ## Success Metrics
 
 ### Feature Completeness
+
 - **Component Coverage**: 5 new component types implemented
 - **Feature Parity**: Matches or exceeds common settings framework capabilities
 - **Integration Ease**: New components require zero custom code for basic usage
 
 ### User Experience
+
 - **Visual Feedback**: Dirty indicators provide clear unsaved change visibility
 - **Form Validation**: Real-time validation prevents user errors
 - **Accessibility**: 100% WCAG 2.1 AA compliance
 - **Performance**: Complex forms remain responsive <200ms
 
-### Developer Experience  
+### Developer Experience
+
 - **Component Reusability**: Components work in any context (popup, options, content)
 - **Configuration Simplicity**: New components configured declaratively in JSON
 - **Testing Support**: Components easily testable with comprehensive test utilities
@@ -650,11 +684,13 @@ describe('DirtyStateManager', () => {
 ## Dependencies
 
 ### Internal Dependencies
+
 - **Configuration Management Story**: Required for enhanced schema support
 - **Settings Manager**: Integration points for new component types
 - **Browser Compatibility**: Cross-browser component rendering
 
 ### External Dependencies
+
 - **Browser APIs**: Standard HTML form controls and validation APIs
 - **CSS Grid/Flexbox**: Modern layout support for component styling
 - **JSON APIs**: Native JSON parsing and validation support
@@ -662,24 +698,27 @@ describe('DirtyStateManager', () => {
 ## Related Work
 
 ### Epic Integration
+
 - **Framework Maturity Epic**: Core feature implementation for complete framework
 - **Developer Experience**: Professional UI components improve framework adoption
 - **Maintainability**: Component architecture enables easy extension
 
 ### Future Story Enablement
+
 - **Extensibility Story**: Component architecture foundation for plugin system
 - **File Organization Story**: Clean component organization improves structure
 - **Testing Enhancement**: Component testing patterns improve overall test quality
 
 ### References
+
 - [Framework Maturity Epic](001-framework-maturity-epic.md) - Parent epic context
 - [Configuration Management Story](002-configuration-management-story.md) - Foundation dependency
 - [WCAG 2.1 Guidelines](https://www.w3.org/WAI/WCAG21/quickref/) - Accessibility requirements
 
 ## Revision History
 
-| Date       | Author           | Changes                                                                      |
-| ---------- | ---------------- | ---------------------------------------------------------------------------- |
+| Date       | Author           | Changes                                                                                |
+| ---------- | ---------------- | -------------------------------------------------------------------------------------- |
 | 2025-08-14 | Development Team | Initial story created based on missing UI component analysis from Christian's feedback |
 
 ---

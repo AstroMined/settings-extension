@@ -7,7 +7,7 @@ Eliminate configuration duplication across the codebase by creating a single sou
 **Status**: Ready for Implementation  
 **Priority**: Highest - Foundation for Framework Maturity Epic  
 **Story Points**: 13 (Large)  
-**Sprint**: 1-2  
+**Sprint**: 1-2
 
 ## User Story
 
@@ -22,7 +22,7 @@ Eliminate configuration duplication across the codebase by creating a single sou
 Settings are currently defined in **4+ separate locations**:
 
 1. **`config/defaults.json`** - Basic setting definitions (NOT actually used)
-2. **`lib/settings-manager.js:loadDefaults()`** - Hardcoded embedded defaults (lines 146-179)  
+2. **`lib/settings-manager.js:loadDefaults()`** - Hardcoded embedded defaults (lines 146-179)
 3. **`lib/settings-manager.js:initializeWithEmbeddedDefaults()`** - Duplicate embedded defaults (lines 89-123)
 4. **`options/options.js:displayNames`** - Hardcoded display name mapping (lines 180-186)
 5. **`options/options.js:settingCategories`** - Hardcoded category mapping (lines 20-24)
@@ -30,9 +30,11 @@ Settings are currently defined in **4+ separate locations**:
 ### Specific Issues Identified
 
 **From Christian's Feedback:**
+
 > "settings-manager is reading from another locally defined set of defaults, which is also duplicated within the settings manager code (loadDefaults & initializeWithEmbeddedDefaults)... instead of reading defaults.json. And defaults.json is not even referenced anywhere"
 
 **Impact on Developers:**
+
 - Must update settings in multiple files to add new setting
 - Display names hardcoded separately from setting definitions
 - Category assignments scattered across files
@@ -102,7 +104,7 @@ Extend `config/defaults.json` to include all UI metadata:
     "category": "general",
     "options": {
       "30": "30 seconds",
-      "60": "1 minute", 
+      "60": "1 minute",
       "300": "5 minutes",
       "900": "15 minutes"
     },
@@ -138,24 +140,28 @@ class ConfigurationLoader {
 ### Migration Strategy
 
 #### Phase 1: Enhanced Schema (Sprint 1, Week 1)
+
 - [ ] Extend `config/defaults.json` with display names and categories
 - [ ] Create `lib/config-loader.js` with comprehensive loading logic
 - [ ] Add schema validation and error handling
 - [ ] Implement caching and performance optimization
 
-#### Phase 2: Settings Manager Integration (Sprint 1, Week 2)  
+#### Phase 2: Settings Manager Integration (Sprint 1, Week 2)
+
 - [ ] Modify `lib/settings-manager.js` to use config-loader
 - [ ] Remove `loadDefaults()` and `initializeWithEmbeddedDefaults()` methods
 - [ ] Update initialization to use centralized configuration
 - [ ] Add comprehensive error handling and fallbacks
 
 #### Phase 3: UI Component Integration (Sprint 2, Week 1)
+
 - [ ] Update `options/options.js` to use centralized configuration
 - [ ] Remove hardcoded `displayNames` and `settingCategories` objects
 - [ ] Implement dynamic category and display name resolution
 - [ ] Add support for new metadata (help text, placeholders, validation)
 
 #### Phase 4: Validation and Cleanup (Sprint 2, Week 2)
+
 - [ ] Remove all hardcoded configuration references
 - [ ] Update `manifest.json` web_accessible_resources if needed
 - [ ] Comprehensive testing across all components
@@ -168,21 +174,23 @@ class ConfigurationLoader {
 #### 1. `lib/settings-manager.js` Changes
 
 **Remove These Methods:**
+
 ```javascript
 // DELETE: Lines 140-183 (loadDefaults method with embedded defaults)
 // DELETE: Lines 88-134 (initializeWithEmbeddedDefaults method)
 ```
 
 **Replace With:**
+
 ```javascript
 async initialize() {
   try {
     const configLoader = new ConfigurationLoader();
     const defaults = await configLoader.loadConfiguration();
-    
+
     const stored = await this.getStoredSettings();
     this.settings = new Map();
-    
+
     // Merge defaults with stored settings
     for (const [key, defaultSetting] of Object.entries(defaults)) {
       const storedValue = stored[key];
@@ -191,7 +199,7 @@ async initialize() {
         value: storedValue !== undefined ? storedValue : defaultSetting.value,
       });
     }
-    
+
     this.initialized = true;
     this.notifyListeners("initialized");
   } catch (error) {
@@ -204,18 +212,20 @@ async initialize() {
 #### 2. `options/options.js` Changes
 
 **Remove These Objects:**
+
 ```javascript
-// DELETE: Lines 180-186 (displayNames object)  
+// DELETE: Lines 180-186 (displayNames object)
 // DELETE: Lines 20-24 (settingCategories object)
 ```
 
 **Replace With:**
+
 ```javascript
 async renderAllSettings() {
   const configLoader = new ConfigurationLoader();
   const config = await configLoader.loadConfiguration();
   const categories = configLoader.getCategories();
-  
+
   for (const category of categories) {
     const categorySettings = configLoader.getCategorySettings(category);
     this.renderCategorySettings(category, categorySettings);
@@ -243,19 +253,21 @@ class ConfigurationLoader {
 
     try {
       // Load from defaults.json in web_accessible_resources
-      const response = await fetch(chrome.runtime.getURL('config/defaults.json'));
+      const response = await fetch(
+        chrome.runtime.getURL("config/defaults.json"),
+      );
       const config = await response.json();
-      
+
       // Validate schema
       this.validateConfiguration(config);
-      
+
       // Cache for performance
       this.configCache = config;
       this.config = config;
-      
+
       return config;
     } catch (error) {
-      console.error('Configuration loading failed:', error);
+      console.error("Configuration loading failed:", error);
       throw error;
     }
   }
@@ -263,15 +275,17 @@ class ConfigurationLoader {
   validateConfiguration(config) {
     // Comprehensive validation logic
     for (const [key, setting] of Object.entries(config)) {
-      if (!setting.type || !setting.hasOwnProperty('value')) {
+      if (!setting.type || !setting.hasOwnProperty("value")) {
         throw new Error(`Invalid setting configuration for ${key}`);
       }
     }
   }
 
   getDisplayName(key) {
-    return this.config?.[key]?.displayName || 
-           key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+    return (
+      this.config?.[key]?.displayName ||
+      key.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase())
+    );
   }
 
   getCategorySettings(category) {
@@ -297,13 +311,15 @@ class ConfigurationLoader {
 ### Unit Testing Requirements
 
 #### Configuration Loading Tests
+
 - [ ] `config-loader.test.js` with >95% coverage
 - [ ] Valid configuration loading success scenarios
 - [ ] Invalid configuration handling (malformed JSON, missing fields)
 - [ ] Network failure fallback behavior
 - [ ] Caching behavior and cache invalidation
 
-#### Settings Manager Integration Tests  
+#### Settings Manager Integration Tests
+
 - [ ] `settings-manager.test.js` updates with new initialization
 - [ ] Configuration loading integration scenarios
 - [ ] Error handling for configuration failures
@@ -312,12 +328,14 @@ class ConfigurationLoader {
 ### E2E Testing Requirements
 
 #### Cross-Context Loading
+
 - [ ] Configuration loading in background script
 - [ ] Configuration loading in popup context
 - [ ] Configuration loading in options page context
 - [ ] Configuration loading in content script context
 
 #### UI Integration Testing
+
 - [ ] Display names render correctly from configuration
 - [ ] Categories populate dynamically from configuration
 - [ ] Settings appear in correct category order
@@ -337,6 +355,7 @@ class ConfigurationLoader {
 **Probability**: High  
 **Impact**: High  
 **Mitigation Strategy**:
+
 - Implement gradual migration with feature flags
 - Maintain backward compatibility methods during transition
 - Comprehensive testing of all existing functionality
@@ -347,6 +366,7 @@ class ConfigurationLoader {
 **Probability**: Medium  
 **Impact**: Medium  
 **Mitigation Strategy**:
+
 - Implement aggressive configuration caching
 - Lazy loading for non-critical configuration metadata
 - Performance benchmarks before/after implementation
@@ -357,6 +377,7 @@ class ConfigurationLoader {
 **Probability**: Medium  
 **Impact**: High  
 **Mitigation Strategy**:
+
 - Robust error handling with user-friendly messages
 - Fallback to minimal working configuration
 - Detailed logging for debugging configuration issues
@@ -365,24 +386,28 @@ class ConfigurationLoader {
 ## Definition of Done
 
 ### Code Quality
+
 - [ ] All configuration loading through single source
 - [ ] Zero hardcoded settings definitions in JavaScript
 - [ ] Comprehensive error handling for all failure scenarios
 - [ ] Performance benchmarks meet requirements (<50ms loading)
 
-### Testing Requirements  
-- [ ] >90% test coverage on configuration loading components
+### Testing Requirements
+
+- [ ] > 90% test coverage on configuration loading components
 - [ ] All E2E tests pass with new configuration system
 - [ ] Cross-browser testing complete (Chrome, Edge, Firefox)
 - [ ] Performance tests validate no regression
 
 ### Documentation
+
 - [ ] Complete API documentation for configuration schema
 - [ ] Migration guide for existing integrations
 - [ ] Troubleshooting guide for configuration issues
 - [ ] Updated architecture documentation
 
 ### User Experience
+
 - [ ] All display names and categories load dynamically
 - [ ] No visible change to end user experience
 - [ ] Error messages are user-friendly and actionable
@@ -391,18 +416,21 @@ class ConfigurationLoader {
 ## Success Metrics
 
 ### Technical Metrics
+
 - **Configuration Duplication**: Reduced from 4+ locations to 1
 - **Lines of Hardcoded Config**: Reduced from ~100 to 0
 - **Configuration Loading Time**: <50ms across all contexts
 - **Test Coverage**: >90% on configuration components
 
 ### Developer Experience Metrics
+
 - **Integration Complexity**: Adding new setting requires 1 file change (defaults.json)
 - **Onboarding Time**: New developer can add settings in <5 minutes
 - **Maintenance Overhead**: Configuration changes require single update
 - **Error Debugging**: Clear error messages for configuration issues
 
 ### Business Impact Metrics
+
 - **Framework Reliability**: Zero configuration-related bugs
 - **Developer Adoption**: Enables confident integration by downstream developers
 - **Maintenance Velocity**: Faster feature development with centralized config
@@ -411,11 +439,13 @@ class ConfigurationLoader {
 ## Dependencies
 
 ### Internal Dependencies
+
 - **Browser Compatibility Layer**: Must support configuration loading in all contexts
 - **Testing Framework**: May need updates for new configuration testing patterns
 - **Build System**: Verify defaults.json is properly included in build artifacts
 
 ### External Dependencies
+
 - **Chrome Extension APIs**: `chrome.runtime.getURL` for configuration loading
 - **Firefox WebExtension APIs**: Equivalent functionality for cross-browser support
 - **Web Accessible Resources**: Proper manifest.json configuration for config files
@@ -423,24 +453,27 @@ class ConfigurationLoader {
 ## Related Work
 
 ### Addresses Epic Goals
+
 - **Configuration Management**: Primary focus of this story
 - **Developer Experience**: Eliminates configuration hunting across files
 - **Maintainability**: Single source of truth improves code quality
 
 ### Enables Future Stories
+
 - **UI Components Story**: Requires centralized configuration for new component metadata
 - **File Organization Story**: Clean configuration loading enables better file structure
 - **Extensibility Story**: Centralized config is foundation for plugin architecture
 
 ### References
+
 - [Framework Maturity Epic](001-framework-maturity-epic.md) - Parent epic
 - [Bulk Operations Investigation](bulk-operations-investigation.md) - Related data integrity issues
 - [CLAUDE.md](../CLAUDE.md) - Critical configuration management patterns
 
 ## Revision History
 
-| Date       | Author           | Changes                                                              |
-| ---------- | ---------------- | -------------------------------------------------------------------- |
+| Date       | Author           | Changes                                                                                        |
+| ---------- | ---------------- | ---------------------------------------------------------------------------------------------- |
 | 2025-08-14 | Development Team | Initial story created based on configuration chaos analysis from downstream developer feedback |
 
 ---

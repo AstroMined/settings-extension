@@ -7,7 +7,7 @@ Fix critical data persistence bugs in bulk operations and implement robust error
 **Status**: Ready for Implementation  
 **Priority**: High - Data Integrity Critical  
 **Story Points**: 13 (Large)  
-**Sprint**: 2-3  
+**Sprint**: 2-3
 
 ## User Story
 
@@ -24,6 +24,7 @@ Fix critical data persistence bugs in bulk operations and implement robust error
 ### Critical Data Loss Bug
 
 **Issue Discovered**: E2E test evidence shows bulk operations may lose data:
+
 - Test sets value: `bulk_2_1755138538319`
 - After page reload finds: `rapid_9_1755138535616` (from previous test)
 - **Expected**: The bulk value should persist
@@ -34,24 +35,28 @@ Fix critical data persistence bugs in bulk operations and implement robust error
 Based on investigation in [Bulk Operations Investigation](bulk-operations-investigation.md), potential causes include:
 
 #### 1. Race Condition in Storage Operations
+
 ```javascript
 // Possible problematic pattern
 chrome.storage.local.set({ key1: value1 }); // Call 1
 chrome.storage.local.set({ key2: value2 }); // Call 2 - might overwrite Call 1
 ```
 
-#### 2. Aggressive Auto-Save Debouncing  
+#### 2. Aggressive Auto-Save Debouncing
+
 ```javascript
 // Possible issue in settings-manager.js
 const DEBOUNCE_DELAY = 1000; // Too long for rapid changes?
 ```
 
 #### 3. Service Worker Context Issues
+
 - Background script reloads during bulk operations
 - Storage contexts become stale
 - Event handling breaks down under load
 
 #### 4. Browser Storage API Throttling
+
 - Chrome/Firefox internal rate limiting
 - Storage quotas triggering failures
 - API calls being silently dropped
@@ -59,11 +64,13 @@ const DEBOUNCE_DELAY = 1000; // Too long for rapid changes?
 ### Impact Assessment
 
 **User Experience Impact**:
+
 - Users making rapid changes might lose recent modifications
 - Power users doing bulk configuration changes affected most severely
 - Workflow disruption and user frustration
 
 **Framework Reliability Impact**:
+
 - Cannot be trusted for production use with current data loss potential
 - Downstream developers (like Christian) experience user complaints
 - Framework reputation damaged by data integrity issues
@@ -99,6 +106,7 @@ const DEBOUNCE_DELAY = 1000; // Too long for rapid changes?
 ### 1. Operation Queue Implementation
 
 #### Storage Operation Manager
+
 ```javascript
 // lib/storage-operation-manager.js
 class StorageOperationManager {
@@ -117,9 +125,9 @@ class StorageOperationManager {
         resolve,
         reject,
         attempts: 0,
-        timestamp: Date.now()
+        timestamp: Date.now(),
       });
-      
+
       this.processQueue();
     });
   }
@@ -133,27 +141,29 @@ class StorageOperationManager {
 
     while (this.operationQueue.length > 0) {
       const item = this.operationQueue.shift();
-      
+
       try {
         const result = await this.executeOperation(item.operation);
         item.resolve(result);
-        
+
         // Log successful operation
-        console.debug('Storage operation completed:', {
+        console.debug("Storage operation completed:", {
           operation: item.operation.type,
-          duration: Date.now() - item.timestamp
+          duration: Date.now() - item.timestamp,
         });
-        
       } catch (error) {
         if (item.attempts < this.retryAttempts) {
           item.attempts++;
-          console.warn(`Storage operation retry ${item.attempts}/${this.retryAttempts}:`, error);
-          
+          console.warn(
+            `Storage operation retry ${item.attempts}/${this.retryAttempts}:`,
+            error,
+          );
+
           // Exponential backoff
           await this.delay(this.retryDelay * Math.pow(2, item.attempts - 1));
           this.operationQueue.unshift(item); // Retry at front of queue
         } else {
-          console.error('Storage operation failed after retries:', error);
+          console.error("Storage operation failed after retries:", error);
           item.reject(error);
         }
       }
@@ -164,13 +174,13 @@ class StorageOperationManager {
 
   async executeOperation(operation) {
     switch (operation.type) {
-      case 'set':
+      case "set":
         return await this.browserAPI.storage.local.set(operation.data);
-      case 'get':
+      case "get":
         return await this.browserAPI.storage.local.get(operation.keys);
-      case 'remove':
+      case "remove":
         return await this.browserAPI.storage.local.remove(operation.keys);
-      case 'clear':
+      case "clear":
         return await this.browserAPI.storage.local.clear();
       default:
         throw new Error(`Unknown storage operation: ${operation.type}`);
@@ -178,7 +188,7 @@ class StorageOperationManager {
   }
 
   delay(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 }
 ```
@@ -186,6 +196,7 @@ class StorageOperationManager {
 ### 2. Enhanced Settings Manager with Queue Integration
 
 #### Updated Settings Manager
+
 ```javascript
 // lib/settings-manager.js - Updated sections
 class SettingsManager {
@@ -195,7 +206,7 @@ class SettingsManager {
     this.initialized = false;
     this.defaultsCache = null;
     this.storageArea = "local";
-    
+
     // Add storage operation manager
     this.storageManager = null;
     this.autoSaveDebounceTime = 500; // Reduced from potential 1000ms
@@ -207,15 +218,15 @@ class SettingsManager {
     // Initialize storage operation manager
     const browserAPI = this.getBrowserAPI();
     this.storageManager = new StorageOperationManager(browserAPI);
-    
+
     try {
       const configLoader = new ConfigurationLoader();
       const defaults = await configLoader.loadConfiguration();
-      
+
       // Use queued operation for initial load
       const stored = await this.storageManager.queueOperation({
-        type: 'get',
-        keys: Object.keys(defaults)
+        type: "get",
+        keys: Object.keys(defaults),
       });
 
       this.settings = new Map();
@@ -229,7 +240,6 @@ class SettingsManager {
 
       this.initialized = true;
       this.notifyListeners("initialized");
-      
     } catch (error) {
       console.error("Settings initialization failed:", error);
       throw error;
@@ -249,7 +259,9 @@ class SettingsManager {
     // Validate the new value
     const validation = this.validateSetting(key, value, setting);
     if (!validation.isValid) {
-      throw new Error(`Invalid value for ${key}: ${validation.errors.join(", ")}`);
+      throw new Error(
+        `Invalid value for ${key}: ${validation.errors.join(", ")}`,
+      );
     }
 
     // Update in-memory setting
@@ -289,27 +301,26 @@ class SettingsManager {
     try {
       // Use queued storage operation
       await this.storageManager.queueOperation({
-        type: 'set',
-        data: changes
+        type: "set",
+        data: changes,
       });
 
-      console.debug('Auto-save completed for keys:', Object.keys(changes));
+      console.debug("Auto-save completed for keys:", Object.keys(changes));
       this.notifyListeners("saved", { keys: Object.keys(changes) });
-      
     } catch (error) {
-      console.error('Auto-save failed:', error);
-      
+      console.error("Auto-save failed:", error);
+
       // Re-queue failed changes
       for (const [key, value] of Object.entries(changes)) {
         this.pendingChanges.set(key, value);
       }
-      
+
       // Notify listeners of save failure
-      this.notifyListeners("save-failed", { 
-        error: error.message, 
-        keys: Object.keys(changes) 
+      this.notifyListeners("save-failed", {
+        error: error.message,
+        keys: Object.keys(changes),
       });
-      
+
       // Retry after delay
       setTimeout(() => {
         this.scheduleAutoSave();
@@ -323,7 +334,7 @@ class SettingsManager {
       clearTimeout(this.autoSaveTimer);
       this.autoSaveTimer = null;
     }
-    
+
     await this.flushPendingChanges();
   }
 
@@ -340,6 +351,7 @@ class SettingsManager {
 ### 3. User Feedback System
 
 #### Save Status Indicator Component
+
 ```javascript
 // components/save-status-indicator.js
 class SaveStatusIndicator {
@@ -350,8 +362,8 @@ class SaveStatusIndicator {
   }
 
   createIndicator() {
-    const indicator = document.createElement('div');
-    indicator.className = 'save-status-indicator';
+    const indicator = document.createElement("div");
+    indicator.className = "save-status-indicator";
     indicator.innerHTML = `
       <div class="save-status-content">
         <span class="save-status-icon"></span>
@@ -362,30 +374,33 @@ class SaveStatusIndicator {
   }
 
   showSaving() {
-    this.indicator.className = 'save-status-indicator saving';
-    this.indicator.querySelector('.save-status-text').textContent = 'Saving changes...';
+    this.indicator.className = "save-status-indicator saving";
+    this.indicator.querySelector(".save-status-text").textContent =
+      "Saving changes...";
   }
 
   showSaved() {
-    this.indicator.className = 'save-status-indicator saved';
-    this.indicator.querySelector('.save-status-text').textContent = 'All changes saved';
+    this.indicator.className = "save-status-indicator saved";
+    this.indicator.querySelector(".save-status-text").textContent =
+      "All changes saved";
   }
 
   showPending(count) {
-    this.indicator.className = 'save-status-indicator pending';
-    this.indicator.querySelector('.save-status-text').textContent = 
-      `${count} change${count === 1 ? '' : 's'} pending`;
+    this.indicator.className = "save-status-indicator pending";
+    this.indicator.querySelector(".save-status-text").textContent =
+      `${count} change${count === 1 ? "" : "s"} pending`;
   }
 
   showError(message) {
-    this.indicator.className = 'save-status-indicator error';
-    this.indicator.querySelector('.save-status-text').textContent = 
+    this.indicator.className = "save-status-indicator error";
+    this.indicator.querySelector(".save-status-text").textContent =
       `Save failed: ${message}`;
   }
 }
 ```
 
 #### CSS Styling
+
 ```css
 /* styles/save-status-indicator.css */
 .save-status-indicator {
@@ -448,20 +463,25 @@ class SaveStatusIndicator {
 }
 
 @keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 ```
 
 ### 4. Enhanced Error Handling and Logging
 
 #### Storage Error Types
+
 ```javascript
 // lib/storage-errors.js
 class StorageError extends Error {
   constructor(message, code, operation, retryable = false) {
     super(message);
-    this.name = 'StorageError';
+    this.name = "StorageError";
     this.code = code;
     this.operation = operation;
     this.retryable = retryable;
@@ -471,24 +491,30 @@ class StorageError extends Error {
 
 class StorageQuotaExceededError extends StorageError {
   constructor(operation) {
-    super('Storage quota exceeded', 'QUOTA_EXCEEDED', operation, false);
+    super("Storage quota exceeded", "QUOTA_EXCEEDED", operation, false);
   }
 }
 
 class StorageNetworkError extends StorageError {
   constructor(operation) {
-    super('Storage network error', 'NETWORK_ERROR', operation, true);
+    super("Storage network error", "NETWORK_ERROR", operation, true);
   }
 }
 
 class StorageCorruptionError extends StorageError {
   constructor(operation) {
-    super('Storage data corruption detected', 'DATA_CORRUPTION', operation, false);
+    super(
+      "Storage data corruption detected",
+      "DATA_CORRUPTION",
+      operation,
+      false,
+    );
   }
 }
 ```
 
 #### Comprehensive Logging System
+
 ```javascript
 // lib/storage-logger.js
 class StorageLogger {
@@ -504,38 +530,46 @@ class StorageLogger {
       level,
       message,
       data,
-      stack: level === 'error' ? new Error().stack : undefined
+      stack: level === "error" ? new Error().stack : undefined,
     };
 
     this.logs.push(entry);
-    
+
     // Trim logs if needed
     if (this.logs.length > this.maxLogs) {
       this.logs.shift();
     }
 
     // Console output
-    if (this.debugMode || level === 'error') {
+    if (this.debugMode || level === "error") {
       console[level](`[StorageLogger] ${message}`, data);
     }
   }
 
-  debug(message, data) { this.log('debug', message, data); }
-  info(message, data) { this.log('info', message, data); }
-  warn(message, data) { this.log('warn', message, data); }
-  error(message, data) { this.log('error', message, data); }
+  debug(message, data) {
+    this.log("debug", message, data);
+  }
+  info(message, data) {
+    this.log("info", message, data);
+  }
+  warn(message, data) {
+    this.log("warn", message, data);
+  }
+  error(message, data) {
+    this.log("error", message, data);
+  }
 
   getLogs(level = null, since = null) {
     let filtered = this.logs;
-    
+
     if (level) {
-      filtered = filtered.filter(log => log.level === level);
+      filtered = filtered.filter((log) => log.level === level);
     }
-    
+
     if (since) {
-      filtered = filtered.filter(log => log.timestamp >= since);
+      filtered = filtered.filter((log) => log.timestamp >= since);
     }
-    
+
     return filtered;
   }
 
@@ -550,12 +584,14 @@ class StorageLogger {
 ### Sprint 2: Core Infrastructure
 
 #### Week 1: Operation Queue System
+
 - [ ] Implement `StorageOperationManager` with queuing logic
 - [ ] Add retry mechanisms with exponential backoff
 - [ ] Create comprehensive error types and handling
 - [ ] Integrate storage logger for debugging
 
-#### Week 2: Settings Manager Integration  
+#### Week 2: Settings Manager Integration
+
 - [ ] Update `SettingsManager` to use queued operations
 - [ ] Optimize auto-save debouncing parameters
 - [ ] Add pending changes tracking
@@ -564,12 +600,14 @@ class StorageLogger {
 ### Sprint 3: User Experience and Polish
 
 #### Week 1: User Feedback System
+
 - [ ] Build `SaveStatusIndicator` component
 - [ ] Add visual feedback for save states
 - [ ] Implement error notification system
 - [ ] Create retry UI for failed operations
 
 #### Week 2: Testing and Validation
+
 - [ ] Comprehensive unit tests for all storage scenarios
 - [ ] Load testing for bulk operations
 - [ ] Cross-browser validation testing
@@ -580,53 +618,57 @@ class StorageLogger {
 ### Unit Testing Requirements
 
 #### Storage Operation Manager Tests
+
 ```javascript
 // test/unit/storage-operation-manager.test.js
-describe('StorageOperationManager', () => {
-  test('queues operations correctly', async () => {
+describe("StorageOperationManager", () => {
+  test("queues operations correctly", async () => {
     const mockAPI = { storage: { local: { set: jest.fn() } } };
     const manager = new StorageOperationManager(mockAPI);
-    
-    const operation = { type: 'set', data: { key: 'value' } };
+
+    const operation = { type: "set", data: { key: "value" } };
     await manager.queueOperation(operation);
-    
-    expect(mockAPI.storage.local.set).toHaveBeenCalledWith({ key: 'value' });
+
+    expect(mockAPI.storage.local.set).toHaveBeenCalledWith({ key: "value" });
   });
 
-  test('retries failed operations', async () => {
+  test("retries failed operations", async () => {
     const mockAPI = {
-      storage: { 
-        local: { 
-          set: jest.fn()
-            .mockRejectedValueOnce(new Error('Network error'))
-            .mockResolvedValueOnce(undefined)
-        }
-      }
+      storage: {
+        local: {
+          set: jest
+            .fn()
+            .mockRejectedValueOnce(new Error("Network error"))
+            .mockResolvedValueOnce(undefined),
+        },
+      },
     };
-    
+
     const manager = new StorageOperationManager(mockAPI);
-    const operation = { type: 'set', data: { key: 'value' } };
-    
+    const operation = { type: "set", data: { key: "value" } };
+
     await manager.queueOperation(operation);
-    
+
     expect(mockAPI.storage.local.set).toHaveBeenCalledTimes(2);
   });
 
-  test('handles concurrent operations correctly', async () => {
+  test("handles concurrent operations correctly", async () => {
     const mockAPI = { storage: { local: { set: jest.fn() } } };
     const manager = new StorageOperationManager(mockAPI);
-    
+
     // Start multiple operations simultaneously
     const promises = [];
     for (let i = 0; i < 5; i++) {
-      promises.push(manager.queueOperation({
-        type: 'set', 
-        data: { [`key${i}`]: `value${i}` }
-      }));
+      promises.push(
+        manager.queueOperation({
+          type: "set",
+          data: { [`key${i}`]: `value${i}` },
+        }),
+      );
     }
-    
+
     await Promise.all(promises);
-    
+
     // All operations should complete in order
     expect(mockAPI.storage.local.set).toHaveBeenCalledTimes(5);
   });
@@ -634,40 +676,42 @@ describe('StorageOperationManager', () => {
 ```
 
 #### Settings Manager Persistence Tests
+
 ```javascript
 // test/unit/settings-manager-persistence.test.js
-describe('SettingsManager Persistence', () => {
-  test('rapid changes all persist correctly', async () => {
+describe("SettingsManager Persistence", () => {
+  test("rapid changes all persist correctly", async () => {
     const manager = new SettingsManager();
     await manager.initialize();
-    
+
     // Make rapid changes
-    const values = ['value1', 'value2', 'value3', 'value4', 'value5'];
+    const values = ["value1", "value2", "value3", "value4", "value5"];
     for (const value of values) {
-      await manager.setSetting('test_key', value);
+      await manager.setSetting("test_key", value);
     }
-    
+
     // Force save all pending changes
     await manager.forceSave();
-    
+
     // Verify final value persisted
-    const stored = await manager.getSetting('test_key');
-    expect(stored.value).toBe('value5');
+    const stored = await manager.getSetting("test_key");
+    expect(stored.value).toBe("value5");
   });
 
-  test('handles storage failures gracefully', async () => {
+  test("handles storage failures gracefully", async () => {
     const manager = new SettingsManager();
     await manager.initialize();
-    
+
     // Mock storage failure
-    manager.storageManager.executeOperation = jest.fn()
-      .mockRejectedValue(new Error('Storage failed'));
-    
-    await manager.setSetting('test_key', 'new_value');
-    
+    manager.storageManager.executeOperation = jest
+      .fn()
+      .mockRejectedValue(new Error("Storage failed"));
+
+    await manager.setSetting("test_key", "new_value");
+
     // Should have pending changes
     expect(manager.hasPendingChanges()).toBe(true);
-    expect(manager.getPendingChanges()).toContain('test_key');
+    expect(manager.getPendingChanges()).toContain("test_key");
   });
 });
 ```
@@ -675,30 +719,31 @@ describe('SettingsManager Persistence', () => {
 ### E2E Testing Requirements
 
 #### Bulk Operations Scenarios
+
 ```javascript
 // test/e2e/bulk-operations.test.js
-describe('Bulk Operations Data Integrity', () => {
-  test('rapid setting changes persist after reload', async () => {
+describe("Bulk Operations Data Integrity", () => {
+  test("rapid setting changes persist after reload", async () => {
     await page.goto(`chrome-extension://${extensionId}/options/options.html`);
-    
+
     // Make rapid changes to multiple settings
     const changes = [
-      { key: 'setting1', value: 'rapid_value_1' },
-      { key: 'setting2', value: 'rapid_value_2' },
-      { key: 'setting3', value: 'rapid_value_3' }
+      { key: "setting1", value: "rapid_value_1" },
+      { key: "setting2", value: "rapid_value_2" },
+      { key: "setting3", value: "rapid_value_3" },
     ];
-    
+
     for (const change of changes) {
       await page.fill(`#setting-${change.key}`, change.value);
       // Don't wait - make changes rapidly
     }
-    
+
     // Wait for save indicator to show "saved"
-    await page.waitForSelector('.save-status-indicator.saved');
-    
+    await page.waitForSelector(".save-status-indicator.saved");
+
     // Reload page
     await page.reload();
-    
+
     // Verify all changes persisted
     for (const change of changes) {
       const value = await page.inputValue(`#setting-${change.key}`);
@@ -706,20 +751,20 @@ describe('Bulk Operations Data Integrity', () => {
     }
   });
 
-  test('save status indicators work correctly', async () => {
+  test("save status indicators work correctly", async () => {
     await page.goto(`chrome-extension://${extensionId}/options/options.html`);
-    
+
     // Make a change
-    await page.fill('#setting-test', 'new_value');
-    
+    await page.fill("#setting-test", "new_value");
+
     // Should show pending
-    await page.waitForSelector('.save-status-indicator.pending');
-    
+    await page.waitForSelector(".save-status-indicator.pending");
+
     // Should transition to saving
-    await page.waitForSelector('.save-status-indicator.saving');
-    
+    await page.waitForSelector(".save-status-indicator.saving");
+
     // Should transition to saved
-    await page.waitForSelector('.save-status-indicator.saved');
+    await page.waitForSelector(".save-status-indicator.saved");
   });
 });
 ```
@@ -727,12 +772,14 @@ describe('Bulk Operations Data Integrity', () => {
 ### Performance Testing
 
 #### Bulk Operation Performance
+
 - [ ] Test 100+ rapid changes within 5 seconds
 - [ ] Verify all changes persist correctly
 - [ ] Monitor memory usage during bulk operations
 - [ ] Validate UI responsiveness throughout operation
 
 #### Cross-Browser Performance
+
 - [ ] Chrome: Bulk operation timing and success rate
 - [ ] Edge: Comparison with Chrome performance
 - [ ] Firefox: WebExtension storage behavior differences
@@ -744,6 +791,7 @@ describe('Bulk Operations Data Integrity', () => {
 **Probability**: Medium  
 **Impact**: Medium  
 **Mitigation Strategy**:
+
 - Performance benchmarks before/after implementation
 - Configurable queue size limits
 - Monitoring for queue buildup scenarios
@@ -754,6 +802,7 @@ describe('Bulk Operations Data Integrity', () => {
 **Probability**: Medium  
 **Impact**: High  
 **Mitigation Strategy**:
+
 - Comprehensive error scenario testing
 - Gradual rollout with monitoring
 - Fallback to original behavior if issues detected
@@ -764,6 +813,7 @@ describe('Bulk Operations Data Integrity', () => {
 **Probability**: High  
 **Impact**: Medium  
 **Mitigation Strategy**:
+
 - Clear documentation of new architecture
 - Unit tests for all edge cases
 - Code review focus on error handling paths
@@ -772,24 +822,28 @@ describe('Bulk Operations Data Integrity', () => {
 ## Definition of Done
 
 ### Data Integrity
+
 - [ ] 100% persistence rate for bulk operations in testing
 - [ ] No data loss scenarios under normal use conditions
 - [ ] Graceful degradation for storage failures
 - [ ] Cross-browser consistency verified
 
 ### User Experience
+
 - [ ] Clear visual feedback for all save states
 - [ ] Error messages actionable and user-friendly
 - [ ] No UI blocking during bulk operations
 - [ ] Responsive design works across devices
 
 ### Code Quality
-- [ ] >95% test coverage for storage operations
+
+- [ ] > 95% test coverage for storage operations
 - [ ] Comprehensive error handling for all failure modes
 - [ ] Performance benchmarks meet requirements
 - [ ] Code review passes for all storage logic
 
 ### Documentation
+
 - [ ] Troubleshooting guide for storage issues
 - [ ] Developer guide for storage architecture
 - [ ] User guide for understanding save indicators
@@ -798,17 +852,20 @@ describe('Bulk Operations Data Integrity', () => {
 ## Success Metrics
 
 ### Technical Metrics
+
 - **Data Loss Rate**: 0% for rapid bulk operations
 - **Storage Operation Success Rate**: >99.9% under normal conditions
 - **Error Recovery Rate**: >95% of failed operations recover automatically
 - **Performance Impact**: <5% increase in operation latency
 
 ### User Experience Metrics
+
 - **Save Feedback Clarity**: 100% of users understand save status
 - **Error Resolution Time**: <30 seconds average for resolvable errors
 - **User Frustration Reports**: <1% of users report data loss concerns
 
 ### Framework Reliability Metrics
+
 - **Production Deployment Readiness**: Pass all integration tests
 - **Downstream Developer Confidence**: Zero reported data loss issues
 - **Cross-Browser Consistency**: 100% feature parity across browsers
@@ -816,12 +873,14 @@ describe('Bulk Operations Data Integrity', () => {
 ## Dependencies
 
 ### Internal Dependencies
+
 - **Settings Manager**: Core storage operations integration point
 - **Browser Compatibility Layer**: Storage API abstraction
 - **Configuration Management**: Settings schema for validation
 - **UI Components**: Visual feedback integration
 
 ### External Dependencies
+
 - **Chrome Storage API**: Quota and performance characteristics
 - **Firefox WebExtension Storage**: Behavioral differences from Chrome
 - **Browser Extension Security**: Storage permission requirements
@@ -829,24 +888,27 @@ describe('Bulk Operations Data Integrity', () => {
 ## Related Work
 
 ### Epic Integration
+
 - **Framework Maturity Epic**: Data integrity essential for production readiness
 - **User Experience**: Reliable persistence improves user confidence
 - **Developer Trust**: Data integrity critical for framework adoption
 
 ### Story Relationships
+
 - **Configuration Management**: Storage operations affect configuration loading
 - **UI Components**: Save status indicators integrate with component system
 - **File Organization**: Storage architecture fits into organized structure
 
 ### References
+
 - [Framework Maturity Epic](001-framework-maturity-epic.md) - Parent epic context
 - [Bulk Operations Investigation](bulk-operations-investigation.md) - Root cause analysis
 - [Chrome Storage API Documentation](https://developer.chrome.com/docs/extensions/reference/storage/) - API behavior
 
 ## Revision History
 
-| Date       | Author           | Changes                                                                      |
-| ---------- | ---------------- | ---------------------------------------------------------------------------- |
+| Date       | Author           | Changes                                                                             |
+| ---------- | ---------------- | ----------------------------------------------------------------------------------- |
 | 2025-08-14 | Development Team | Initial story created based on bulk operations investigation and data loss analysis |
 
 ---
