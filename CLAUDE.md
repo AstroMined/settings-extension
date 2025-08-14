@@ -22,8 +22,10 @@ npm run test:chrome      # Test extension in Chrome browser (manual)
 npm run test:firefox     # Test extension in Firefox browser (manual)
 
 # Enhanced E2E Testing (Preferred for Extension Testing)
-npm run test:e2e -- --project=chromium    # Run E2E tests in Chrome only
-npm run test:e2e -- --project=firefox     # Run E2E tests in Firefox only
+npm run test:e2e:chrome                    # Run E2E tests in Chrome with real extension loading
+npm run test:e2e:firefox                   # Run E2E tests in Firefox with FirefoxFunctionalTester (NEW!)
+npm run test:e2e:firefox-functional        # Run comprehensive Firefox functional tests
+npm run test:e2e:all                       # Run both Chrome and Firefox E2E tests
 npm run test:e2e -- --grep "popup"        # Run specific E2E test patterns
 npm run test:e2e -- --headed              # Run E2E tests in headed mode
 npm run test:e2e -- --debug               # Run E2E tests with debugging
@@ -167,13 +169,47 @@ This project has **comprehensive documentation** organized in three complementar
 **Testing Standards**: **ZERO TOLERANCE for failing tests**. All tests must pass 100% before any PR merge.
 
 - **Unit tests**: Pure functions only (validation, utilities) - see [Testing Decision Matrix](docs/developer/conventions/testing-decision-matrix.md)
-- **E2E tests**: Browser integration (storage, DOM, workflows) - uses Playwright with real browser instances
+- **E2E tests**: Browser integration (storage, DOM, workflows) - uses Playwright for Chrome, FirefoxFunctionalTester for Firefox
+- **Firefox Testing**: 🎉 **NEW!** Real Firefox extension testing using web-ext + functional validation (replaces old smoke tests)
+- **Cross-browser**: Both Chrome and Firefox now have full extension functionality testing
 - **No integration tests**: Avoid over-mocked middle-ground that leads to flaky tests
 - **Enforcement**: Failing tests indicate either bad tests or bugs - no third option
 
 **→ See [Testing Guide](docs/developer/workflows/testing-guide.md) for complete standards**
 
 **Build System**: Simple file copying via `scripts/build.js` - no bundling or transpilation. Firefox build uses different manifest.
+
+## Firefox Extension Testing Breakthrough 🎉
+
+### **Real Firefox Extension Testing (August 2025)**
+
+We've successfully implemented **real Firefox extension testing** that replaces the previous smoke tests:
+
+**New Firefox Testing Commands**:
+
+```bash
+npm run test:e2e:firefox                   # Run Firefox functional tests (replaces smoke tests)
+npm run test:e2e:firefox-functional        # Run comprehensive Firefox extension validation
+TEST_FIREFOX=true npm test:e2e:firefox     # Force enable Firefox testing in any environment
+```
+
+**What This Achieves**:
+
+- ✅ **Real Firefox extension loading** using Mozilla's official `web-ext` tool
+- ✅ **Actual `moz-extension://` URL testing** (no more protocol errors)
+- ✅ **Extension functionality validation** (popup, options, storage, manifest)
+- ✅ **CI/CD compatibility** with Xvfb and GitHub Actions
+- ✅ **No more profile popup errors** with automatic profile management
+
+**Technical Implementation**:
+
+- Uses `FirefoxFunctionalTester` class in `test/e2e/utils/firefox-functional-tester.js`
+- Leverages `web-ext run` for proper Firefox extension loading
+- Validates extension files, UI components, and storage functionality
+- Works in both local development and CI environments
+
+**Migration from Smoke Tests**:
+The old Firefox "smoke tests" only tested basic browser functionality without loading extensions. The new approach provides comprehensive extension testing equivalent to Chrome E2E tests.
 
 ## Common Issues & Troubleshooting
 

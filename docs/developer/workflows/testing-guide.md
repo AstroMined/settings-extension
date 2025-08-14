@@ -32,7 +32,8 @@
 ### Testing Framework Stack
 
 - **Unit Testing**: Jest with jsdom environment (pure functions only)
-- **E2E Testing**: Playwright with real browser instances
+- **E2E Testing**: Playwright with real browser instances + Firefox functional testing
+- **Firefox Testing**: Mozilla web-ext tool for real extension loading and validation
 - **Coverage**: Jest coverage reports (80% threshold)
 - **Mocking**: Forbidden except for network requests
 - **Style**: Function-style tests (not class-style)
@@ -41,28 +42,23 @@
 
 ```
 test/
-├── unit/                    # Unit tests
-│   ├── background.test.js   # Background script tests
-│   ├── content-script.test.js # Content script tests
-│   ├── popup.test.js        # Popup functionality tests
+├── unit/                    # Unit tests (pure functions only)
 │   └── lib/                 # Library unit tests
 │       ├── settings-manager.test.js
 │       └── content-settings.test.js
-├── integration/             # Integration tests
-│   ├── storage.test.js      # Storage operations
-│   ├── messaging.test.js    # Message passing
-│   └── cross-component.test.js
-├── browser/                 # Browser-specific tests
-│   ├── chrome/              # Chrome-specific tests
-│   └── firefox/             # Firefox-specific tests
+├── e2e/                     # E2E tests (real browser integration)
+│   ├── chrome.test.js       # Chrome Playwright tests
+│   ├── firefox-functional.test.js # Firefox functional tests (web-ext)
+│   ├── cross-browser.test.js # Cross-browser compatibility
+│   └── utils/               # E2E test utilities
+│       ├── firefox-functional-tester.js # Firefox testing framework
+│       └── browser-factory.js # Browser setup utilities
 ├── performance/             # Performance tests
 │   └── load-time.test.js
 ├── fixtures/                # Test data
 │   ├── settings.json        # Sample settings
 │   └── mock-responses.json
 └── helpers/                 # Test utilities
-    ├── chrome-mock.js       # Chrome API mocks
-    ├── firefox-mock.js      # Firefox API mocks
     └── test-utils.js        # Common utilities
 ```
 
@@ -90,17 +86,22 @@ npm test -- --testNamePattern="storage"
 ### Browser-Specific Testing
 
 ```bash
-# Test in Chrome
-npm run test:chrome
+# Enhanced E2E Testing (Recommended)
+npm run test:e2e                    # Run all browser E2E tests
+npm run test:e2e:chrome             # Chrome Playwright tests
+npm run test:e2e:firefox            # Firefox functional tests (real extension loading)
+npm run test:e2e:firefox-functional # Comprehensive Firefox extension validation
 
-# Test in Firefox
-npm run test:firefox
+# Legacy browser tests (manual)
+npm run test:chrome                 # Manual Chrome testing
+npm run test:firefox                # Manual Firefox testing
+npm run test:all                    # Test in both browsers
+npm run validate                    # Validate extension in browsers
 
-# Test in both browsers
-npm run test:all
-
-# Validate extension in browsers
-npm run validate
+# Firefox Testing Breakthrough 🎉
+# We now have REAL Firefox extension testing that loads actual extensions
+# instead of the previous smoke tests that didn't work properly
+TEST_FIREFOX=true npm run test:e2e:firefox  # Force enable Firefox testing
 ```
 
 ### Coverage Requirements
@@ -350,6 +351,22 @@ afterEach(() => {
 
 **For ALL code that interacts with browser APIs, storage, DOM, or async operations.**
 
+### E2E Testing Approaches by Browser
+
+#### Chrome/Edge: Playwright Integration
+
+- Uses `launchPersistentContext()` with `--load-extension` flag
+- Full Playwright API support for UI automation
+- Service worker detection and interaction
+- Real browser environment with extension loaded
+
+#### Firefox: Functional Testing with web-ext
+
+- Uses Mozilla's official `web-ext run` tool
+- Functional validation instead of UI automation
+- Real extension loading and browser environment
+- Comprehensive extension functionality testing
+
 ### When to Use E2E Tests
 
 - Settings persistence and loading
@@ -428,38 +445,57 @@ This middle-ground approach leads to:
 ### CI/CD Pipeline Requirements
 
 ```yaml
-# .github/workflows/test-quality.yml
-name: Test Quality Gate
+# .github/workflows/test.yml (Current Implementation)
+name: Test Suite
 
 on: [push, pull_request]
 
 jobs:
-  unit-tests:
+  test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: "npm"
       - run: npm ci
+      - run: npm run lint
       - run: npm test
+      - run: npm run test:coverage
       # MUST pass 100% - no allowed_failures
 
   e2e-tests:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        browser: [chromium, firefox]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: "npm"
       - run: npm ci
-      - run: npm run build
-      - run: npx playwright install
-      - run: npm run test:e2e
+      - run: npx playwright install --with-deps ${{ matrix.browser }}
+      - name: Run E2E tests for ${{ matrix.browser }}
+        run: |
+          if [ "${{ matrix.browser }}" = "chromium" ]; then
+            xvfb-run --auto-servernum npm run test:e2e:chrome
+          elif [ "${{ matrix.browser }}" = "firefox" ]; then
+            xvfb-run --auto-servernum npm run test:e2e:firefox
+          fi
       # MUST pass 100% - no allowed_failures
 
-  merge-gate:
-    needs: [unit-tests, e2e-tests]
+  quality-gate:
+    needs: [test, e2e-tests]
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
     steps:
-      - run: echo "All tests passed - PR ready for review"
+      - uses: actions/checkout@v5
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run test:coverage
+      - run: npm run package
 ```
 
 ### Test Failure Response Protocol

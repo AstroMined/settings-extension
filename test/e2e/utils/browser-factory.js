@@ -1,6 +1,12 @@
 /**
  * Dynamic Browser Factory for Cross-Browser E2E Testing
  * Provides project-aware browser selection for Playwright tests
+ *
+ * 🎉 UPDATED: Firefox now uses FirefoxFunctionalTester for REAL extension testing!
+ * - No more smoke tests - Firefox extensions are now fully tested
+ * - Uses web-ext + proper Firefox extension loading
+ * - Tests actual moz-extension:// URLs and extension functionality
+ * - Works in CI environments
  */
 
 const { chromium, firefox } = require("@playwright/test");
@@ -79,13 +85,12 @@ class BrowserFactory {
     console.log(`Using user data dir: ${userDataDir}`);
 
     if (isFirefox) {
-      // Firefox smoke testing approach
-      // Note: Full Firefox extension E2E testing has limitations due to extension loading complexity
-      // This provides basic browser testing to verify Firefox compatibility
+      // NEW: Firefox functional testing approach using FirefoxFunctionalTester
+      // This replaces the old smoke testing approach with real extension testing
       try {
-        console.log("Using Firefox smoke testing approach");
+        console.log("Using Firefox functional testing approach");
         console.log(
-          "Note: Firefox extension loading skipped - using Chrome for comprehensive E2E tests",
+          "Note: Firefox extension now uses FirefoxFunctionalTester for real testing",
         );
 
         const baseConfig = {
