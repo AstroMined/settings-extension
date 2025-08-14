@@ -11,7 +11,7 @@ let context;
 let extensionId;
 
 test.describe("Advanced Storage and Sync", () => {
-  test.beforeAll(async (_, testInfo) => {
+  test.beforeAll(async ({}, testInfo) => {
     // Use browser factory for consistent configuration across environments
     context = await BrowserFactory.createExtensionContext(testInfo);
 
