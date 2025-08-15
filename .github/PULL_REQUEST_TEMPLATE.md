@@ -22,9 +22,9 @@ Please check the type of change your PR introduces:
 
 Describe the changes made in this PR:
 
-- 
-- 
-- 
+-
+-
+-
 
 ## Related Issues
 
@@ -35,12 +35,14 @@ Resolves #(issue number)
 ## Testing
 
 ### Test Coverage
+
 - [ ] Unit tests pass
 - [ ] Integration tests pass
 - [ ] E2E tests pass
 - [ ] Coverage meets threshold (≥80%)
 
 ### Manual Testing
+
 Describe the manual testing performed:
 
 - [ ] Tested in Chrome
@@ -49,9 +51,10 @@ Describe the manual testing performed:
 - [ ] Verified no console errors
 
 #### Test Scenarios
-1. 
-2. 
-3. 
+
+1.
+2.
+3.
 
 ## Browser Compatibility
 
@@ -77,6 +80,7 @@ Describe the manual testing performed:
 ## Review Checklist
 
 ### For Reviewers
+
 - [ ] Code is readable and follows project conventions
 - [ ] Logic is sound and efficient
 - [ ] Tests are comprehensive and meaningful
@@ -85,16 +89,17 @@ Describe the manual testing performed:
 - [ ] Security considerations addressed
 
 ### Breaking Changes
+
 If this PR introduces breaking changes, describe them here and provide migration guidance:
 
-- 
-- 
+-
+-
 
 ## Screenshots/GIFs
 
 If applicable, add screenshots or GIFs showing the changes:
 
-<!-- 
+<!--
 Add images here:
 ![Description](image-url)
 -->
@@ -103,12 +108,11 @@ Add images here:
 
 Any additional information, considerations, or notes for reviewers:
 
-- 
-- 
+-
+- ***
 
----
+  **By submitting this PR, I confirm that:**
 
-**By submitting this PR, I confirm that:**
 - [ ] I have read and agree to follow the [Contributing Guidelines](CONTRIBUTING.md)
 - [ ] My code follows the project's coding standards
 - [ ] I have performed self-review of my code

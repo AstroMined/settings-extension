@@ -168,12 +168,15 @@ function handleMessage(message, sender, sendResponse) {
 
   // Handle settings manager not available
   if (!settingsManager) {
-    console.warn("Settings manager not available, attempting re-initialization...");
+    console.warn(
+      "Settings manager not available, attempting re-initialization...",
+    );
     initializeSettingsOnStartup()
       .then(() => {
         if (!settingsManager) {
           sendResponse({
-            error: "Settings manager not available. Service worker may need restart.",
+            error:
+              "Settings manager not available. Service worker may need restart.",
             fallback: true,
           });
           return;
@@ -183,7 +186,8 @@ function handleMessage(message, sender, sendResponse) {
       .catch((error) => {
         console.error("Failed to re-initialize settings manager:", error);
         sendResponse({
-          error: "Settings manager not available. Service worker may need restart.",
+          error:
+            "Settings manager not available. Service worker may need restart.",
           fallback: true,
         });
       });
@@ -257,8 +261,11 @@ async function broadcastSettingsChange(changes, sender) {
 
     const validTabs = tabs.filter((tab) => {
       // Skip extension pages and invalid URLs
-      if (!tab.url || tab.url.startsWith("chrome-extension://") || 
-          tab.url.startsWith("chrome://")) {
+      if (
+        !tab.url ||
+        tab.url.startsWith("chrome-extension://") ||
+        tab.url.startsWith("chrome://")
+      ) {
         return false;
       }
       // Skip the sender tab to avoid double updates
@@ -279,7 +286,10 @@ async function broadcastSettingsChange(changes, sender) {
         if (error.message.includes("Could not establish connection")) {
           return;
         }
-        console.debug(`Failed to send message to tab ${tab.id}:`, error.message);
+        console.debug(
+          `Failed to send message to tab ${tab.id}:`,
+          error.message,
+        );
       }
     });
 
@@ -340,13 +350,13 @@ class ExtensionContentScript {
     try {
       // Test connection first (with retry logic built into API)
       await this.testConnection();
-      
+
       // Load initial configuration
       const config = await this.settings.getSettings([
         "feature_enabled",
-        "api_endpoint", 
+        "api_endpoint",
         "refresh_interval",
-        "advanced_config"
+        "advanced_config",
       ]);
 
       if (config.feature_enabled?.value) {
@@ -382,7 +392,9 @@ class ExtensionContentScript {
       case "changed":
         // Handle individual setting changes
         if (data.feature_enabled !== undefined) {
-          data.feature_enabled ? this.enableMainFeature() : this.disableMainFeature();
+          data.feature_enabled
+            ? this.enableMainFeature()
+            : this.disableMainFeature();
         }
         if (data.advanced_config !== undefined) {
           this.updateConfiguration(data.advanced_config);
@@ -399,9 +411,12 @@ class ExtensionContentScript {
 
   async enableMainFeature(config = null) {
     if (!config) {
-      config = await this.settings.getSettings(["api_endpoint", "advanced_config"]);
+      config = await this.settings.getSettings([
+        "api_endpoint",
+        "advanced_config",
+      ]);
     }
-    
+
     console.log("🚀 Enabling main feature with config:", config);
     // Your extension logic here
   }
@@ -453,7 +468,7 @@ class ResilientFeatureManager {
       // Try to get current setting
       const enabled = await this.settings.getSetting("feature_enabled");
       this.featureState = enabled.value;
-      
+
       if (this.featureState) {
         this.enableFeature();
       }
@@ -465,7 +480,6 @@ class ResilientFeatureManager {
           data.feature_enabled ? this.enableFeature() : this.disableFeature();
         }
       });
-
     } catch (error) {
       console.error("Settings unavailable, using fallback:", error);
       this.initializeFallbackMode();
@@ -476,7 +490,7 @@ class ResilientFeatureManager {
     // Use default state when settings unavailable
     this.featureState = true; // Default enabled
     this.enableFeature();
-    
+
     // Retry connection periodically
     this.fallbackTimeout = setInterval(() => {
       this.retrySettingsConnection();
@@ -510,10 +524,13 @@ class SmartConfigLoader {
 
   async getConfiguration(forceRefresh = false) {
     const now = Date.now();
-    
+
     // Return cached config if fresh
-    if (!forceRefresh && (now - this.lastUpdate) < this.cacheLifetime && 
-        this.configCache.size > 0) {
+    if (
+      !forceRefresh &&
+      now - this.lastUpdate < this.cacheLifetime &&
+      this.configCache.size > 0
+    ) {
       return this.getCachedConfig();
     }
 
@@ -521,10 +538,10 @@ class SmartConfigLoader {
       // Load fresh configuration
       const config = await this.settings.getSettings([
         "api_endpoint",
-        "timeout", 
+        "timeout",
         "retries",
         "api_key",
-        "advanced_config"
+        "advanced_config",
       ]);
 
       // Update cache
@@ -537,7 +554,7 @@ class SmartConfigLoader {
       return this.getCachedConfig();
     } catch (error) {
       console.error("Failed to load configuration:", error);
-      
+
       // Return cached config if available, otherwise defaults
       if (this.configCache.size > 0) {
         console.warn("Using cached configuration due to error");
@@ -550,11 +567,12 @@ class SmartConfigLoader {
 
   getCachedConfig() {
     return {
-      endpoint: this.configCache.get("api_endpoint") || "https://api.example.com",
+      endpoint:
+        this.configCache.get("api_endpoint") || "https://api.example.com",
       timeout: this.configCache.get("timeout") || 5000,
       retries: this.configCache.get("retries") || 3,
       apiKey: this.configCache.get("api_key") || "",
-      advanced: this.configCache.get("advanced_config") || {}
+      advanced: this.configCache.get("advanced_config") || {},
     };
   }
 
@@ -564,7 +582,7 @@ class SmartConfigLoader {
       timeout: 5000,
       retries: 3,
       apiKey: "",
-      advanced: {}
+      advanced: {},
     };
   }
 }
@@ -586,7 +604,7 @@ class DynamicUIManager {
         "theme_preference",
         "custom_css",
         "ui_scale",
-        "animations_enabled"
+        "animations_enabled",
       ]);
 
       this.applyUISettings(uiSettings);
@@ -597,7 +615,6 @@ class DynamicUIManager {
           this.handleUIChange(data);
         }
       });
-
     } catch (error) {
       console.error("Failed to initialize UI settings:", error);
       this.applyDefaultUI();
@@ -652,10 +669,12 @@ class DynamicUIManager {
   }
 
   isUIRelatedChange(data) {
-    return !!(data.theme_preference !== undefined || 
-             data.custom_css !== undefined ||
-             data.ui_scale !== undefined ||
-             data.animations_enabled !== undefined);
+    return !!(
+      data.theme_preference !== undefined ||
+      data.custom_css !== undefined ||
+      data.ui_scale !== undefined ||
+      data.animations_enabled !== undefined
+    );
   }
 }
 ```
@@ -690,7 +709,7 @@ async function initializeWithFallbacks() {
     await settingsManager.initialize();
   } catch (error) {
     console.error("Primary initialization failed:", error);
-    
+
     try {
       // Fallback to embedded defaults
       settingsManager = new SettingsManager();
@@ -731,7 +750,7 @@ async function checkStorageHealth() {
   try {
     const stats = await settingsManager.getStorageStats();
     const quota = await settingsManager.checkStorageQuota();
-    
+
     if (quota.percentUsed > 80) {
       console.warn("Storage quota usage high:", quota);
       // Implement cleanup or warning logic
@@ -815,12 +834,14 @@ All settings are automatically validated based on their schema:
 ```javascript
 // ✅ Good: Batch operations
 const settings = await settingsAPI.getSettings([
-  "setting1", "setting2", "setting3"
+  "setting1",
+  "setting2",
+  "setting3",
 ]);
 
 await settingsAPI.updateSettings({
   setting1: "value1",
-  setting2: "value2"
+  setting2: "value2",
 });
 
 // ❌ Avoid: Individual operations in loops
@@ -859,28 +880,28 @@ settings.setMessageTimeout(10000); // 10 second timeout for slow networks
 ```javascript
 async function testBasicIntegration() {
   const settings = new ContentScriptSettings();
-  
+
   try {
     // Test connection
     console.log("Testing connection...");
     const ping = await chrome.runtime.sendMessage({ type: "PING" });
     console.assert(ping.pong === true, "Ping test failed");
-    
+
     // Test get setting
     console.log("Testing get setting...");
     const setting = await settings.getSetting("feature_enabled");
     console.assert(setting !== null, "Get setting failed");
-    
+
     // Test update setting
     console.log("Testing update setting...");
     const originalValue = setting.value;
     await settings.updateSetting("feature_enabled", !originalValue);
     const updated = await settings.getSetting("feature_enabled");
     console.assert(updated.value === !originalValue, "Update setting failed");
-    
+
     // Restore original value
     await settings.updateSetting("feature_enabled", originalValue);
-    
+
     console.log("✅ All integration tests passed!");
   } catch (error) {
     console.error("❌ Integration test failed:", error);
@@ -897,14 +918,14 @@ testBasicIntegration();
 
 ```javascript
 // Old approach
-chrome.storage.local.get(['setting1'], (result) => {
+chrome.storage.local.get(["setting1"], (result) => {
   const value = result.setting1;
   // Use value
 });
 
 // New approach
 const settings = new ContentScriptSettings();
-const setting = await settings.getSetting('setting1');
+const setting = await settings.getSetting("setting1");
 const value = setting.value; // Includes validation, caching, change notifications
 ```
 
@@ -912,24 +933,27 @@ const value = setting.value; // Includes validation, caching, change notificatio
 
 ```javascript
 // Old approach
-chrome.runtime.sendMessage({action: 'getSetting', key: 'setting1'}, (response) => {
-  // Handle response
-});
+chrome.runtime.sendMessage(
+  { action: "getSetting", key: "setting1" },
+  (response) => {
+    // Handle response
+  },
+);
 
-// New approach  
+// New approach
 const settings = new ContentScriptSettings();
-const setting = await settings.getSetting('setting1'); // Includes retry logic, timeouts, error handling
+const setting = await settings.getSetting("setting1"); // Includes retry logic, timeouts, error handling
 ```
 
 ## Troubleshooting Quick Reference
 
-| Issue | Cause | Solution |
-|-------|--------|----------|
-| "Message port closed" errors | Using `async function handleMessage()` | Use sync/async separation pattern |
-| Settings not loading | Service worker not running | Check background script initialization |
-| Changes not reflecting | Missing change listeners | Setup listeners before loading settings |
-| Performance issues | Individual API calls in loops | Use batch operations |
-| Validation errors | Schema mismatch | Verify setting types and constraints |
+| Issue                        | Cause                                  | Solution                                |
+| ---------------------------- | -------------------------------------- | --------------------------------------- |
+| "Message port closed" errors | Using `async function handleMessage()` | Use sync/async separation pattern       |
+| Settings not loading         | Service worker not running             | Check background script initialization  |
+| Changes not reflecting       | Missing change listeners               | Setup listeners before loading settings |
+| Performance issues           | Individual API calls in loops          | Use batch operations                    |
+| Validation errors            | Schema mismatch                        | Verify setting types and constraints    |
 
 For comprehensive troubleshooting, see `troubleshooting-guide.md`.
 

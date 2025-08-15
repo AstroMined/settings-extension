@@ -42,14 +42,23 @@ Legend: ✅ Full support, ⚠️ Partial/Different API, ❌ Not supported
 ### Automated Testing Setup
 
 ```bash
-# Install testing dependencies
-npm install --save-dev web-ext selenium-webdriver chromedriver geckodriver
+# Install testing dependencies (updated for 2025)
+npm install --save-dev @playwright/test web-ext
 
-# Browser testing scripts
-npm run test:chrome    # Chrome headless testing
-npm run test:firefox   # Firefox headless testing
-npm run test:edge      # Edge testing (Windows only)
-npm run test:all       # All browsers sequentially
+# Enhanced E2E testing scripts (recommended)
+npm run test:e2e                    # All browsers with optimal approach
+npm run test:e2e:chrome             # Chrome Playwright tests
+npm run test:e2e:firefox            # Firefox functional tests (web-ext)
+npm run test:e2e:firefox-functional # Comprehensive Firefox validation
+
+# Legacy browser testing scripts
+npm run test:chrome                 # Chrome manual testing
+npm run test:firefox                # Firefox manual testing
+npm run test:edge                   # Edge testing (Windows only)
+npm run test:all                    # All browsers sequentially
+
+# Force Firefox testing in any environment
+TEST_FIREFOX=true npm run test:e2e:firefox
 ```
 
 ### Test Configuration
@@ -350,55 +359,72 @@ describe("Chrome Extension Tests", () => {
 });
 ```
 
-### Firefox Testing
+### Firefox Functional Testing 🎉
+
+**NEW: Real Firefox extension testing using Mozilla's web-ext tool (August 2025)**
 
 ```javascript
-// test/browsers/firefox.test.js
-describe("Firefox Extension Tests", () => {
-  let driver;
+// test/e2e/firefox-functional.test.js
+import { test, expect } from "@playwright/test";
+import { FirefoxFunctionalTester } from "./utils/firefox-functional-tester.js";
+
+describe("Firefox Extension Functional Tests", () => {
+  let tester;
 
   beforeAll(async () => {
-    driver = await setupFirefoxDriver();
+    tester = new FirefoxFunctionalTester();
   });
 
-  test("webextension polyfill compatibility", async () => {
-    // Test browser vs chrome namespace
-    const hasPolyfill = await driver.executeScript(`
-      return typeof browser !== 'undefined' && typeof browser.storage !== 'undefined';
-    `);
-
-    expect(hasPolyfill).toBe(true);
+  afterAll(async () => {
+    if (tester) {
+      await tester.cleanup();
+    }
   });
 
-  test("manifest v2/v3 compatibility", async () => {
-    const manifest = await driver.executeScript(`
-      return browser.runtime.getManifest();
-    `);
+  test("should launch Firefox with extension successfully", async () => {
+    const results = await tester.runFunctionalTest({
+      testType: "basic",
+      timeout: 20000,
+    });
 
-    // Firefox may support V2 or V3
-    expect([2, 3]).toContain(manifest.manifest_version);
+    expect(results.firefoxLaunch).toBe(true);
+    expect(results.extensionFilesExist).toBe(true);
+    expect(results.manifestValid).toBe(true);
   });
 
-  test("firefox-specific permissions", async () => {
-    // Test Firefox-specific permission handling
-    const hasPermission = await driver.executeScript(`
-      return browser.permissions.contains({permissions: ['storage']});
-    `);
+  test("should validate extension functionality", async () => {
+    const results = await tester.runFunctionalTest({
+      testType: "comprehensive",
+      timeout: 25000,
+    });
 
-    expect(hasPermission).toBe(true);
+    expect(results.firefoxLaunch).toBe(true);
+    expect(results.functionalityTest).toBe(true);
   });
 
-  test("content security policy", async () => {
-    // Firefox CSP handling
-    const cspErrors = await driver.executeScript(`
-      return window.performance.getEntriesByType('navigation')
-        .filter(entry => entry.name.includes('csp'));
-    `);
+  test("should handle extension in CI environment", async () => {
+    // This test verifies CI compatibility
+    process.env.CI = "true";
 
-    expect(cspErrors.length).toBe(0);
+    const results = await tester.runFunctionalTest({
+      testType: "ci",
+      timeout: 30000,
+    });
+
+    expect(results.firefoxLaunch).toBe(true);
+
+    delete process.env.CI;
   });
 });
 ```
+
+**Key Advantages:**
+
+- **Real Extension Loading**: Uses `web-ext run` to actually load extensions in Firefox
+- **Official Mozilla Tool**: Uses the same tool Mozilla developers use
+- **CI Compatible**: Works in GitHub Actions with proper process management
+- **No Profile Issues**: Lets web-ext handle its own profile management
+- **Functional Validation**: Tests actual extension behavior, not just browser launch
 
 ### Edge Testing
 
@@ -723,84 +749,86 @@ describe("Cross-Browser Performance", () => {
 
 ## Automated Testing Pipeline
 
-### GitHub Actions Workflow
+### GitHub Actions Workflow (Updated for 2025)
 
 ```yaml
-# .github/workflows/cross-browser-tests.yml
-name: Cross-Browser Tests
+# .github/workflows/test.yml (Current Implementation)
+name: Test Suite
 
 on:
   push:
     branches: [main, develop]
   pull_request:
-    branches: [main]
+    branches: [main, develop]
 
 jobs:
-  chrome-tests:
+  test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
+      - name: Checkout code
+        uses: actions/checkout@v5
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
         with:
-          node-version: "18"
-
+          node-version: 22
+          cache: "npm"
       - name: Install dependencies
         run: npm ci
+      - name: Run linting
+        run: npm run lint
+      - name: Run unit tests
+        run: npm test
+      - name: Generate coverage report
+        run: npm run test:coverage
 
-      - name: Build extension
-        run: npm run build
+  e2e-tests:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        browser: [chromium, firefox]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: "npm"
+      - name: Install dependencies
+        run: npm ci
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps ${{ matrix.browser }}
+      - name: Run E2E tests for ${{ matrix.browser }}
+        run: |
+          if [ "${{ matrix.browser }}" = "chromium" ]; then
+            xvfb-run --auto-servernum npm run test:e2e:chrome
+          elif [ "${{ matrix.browser }}" = "firefox" ]; then
+            xvfb-run --auto-servernum npm run test:e2e:firefox
+          fi
 
-      - name: Package for Chrome
-        run: npm run package:chrome
-
-      - name: Run Chrome tests
-        run: npm run test:chrome
-
-  firefox-tests:
+  # Additional quality gates
+  performance-benchmark:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v4
         with:
-          node-version: "18"
+          node-version: 22
+      - run: npm ci
+      - run: node test/ci/test-runner.js --benchmark
 
-      - name: Setup Firefox
-        uses: browser-actions/setup-firefox@latest
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Build extension
-        run: npm run build
-
-      - name: Package for Firefox
-        run: npm run package:firefox
-
-      - name: Run Firefox tests
-        run: npm run test:firefox
-
-  edge-tests:
-    runs-on: windows-latest
+  quality-gate:
+    runs-on: ubuntu-latest
+    needs: [test, e2e-tests, performance-benchmark]
     steps:
-      - uses: actions/checkout@v3
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v4
         with:
-          node-version: "18"
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Build extension
-        run: npm run build
-
-      - name: Run Edge tests
-        run: npm run test:edge
+          node-version: 22
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run test:coverage
+      - run: npm run package
 ```
 
 ### Test Reporting
@@ -925,39 +953,46 @@ export default CrossBrowserReporter;
 
 ## Manual Testing Checklist
 
-### Pre-Release Testing
+### Pre-Release Testing (Updated)
 
 ```markdown
-## Cross-Browser Manual Test Checklist
+## Cross-Browser Test Checklist (2025)
 
-### Chrome
+### Chrome (Playwright E2E)
 
-- [ ] Extension loads without errors
+- [ ] Run: npm run test:e2e:chrome
+- [ ] Extension loads via --load-extension
 - [ ] Popup opens and functions correctly
 - [ ] Options page accessible and usable
 - [ ] Content scripts inject properly
 - [ ] Storage operations work
-- [ ] Sync functionality operates
-- [ ] Context menus appear
-- [ ] Keyboard shortcuts work
+- [ ] Service worker responds to messages
 - [ ] No console errors or warnings
 
-### Firefox
+### Firefox (Functional Testing)
 
-- [ ] Extension installs from XPI
-- [ ] All Chrome tests pass
-- [ ] Firefox-specific APIs work
-- [ ] CSP policies don't block functionality
-- [ ] about:debugging shows no errors
-- [ ] Temporary vs permanent installation
+- [ ] Run: npm run test:e2e:firefox
+- [ ] Extension loads via web-ext run
+- [ ] Functional validation passes
+- [ ] Manifest V3 compatibility confirmed
+- [ ] No profile creation issues
+- [ ] CI environment compatibility verified
+- [ ] Process cleanup works properly
 
-### Edge
+### Edge (Chrome-Compatible)
 
 - [ ] Chrome extension package works
-- [ ] All Chrome tests pass
+- [ ] All Chrome Playwright tests pass
 - [ ] Edge-specific behaviors noted
 - [ ] Microsoft Edge Add-ons compatibility
 - [ ] Windows integration features
+
+### Automated Testing
+
+- [ ] All CI tests pass: npm run test:e2e
+- [ ] No failing tests tolerated
+- [ ] Coverage thresholds met
+- [ ] Linting passes
 ```
 
 ## Troubleshooting Cross-Browser Issues
@@ -1003,13 +1038,16 @@ export default CrossBrowserReporter;
    }
    ```
 
-## Best Practices
+## Best Practices (Updated for 2025)
 
 1. **Write Once, Test Everywhere**: Design with cross-browser compatibility in mind
-2. **Feature Detection**: Check for API availability before use
-3. **Graceful Degradation**: Provide fallbacks for unsupported features
-4. **Consistent Testing**: Test all browsers regularly, not just at release
-5. **Documentation**: Document browser-specific behaviors and workarounds
+2. **Use Appropriate Testing Method**: Playwright for Chrome/Edge, functional testing for Firefox
+3. **Feature Detection**: Check for API availability before use
+4. **Graceful Degradation**: Provide fallbacks for unsupported features
+5. **Consistent Testing**: Use automated E2E tests, not just manual testing
+6. **Zero Tolerance**: All tests must pass 100% - no exceptions
+7. **Real Extension Testing**: Avoid smoke tests, use actual extension loading
+8. **Documentation**: Document browser-specific behaviors and testing approaches
 
 ## References
 

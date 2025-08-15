@@ -17,7 +17,7 @@ Thank you for your interest in contributing to the Settings Extension project! W
 3. **Set up development environment**: Follow our [Local Setup Guide](developer/workflows/local-setup.md)
 4. **Create a feature branch**: `git checkout -b feature/your-feature-name`
 5. **Make your changes** following our [Coding Standards](developer/conventions/coding-standards.md)
-6. **Test your changes**: `npm test && npm run test:chrome && npm run test:firefox`
+6. **Test your changes**: `npm test && npm run test:e2e`
 7. **Submit a pull request** following our [Git Workflow](developer/conventions/git-workflow.md)
 
 ## Table of Contents
@@ -149,7 +149,7 @@ We use **Git Flow** with the following branches:
    npm run lint              # Code quality
    npm test                  # Unit tests
    npm run test:chrome       # Chrome testing
-   npm run test:firefox      # Firefox testing
+   npm run test:e2e:firefox  # Firefox functional testing (web-ext)
    npm run build            # Build verification
    ```
 
@@ -368,17 +368,22 @@ npm test
 npm run test:coverage
 ```
 
-**Cross-Browser Testing**
+**Cross-Browser Testing (Updated 2025)**
 
 ```bash
-# Test in Chrome
-npm run test:chrome
+# Enhanced E2E Testing (Recommended)
+npm run test:e2e                    # All browsers with optimal testing approach
+npm run test:e2e:chrome             # Chrome Playwright tests
+npm run test:e2e:firefox            # Firefox functional tests (web-ext)
+npm run test:e2e:firefox-functional # Comprehensive Firefox validation
 
-# Test in Firefox
-npm run test:firefox
+# Legacy Manual Testing
+npm run test:chrome                 # Chrome manual testing
+npm run test:firefox                # Firefox manual testing
+npm run test:all                    # Both browsers sequentially
 
-# Test in both browsers
-npm run test:all
+# Force Firefox testing in any environment
+TEST_FIREFOX=true npm run test:e2e:firefox
 ```
 
 **Code Quality**

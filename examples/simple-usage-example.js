@@ -114,7 +114,7 @@ async function getAllSettings() {
 
     // Log setting types breakdown
     const typeBreakdown = {};
-    for (const [key, setting] of Object.entries(allSettings)) {
+    for (const [, setting] of Object.entries(allSettings)) {
       typeBreakdown[setting.type] = (typeBreakdown[setting.type] || 0) + 1;
     }
 
@@ -235,7 +235,7 @@ async function importSettings(jsonData) {
     let importObject;
     try {
       importObject = JSON.parse(jsonData);
-    } catch (parseError) {
+    } catch {
       throw new Error("Invalid JSON format in import data");
     }
 
@@ -867,6 +867,11 @@ async function runExamples() {
     await robustSettingsOperation();
 
     console.log("✅ All examples completed successfully");
+
+    // Cleanup listeners when done
+    if (cleanupListeners) {
+      cleanupListeners();
+    }
   } catch (error) {
     console.error("❌ Example execution failed:", error);
   }
@@ -908,6 +913,61 @@ window.SettingsExtensionAPI = {
 console.log(
   "🚀 Settings Extension API examples loaded. Access via window.SettingsExtensionAPI",
 );
+
+// ========================================
+// STUB IMPLEMENTATIONS FOR EXAMPLE FUNCTIONS
+// ========================================
+// These functions are referenced in the examples above
+// In a real implementation, replace these with your actual logic
+
+/**
+ * Toggle the main feature on/off
+ * @param {boolean} enabled - Whether the feature should be enabled
+ */
+function toggleMainFeature(enabled) {
+  console.log(`🔄 Main feature ${enabled ? "enabled" : "disabled"}`);
+  // Implementation: Enable/disable your main extension feature
+}
+
+/**
+ * Apply custom CSS styles
+ * @param {string} cssText - CSS text to apply
+ */
+function applyCustomCSS(cssText) {
+  console.log("🎨 Applying custom CSS:", cssText.substring(0, 50) + "...");
+  // Implementation: Inject CSS into page or extension UI
+}
+
+/**
+ * Update the refresh interval for periodic operations
+ * @param {number} intervalMs - New interval in milliseconds
+ */
+function updateRefreshInterval(intervalMs) {
+  console.log(`⏱️ Refresh interval updated to ${intervalMs}ms`);
+  // Implementation: Update your periodic refresh timer
+}
+
+/**
+ * Reconfigure advanced features based on new config
+ * @param {Object} config - Advanced configuration object
+ */
+function reconfigureAdvancedFeatures(config) {
+  console.log("⚙️ Reconfiguring advanced features:", Object.keys(config));
+  // Implementation: Apply advanced configuration changes
+}
+
+/**
+ * Reinitialize the extension with new settings
+ * @param {Object} allSettings - Complete settings object
+ */
+function reinitializeExtension(allSettings) {
+  console.log(
+    "🔄 Reinitializing extension with",
+    Object.keys(allSettings).length,
+    "settings",
+  );
+  // Implementation: Restart your extension with new settings
+}
 
 /**
  * COMPLETE API REFERENCE SUMMARY:

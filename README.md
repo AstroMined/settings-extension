@@ -84,6 +84,7 @@ This Settings Extension is designed as a **drop-in library/framework** for other
 **Best for**: Teams integrating this into existing extension projects
 
 1. **Copy the distribution files**:
+
    ```bash
    # Copy all files from the dist/ directory to your project
    cp -r dist/* your-extension-project/
@@ -97,6 +98,7 @@ This Settings Extension is designed as a **drop-in library/framework** for other
 3. **No build dependencies required** - just copy and integrate!
 
 **Benefits**:
+
 - ✅ No Node.js/npm dependencies for integration
 - ✅ Works with any build system
 - ✅ Your existing cross-platform workflow remains unchanged
@@ -110,6 +112,7 @@ This Settings Extension is designed as a **drop-in library/framework** for other
 - **Firefox**: Use `web-ext-artifacts/settings-extension-firefox.xpi`
 
 **Use cases**:
+
 - ✅ Direct installation for testing
 - ✅ Distribution to technical end-users
 - ✅ QA team validation
@@ -117,8 +120,9 @@ This Settings Extension is designed as a **drop-in library/framework** for other
 ### Integration Examples
 
 The `examples/` directory contains integration patterns:
+
 - [`minimal-integration.js`](examples/minimal-integration.js) - Basic integration
-- [`background-integration.js`](examples/background-integration.js) - Service worker integration  
+- [`background-integration.js`](examples/background-integration.js) - Service worker integration
 - [`content-script-example.js`](examples/content-script-example.js) - Content script usage
 
 ## 📦 Development Installation

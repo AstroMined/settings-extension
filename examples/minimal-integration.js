@@ -58,6 +58,7 @@ async function initializeExtension() {
 }
 
 // Step 3: Update settings with proper validation
+// eslint-disable-next-line no-unused-vars
 async function updateUserSetting(key, value) {
   try {
     await settings.updateSetting(key, value);

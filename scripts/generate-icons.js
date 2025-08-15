@@ -21,7 +21,7 @@ function isSharpAvailable() {
   try {
     require.resolve("sharp");
     return true;
-  } catch (e) {
+  } catch {
     return false;
   }
 }

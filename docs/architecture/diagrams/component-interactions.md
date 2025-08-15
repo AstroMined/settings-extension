@@ -251,6 +251,6 @@ When completed, will include:
 
 ## Revision History
 
-| Date       | Author            | Changes                                            |
-| ---------- | ----------------- | -------------------------------------------------- |
+| Date       | Author             | Changes                                                |
+| ---------- | ------------------ | ------------------------------------------------------ |
 | 2025-08-13 | Documentation Team | Created placeholder for component interactions diagram |

@@ -3,50 +3,27 @@
  * Tests complete user scenarios with the actual browser extension
  */
 
-const { test, expect, chromium } = require("@playwright/test");
-const path = require("path");
+const { test, expect } = require("@playwright/test");
+const BrowserFactory = require("./utils/browser-factory");
 
 // Removed complex helper functions - using launchPersistentContext approach
 
 test.describe("End-to-End User Workflows", () => {
   let context;
   let extensionId;
+  let serviceWorker;
 
-  test.beforeAll(async () => {
-    const extensionPath = path.resolve(__dirname, "../../dist");
-    const userDataDir = path.resolve(
-      __dirname,
-      "../../test-user-data-workflows",
+  // eslint-disable-next-line no-empty-pattern
+  test.beforeAll(async ({}, testInfo) => {
+    console.log(
+      `Test setup for project: ${testInfo?.project?.name || "default"}`,
     );
 
-    console.log(`Loading extension from: ${extensionPath}`);
-    console.log(`Using user data dir: ${userDataDir}`);
-
-    // Use launchPersistentContext for extension loading (2025 best practice)
-    context = await chromium.launchPersistentContext(userDataDir, {
-      headless: false,
-      args: [
-        `--disable-extensions-except=${extensionPath}`,
-        `--load-extension=${extensionPath}`,
-        "--no-sandbox",
-        "--disable-dev-shm-usage",
-      ],
-    });
-
-    // Wait for extension to load and service worker to initialize
-    console.log("Waiting for extension to load...");
-    await new Promise((resolve) => setTimeout(resolve, 3000));
-
-    // Get service worker using 2025 pattern
-    let [serviceWorker] = context.serviceWorkers();
-    if (!serviceWorker) {
-      console.log(
-        "Service worker not immediately available, waiting for event...",
-      );
-      serviceWorker = await context.waitForEvent("serviceworker", {
-        timeout: 10000,
-      });
-    }
+    // Use dynamic browser factory for cross-browser support
+    const extensionSetup = await BrowserFactory.setupExtension(testInfo);
+    context = extensionSetup.context;
+    serviceWorker = extensionSetup.serviceWorker;
+    extensionId = extensionSetup.extensionId;
 
     if (serviceWorker) {
       const workerUrl = serviceWorker.url();

@@ -51,7 +51,7 @@ class SettingsMockFactory {
 
     const cache = new Map();
     const listeners = new Set();
-    let messageTimeout = 5000;
+    let _messageTimeout = 5000; // eslint-disable-line no-unused-vars
     let failureMode = options.failureMode || null;
     let responseDelay = options.responseDelay || 0;
 
@@ -298,7 +298,7 @@ class SettingsMockFactory {
 
       // Configuration methods
       setMessageTimeout(timeout) {
-        messageTimeout = timeout;
+        _messageTimeout = timeout;
       },
 
       destroy() {

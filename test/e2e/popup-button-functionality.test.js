@@ -4,56 +4,28 @@
  * to prevent regressions in the event listener setup
  */
 
-const { test, expect, chromium } = require("@playwright/test");
-const path = require("path");
+const { test, expect } = require("@playwright/test");
+const BrowserFactory = require("./utils/browser-factory");
 
 test.describe("Popup Button Functionality", () => {
   let context;
   let extensionId;
+  let serviceWorker;
 
-  test.beforeAll(async () => {
-    const extensionPath = path.resolve(__dirname, "../../dist");
-    const userDataDir = path.resolve(__dirname, "../../test-user-data-popup");
+  // eslint-disable-next-line no-empty-pattern
+  test.beforeAll(async ({}, testInfo) => {
+    console.log(
+      `Test setup for project: ${testInfo?.project?.name || "default"}`,
+    );
 
-    console.log(`Loading extension from: ${extensionPath}`);
+    // Use dynamic browser factory for cross-browser support
+    const extensionSetup = await BrowserFactory.setupExtension(testInfo);
+    context = extensionSetup.context;
+    serviceWorker = extensionSetup.serviceWorker;
+    extensionId = extensionSetup.extensionId;
 
-    // Verify dist folder exists
-    const fs = require("fs");
-    if (!fs.existsSync(extensionPath)) {
-      throw new Error(
-        `Extension build not found at ${extensionPath}. Run 'npm run build' first.`,
-      );
-    }
-
-    // Launch browser with extension
-    context = await chromium.launchPersistentContext(userDataDir, {
-      headless: false,
-      args: [
-        `--disable-extensions-except=${extensionPath}`,
-        `--load-extension=${extensionPath}`,
-        "--no-sandbox",
-        "--disable-dev-shm-usage",
-      ],
-    });
-
-    // Get extension ID
-    console.log("Waiting for extension to load...");
-    await new Promise((resolve) => setTimeout(resolve, 3000));
-
-    let [serviceWorker] = context.serviceWorkers();
-    if (!serviceWorker) {
-      serviceWorker = await context.waitForEvent("serviceworker", {
-        timeout: 10000,
-      });
-    }
-
-    if (serviceWorker) {
-      const workerUrl = serviceWorker.url();
-      extensionId = workerUrl.split("/")[2];
-      console.log(`Extension loaded successfully! ID: ${extensionId}`);
-    } else {
-      throw new Error("Extension service worker not found");
-    }
+    // Use serviceWorker to prevent unused warning
+    console.log(`Service worker initialized: ${serviceWorker ? "yes" : "no"}`);
   });
 
   test.afterAll(async () => {
@@ -79,7 +51,7 @@ test.describe("Popup Button Functionality", () => {
           if (!resetResponse?.success) {
             await browserAPI.storage.local.clear();
           }
-        } catch (error) {
+        } catch {
           await browserAPI.storage.local.clear();
         }
       });
@@ -283,7 +255,7 @@ test.describe("Popup Button Functionality", () => {
             await checkPage.waitForSelector("#general-tab", { timeout: 5000 });
             break;
           }
-        } catch (error) {
+        } catch {
           // Page might be closed or not accessible, continue checking others
           continue;
         }

@@ -7,6 +7,7 @@ Advanced performance optimization techniques for the Settings Extension framewor
 This guide provides comprehensive performance optimization strategies for the Settings Extension framework. It covers architectural optimizations, caching patterns, batch operations, service worker lifecycle management, and real-world performance monitoring techniques derived from the sophisticated production implementation.
 
 **Performance Targets:**
+
 - Settings operations: <100ms average response time
 - UI load times: <500ms for popup/options
 - Memory usage: <10MB per tab
@@ -20,6 +21,7 @@ This guide provides comprehensive performance optimization strategies for the Se
 The production implementation includes sophisticated service worker management to prevent termination and ensure consistent performance.
 
 **Keep-Alive Strategy:**
+
 ```javascript
 // Production keep-alive implementation (from background.js)
 // Critical: Register at TOP LEVEL before any imports
@@ -49,13 +51,15 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 // Performance monitoring
 setInterval(() => {
   const idleTime = Date.now() - lastActivity;
-  if (idleTime > 30000) { // 30 seconds idle
-    console.warn('Service worker has been idle for', idleTime + 'ms');
+  if (idleTime > 30000) {
+    // 30 seconds idle
+    console.warn("Service worker has been idle for", idleTime + "ms");
   }
 }, 10000);
 ```
 
 **Event Registration Optimization:**
+
 ```javascript
 // CRITICAL: Register all listeners synchronously at top level
 // This prevents "Extension context invalidated" errors
@@ -82,6 +86,7 @@ importScripts("lib/browser-compat.js", "lib/settings-manager.js");
 ### 2. Message Handling Optimization
 
 **Async/Sync Separation Pattern:**
+
 ```javascript
 // Production-optimized message handling
 function handleMessage(message, sender, sendResponse) {
@@ -90,16 +95,16 @@ function handleMessage(message, sender, sendResponse) {
   console.log("📨 MSG:", {
     type: message?.type,
     sender: sender?.tab?.id || "extension",
-    timestamp: Date.now()
+    timestamp: Date.now(),
   });
 
   // CRITICAL: Handle PING synchronously for immediate response
   if (message.type === "PING") {
     const responseTime = performance.now() - startTime;
-    sendResponse({ 
-      pong: true, 
+    sendResponse({
+      pong: true,
       timestamp: Date.now(),
-      responseTime: responseTime
+      responseTime: responseTime,
     });
     return false; // Don't keep port open
   }
@@ -109,26 +114,37 @@ function handleMessage(message, sender, sendResponse) {
   return true; // Keep port open
 }
 
-async function processAsyncMessageWithMetrics(message, sender, sendResponse, startTime) {
+async function processAsyncMessageWithMetrics(
+  message,
+  sender,
+  sendResponse,
+  startTime,
+) {
   try {
     const result = await processAsyncMessage(message, sender);
     const totalTime = performance.now() - startTime;
-    
+
     // Performance monitoring
     if (totalTime > 100) {
-      console.warn(`Slow operation: ${message.type} took ${totalTime.toFixed(2)}ms`);
+      console.warn(
+        `Slow operation: ${message.type} took ${totalTime.toFixed(2)}ms`,
+      );
     }
-    
+
     sendResponse({ ...result, responseTime: totalTime });
   } catch (error) {
     const totalTime = performance.now() - startTime;
-    console.error(`Error in ${message.type} after ${totalTime.toFixed(2)}ms:`, error);
+    console.error(
+      `Error in ${message.type} after ${totalTime.toFixed(2)}ms:`,
+      error,
+    );
     sendResponse({ error: error.message, responseTime: totalTime });
   }
 }
 ```
 
 **Connection Pool Management:**
+
 ```javascript
 // Connection health monitoring
 class ConnectionHealthMonitor {
@@ -138,7 +154,7 @@ class ConnectionHealthMonitor {
       totalRequests: 0,
       failedRequests: 0,
       avgResponseTime: 0,
-      slowRequests: 0
+      slowRequests: 0,
     };
   }
 
@@ -146,11 +162,11 @@ class ConnectionHealthMonitor {
     this.healthStats.totalRequests++;
     if (!success) this.healthStats.failedRequests++;
     if (responseTime > 200) this.healthStats.slowRequests++;
-    
+
     // Update rolling average
-    this.healthStats.avgResponseTime = 
-      (this.healthStats.avgResponseTime * 0.9) + (responseTime * 0.1);
-    
+    this.healthStats.avgResponseTime =
+      this.healthStats.avgResponseTime * 0.9 + responseTime * 0.1;
+
     // Track per-tab performance
     if (tabId) {
       if (!this.connections.has(tabId)) {
@@ -158,16 +174,19 @@ class ConnectionHealthMonitor {
       }
       const conn = this.connections.get(tabId);
       conn.requests++;
-      conn.avgTime = (conn.avgTime * 0.9) + (responseTime * 0.1);
+      conn.avgTime = conn.avgTime * 0.9 + responseTime * 0.1;
     }
   }
 
   getHealthReport() {
     return {
       ...this.healthStats,
-      failureRate: (this.healthStats.failedRequests / this.healthStats.totalRequests) * 100,
-      slowRate: (this.healthStats.slowRequests / this.healthStats.totalRequests) * 100,
-      connectionCount: this.connections.size
+      failureRate:
+        (this.healthStats.failedRequests / this.healthStats.totalRequests) *
+        100,
+      slowRate:
+        (this.healthStats.slowRequests / this.healthStats.totalRequests) * 100,
+      connectionCount: this.connections.size,
     };
   }
 }
@@ -182,15 +201,16 @@ const healthMonitor = new ConnectionHealthMonitor();
 The production implementation uses sophisticated caching with automatic invalidation.
 
 **Content Script Caching:**
+
 ```javascript
 // Production-optimized caching in ContentScriptSettings
 class OptimizedContentScriptSettings extends ContentScriptSettings {
   constructor() {
     super();
-    this.cacheStrategy = 'smart'; // 'aggressive', 'conservative', 'smart'
+    this.cacheStrategy = "smart"; // 'aggressive', 'conservative', 'smart'
     this.cacheMetrics = new Map();
     this.cacheTTL = new Map();
-    this.preloadKeys = new Set(['feature_enabled', 'theme_preference']);
+    this.preloadKeys = new Set(["feature_enabled", "theme_preference"]);
   }
 
   // Smart caching with usage-based TTL
@@ -198,7 +218,7 @@ class OptimizedContentScriptSettings extends ContentScriptSettings {
     const ttl = this.calculateTTL(key, accessFrequency);
     this.cache.set(key, value);
     this.cacheTTL.set(key, Date.now() + ttl);
-    
+
     // Track cache metrics
     if (!this.cacheMetrics.has(key)) {
       this.cacheMetrics.set(key, { hits: 0, misses: 0, lastAccess: 0 });
@@ -208,12 +228,12 @@ class OptimizedContentScriptSettings extends ContentScriptSettings {
   calculateTTL(key, accessFrequency) {
     const baseTTL = 60000; // 1 minute base
     const maxTTL = 300000; // 5 minutes max
-    const minTTL = 10000;  // 10 seconds min
-    
+    const minTTL = 10000; // 10 seconds min
+
     // Frequently accessed settings get longer TTL
     const frequencyMultiplier = Math.min(accessFrequency / 10, 3);
     const ttl = baseTTL * (1 + frequencyMultiplier);
-    
+
     return Math.min(Math.max(ttl, minTTL), maxTTL);
   }
 
@@ -223,16 +243,19 @@ class OptimizedContentScriptSettings extends ContentScriptSettings {
     if (this.cache.has(key)) {
       const ttl = this.cacheTTL.get(key);
       const metrics = this.cacheMetrics.get(key);
-      
+
       if (ttl && Date.now() < ttl) {
         // Cache hit
         metrics.hits++;
         metrics.lastAccess = Date.now();
-        
+
         // Update TTL based on access pattern
-        const newTTL = this.calculateTTL(key, metrics.hits / (metrics.hits + metrics.misses));
+        const newTTL = this.calculateTTL(
+          key,
+          metrics.hits / (metrics.hits + metrics.misses),
+        );
         this.cacheTTL.set(key, Date.now() + newTTL);
-        
+
         return this.cache.get(key);
       } else {
         // Cache expired
@@ -242,13 +265,21 @@ class OptimizedContentScriptSettings extends ContentScriptSettings {
     }
 
     // Cache miss - fetch from background
-    const metrics = this.cacheMetrics.get(key) || { hits: 0, misses: 0, lastAccess: 0 };
+    const metrics = this.cacheMetrics.get(key) || {
+      hits: 0,
+      misses: 0,
+      lastAccess: 0,
+    };
     metrics.misses++;
     metrics.lastAccess = Date.now();
-    
+
     try {
       const result = await super.getSetting(key);
-      this.setCacheWithTTL(key, result, metrics.hits / (metrics.hits + metrics.misses));
+      this.setCacheWithTTL(
+        key,
+        result,
+        metrics.hits / (metrics.hits + metrics.misses),
+      );
       return result;
     } catch (error) {
       // Don't cache errors, but track failed attempts
@@ -264,9 +295,11 @@ class OptimizedContentScriptSettings extends ContentScriptSettings {
 
     try {
       const settings = await this.getSettings(criticalKeys);
-      console.log(`Preloaded ${Object.keys(settings).length} critical settings`);
+      console.log(
+        `Preloaded ${Object.keys(settings).length} critical settings`,
+      );
     } catch (error) {
-      console.warn('Preload failed:', error);
+      console.warn("Preload failed:", error);
     }
   }
 
@@ -276,16 +309,16 @@ class OptimizedContentScriptSettings extends ContentScriptSettings {
       totalEntries: this.cache.size,
       hitRate: 0,
       avgAccessFrequency: 0,
-      memoryUsage: 0
+      memoryUsage: 0,
     };
 
     let totalHits = 0;
     let totalMisses = 0;
-    
+
     for (const [key, metrics] of this.cacheMetrics) {
       totalHits += metrics.hits;
       totalMisses += metrics.misses;
-      
+
       // Estimate memory usage
       const entry = this.cache.get(key);
       if (entry) {
@@ -293,7 +326,7 @@ class OptimizedContentScriptSettings extends ContentScriptSettings {
       }
     }
 
-    report.hitRate = totalHits / (totalHits + totalMisses) * 100;
+    report.hitRate = (totalHits / (totalHits + totalMisses)) * 100;
     report.avgAccessFrequency = totalHits / this.cacheMetrics.size;
 
     return report;
@@ -304,6 +337,7 @@ class OptimizedContentScriptSettings extends ContentScriptSettings {
 ### 4. Background Script Caching
 
 **Settings Manager Optimization:**
+
 ```javascript
 // Production settings manager with advanced caching
 class OptimizedSettingsManager extends SettingsManager {
@@ -315,23 +349,23 @@ class OptimizedSettingsManager extends SettingsManager {
     this.writeBatchDelay = 50; // 50ms batching window
     this.performanceMetrics = {
       reads: { total: 0, cached: 0, avgTime: 0 },
-      writes: { total: 0, batched: 0, avgTime: 0 }
+      writes: { total: 0, batched: 0, avgTime: 0 },
     };
   }
 
   // Optimized getSetting with read cache
   async getSetting(key) {
     const startTime = performance.now();
-    
+
     // Check read cache first
     if (this.readCache.has(key)) {
       const cached = this.readCache.get(key);
       const responseTime = performance.now() - startTime;
-      
+
       this.performanceMetrics.reads.cached++;
-      this.performanceMetrics.reads.avgTime = 
-        (this.performanceMetrics.reads.avgTime * 0.9) + (responseTime * 0.1);
-      
+      this.performanceMetrics.reads.avgTime =
+        this.performanceMetrics.reads.avgTime * 0.9 + responseTime * 0.1;
+
       return { ...cached }; // Return copy to prevent mutations
     }
 
@@ -339,14 +373,14 @@ class OptimizedSettingsManager extends SettingsManager {
     try {
       this.performanceMetrics.reads.total++;
       const result = await super.getSetting(key);
-      
+
       // Cache successful reads
       this.readCache.set(key, result);
-      
+
       const responseTime = performance.now() - startTime;
-      this.performanceMetrics.reads.avgTime = 
-        (this.performanceMetrics.reads.avgTime * 0.9) + (responseTime * 0.1);
-      
+      this.performanceMetrics.reads.avgTime =
+        this.performanceMetrics.reads.avgTime * 0.9 + responseTime * 0.1;
+
       return result;
     } catch (error) {
       // Don't cache errors
@@ -359,7 +393,7 @@ class OptimizedSettingsManager extends SettingsManager {
     return new Promise((resolve, reject) => {
       // Add to write queue
       this.writeQueue.set(key, { value, resolve, reject });
-      
+
       // Start batch timer if not running
       if (!this.writeBatchTimer) {
         this.writeBatchTimer = setTimeout(() => {
@@ -378,7 +412,7 @@ class OptimizedSettingsManager extends SettingsManager {
 
     const startTime = performance.now();
     const updates = {};
-    
+
     try {
       // Validate all updates first
       for (const [key, operation] of batch) {
@@ -386,14 +420,14 @@ class OptimizedSettingsManager extends SettingsManager {
         if (!setting) {
           throw new Error(`Setting '${key}' not found`);
         }
-        
+
         this.validateSetting(setting, operation.value);
         updates[key] = operation.value;
       }
 
       // Apply all updates atomically
       await super.updateSettings(updates);
-      
+
       // Update read cache
       for (const [key, operation] of batch) {
         const setting = this.settings.get(key);
@@ -405,11 +439,12 @@ class OptimizedSettingsManager extends SettingsManager {
       this.performanceMetrics.writes.total += batch.size;
       this.performanceMetrics.writes.batched += batch.size > 1 ? batch.size : 0;
       const responseTime = performance.now() - startTime;
-      this.performanceMetrics.writes.avgTime = 
-        (this.performanceMetrics.writes.avgTime * 0.9) + (responseTime * 0.1);
+      this.performanceMetrics.writes.avgTime =
+        this.performanceMetrics.writes.avgTime * 0.9 + responseTime * 0.1;
 
-      console.log(`Batched ${batch.size} writes in ${responseTime.toFixed(2)}ms`);
-      
+      console.log(
+        `Batched ${batch.size} writes in ${responseTime.toFixed(2)}ms`,
+      );
     } catch (error) {
       // Reject all operations in batch
       for (const [, operation] of batch) {
@@ -432,23 +467,27 @@ class OptimizedSettingsManager extends SettingsManager {
 
   // Performance monitoring
   getPerformanceReport() {
-    const cacheHitRate = this.performanceMetrics.reads.cached / 
-                        this.performanceMetrics.reads.total * 100;
-    
-    const batchEfficiency = this.performanceMetrics.writes.batched / 
-                           this.performanceMetrics.writes.total * 100;
+    const cacheHitRate =
+      (this.performanceMetrics.reads.cached /
+        this.performanceMetrics.reads.total) *
+      100;
+
+    const batchEfficiency =
+      (this.performanceMetrics.writes.batched /
+        this.performanceMetrics.writes.total) *
+      100;
 
     return {
       cache: {
         entries: this.readCache.size,
-        hitRate: cacheHitRate.toFixed(1) + '%',
-        avgReadTime: this.performanceMetrics.reads.avgTime.toFixed(2) + 'ms'
+        hitRate: cacheHitRate.toFixed(1) + "%",
+        avgReadTime: this.performanceMetrics.reads.avgTime.toFixed(2) + "ms",
       },
       writes: {
         total: this.performanceMetrics.writes.total,
-        batchEfficiency: batchEfficiency.toFixed(1) + '%',
-        avgWriteTime: this.performanceMetrics.writes.avgTime.toFixed(2) + 'ms'
-      }
+        batchEfficiency: batchEfficiency.toFixed(1) + "%",
+        avgWriteTime: this.performanceMetrics.writes.avgTime.toFixed(2) + "ms",
+      },
     };
   }
 }
@@ -459,6 +498,7 @@ class OptimizedSettingsManager extends SettingsManager {
 ### 5. Smart Batching Strategies
 
 **Client-Side Batch Management:**
+
 ```javascript
 // Intelligent batching for multiple operations
 class BatchedSettingsClient {
@@ -474,7 +514,12 @@ class BatchedSettingsClient {
   async queueOperation(type, key, value = null) {
     return new Promise((resolve, reject) => {
       this.operationQueue.push({
-        type, key, value, resolve, reject, timestamp: Date.now()
+        type,
+        key,
+        value,
+        resolve,
+        reject,
+        timestamp: Date.now(),
       });
 
       // Process immediately if batch is full
@@ -483,7 +528,10 @@ class BatchedSettingsClient {
       } else {
         // Set timer for batching window
         if (!this.batchTimer) {
-          this.batchTimer = setTimeout(() => this.processBatch(), this.batchWindow);
+          this.batchTimer = setTimeout(
+            () => this.processBatch(),
+            this.batchWindow,
+          );
         }
       }
     });
@@ -496,8 +544,8 @@ class BatchedSettingsClient {
     if (batch.length === 0) return;
 
     // Group operations by type
-    const reads = batch.filter(op => op.type === 'read');
-    const writes = batch.filter(op => op.type === 'write');
+    const reads = batch.filter((op) => op.type === "read");
+    const writes = batch.filter((op) => op.type === "write");
 
     // Process reads in batch
     if (reads.length > 0) {
@@ -512,49 +560,49 @@ class BatchedSettingsClient {
 
   async processBatchedReads(reads) {
     try {
-      const keys = reads.map(op => op.key);
+      const keys = reads.map((op) => op.key);
       const results = await this.settings.getSettings(keys);
-      
+
       // Resolve individual promises
-      reads.forEach(op => {
+      reads.forEach((op) => {
         if (results[op.key]) {
           op.resolve(results[op.key]);
         } else {
           op.reject(new Error(`Setting '${op.key}' not found`));
         }
       });
-      
+
       console.log(`Batched ${reads.length} reads`);
     } catch (error) {
-      reads.forEach(op => op.reject(error));
+      reads.forEach((op) => op.reject(error));
     }
   }
 
   async processBatchedWrites(writes) {
     try {
       const updates = {};
-      writes.forEach(op => {
+      writes.forEach((op) => {
         updates[op.key] = op.value;
       });
-      
+
       await this.settings.updateSettings(updates);
-      
+
       // Resolve all write promises
-      writes.forEach(op => op.resolve(true));
-      
+      writes.forEach((op) => op.resolve(true));
+
       console.log(`Batched ${writes.length} writes`);
     } catch (error) {
-      writes.forEach(op => op.reject(error));
+      writes.forEach((op) => op.reject(error));
     }
   }
 
   // Public interface with batching
   async getSetting(key) {
-    return this.queueOperation('read', key);
+    return this.queueOperation("read", key);
   }
 
   async updateSetting(key, value) {
-    return this.queueOperation('write', key, value);
+    return this.queueOperation("write", key, value);
   }
 
   // Force immediate batch processing
@@ -569,6 +617,7 @@ class BatchedSettingsClient {
 ### 6. Predictive Loading
 
 **Smart Preloading Based on Usage Patterns:**
+
 ```javascript
 // Usage pattern analysis for predictive loading
 class PredictiveLoader {
@@ -586,7 +635,7 @@ class PredictiveLoader {
       this.usagePatterns.set(key, {
         count: 0,
         lastAccess: now,
-        intervals: []
+        intervals: [],
       });
     }
 
@@ -594,7 +643,7 @@ class PredictiveLoader {
     if (pattern.lastAccess) {
       const interval = now - pattern.lastAccess;
       pattern.intervals.push(interval);
-      
+
       // Keep only recent intervals
       if (pattern.intervals.length > 10) {
         pattern.intervals = pattern.intervals.slice(-10);
@@ -615,7 +664,7 @@ class PredictiveLoader {
     }
 
     const keyCorrelations = this.correlations.get(key);
-    sessionKeys.forEach(otherKey => {
+    sessionKeys.forEach((otherKey) => {
       if (otherKey !== key) {
         keyCorrelations.set(otherKey, (keyCorrelations.get(otherKey) || 0) + 1);
       }
@@ -624,7 +673,7 @@ class PredictiveLoader {
 
   updatePreloadCandidates(key) {
     const pattern = this.usagePatterns.get(key);
-    
+
     // Settings accessed frequently should be preloaded
     if (pattern.count > 5) {
       this.preloadCandidates.add(key);
@@ -632,10 +681,14 @@ class PredictiveLoader {
 
     // Settings with predictable intervals should be preloaded
     if (pattern.intervals.length > 3) {
-      const avgInterval = pattern.intervals.reduce((a, b) => a + b) / pattern.intervals.length;
-      const variance = pattern.intervals.reduce((acc, interval) => 
-        acc + Math.pow(interval - avgInterval, 2), 0) / pattern.intervals.length;
-      
+      const avgInterval =
+        pattern.intervals.reduce((a, b) => a + b) / pattern.intervals.length;
+      const variance =
+        pattern.intervals.reduce(
+          (acc, interval) => acc + Math.pow(interval - avgInterval, 2),
+          0,
+        ) / pattern.intervals.length;
+
       // Low variance indicates predictable access pattern
       if (variance < avgInterval * 0.5) {
         this.preloadCandidates.add(key);
@@ -650,16 +703,18 @@ class PredictiveLoader {
     try {
       const candidatesArray = Array.from(this.preloadCandidates);
       const startTime = performance.now();
-      
+
       await this.settings.getSettings(candidatesArray);
-      
+
       const duration = performance.now() - startTime;
-      console.log(`Preloaded ${candidatesArray.length} settings in ${duration.toFixed(2)}ms`);
-      
+      console.log(
+        `Preloaded ${candidatesArray.length} settings in ${duration.toFixed(2)}ms`,
+      );
+
       // Clear preload candidates after successful preload
       this.preloadCandidates.clear();
     } catch (error) {
-      console.warn('Predictive preload failed:', error);
+      console.warn("Predictive preload failed:", error);
     }
   }
 
@@ -680,7 +735,7 @@ class PredictiveLoader {
       totalAccesses: 0,
       uniqueSettings: this.usagePatterns.size,
       preloadCandidates: this.preloadCandidates.size,
-      topSettings: []
+      topSettings: [],
     };
 
     const sortedByUsage = Array.from(this.usagePatterns.entries())
@@ -690,12 +745,16 @@ class PredictiveLoader {
     report.topSettings = sortedByUsage.map(([key, pattern]) => ({
       key,
       count: pattern.count,
-      avgInterval: pattern.intervals.length > 0 
-        ? pattern.intervals.reduce((a, b) => a + b) / pattern.intervals.length 
-        : 0
+      avgInterval:
+        pattern.intervals.length > 0
+          ? pattern.intervals.reduce((a, b) => a + b) / pattern.intervals.length
+          : 0,
     }));
 
-    report.totalAccesses = sortedByUsage.reduce((sum, [, pattern]) => sum + pattern.count, 0);
+    report.totalAccesses = sortedByUsage.reduce(
+      (sum, [, pattern]) => sum + pattern.count,
+      0,
+    );
 
     return report;
   }
@@ -707,6 +766,7 @@ class PredictiveLoader {
 ### 7. Storage Efficiency Strategies
 
 **Compression and Serialization:**
+
 ```javascript
 // Optimized storage with compression for large settings
 class OptimizedStorageManager {
@@ -717,7 +777,7 @@ class OptimizedStorageManager {
 
   // Compress large JSON settings
   compressValue(value, type) {
-    if (type !== 'json' && type !== 'longtext') {
+    if (type !== "json" && type !== "longtext") {
       return value; // Don't compress simple types
     }
 
@@ -730,31 +790,32 @@ class OptimizedStorageManager {
       // Simple compression using repeated pattern detection
       const compressed = this.compressString(serialized);
       const compressionRatio = compressed.length / serialized.length;
-      
-      this.compressionRatio.set('last', compressionRatio);
-      
-      if (compressionRatio < 0.8) { // 20% or better compression
+
+      this.compressionRatio.set("last", compressionRatio);
+
+      if (compressionRatio < 0.8) {
+        // 20% or better compression
         return {
           __compressed: true,
           __originalSize: serialized.length,
-          __data: compressed
+          __data: compressed,
         };
       }
     } catch (error) {
-      console.warn('Compression failed:', error);
+      console.warn("Compression failed:", error);
     }
 
     return value;
   }
 
   decompressValue(value) {
-    if (typeof value === 'object' && value.__compressed) {
+    if (typeof value === "object" && value.__compressed) {
       try {
         const decompressed = this.decompressString(value.__data);
         return JSON.parse(decompressed);
       } catch (error) {
-        console.error('Decompression failed:', error);
-        throw new Error('Failed to decompress stored value');
+        console.error("Decompression failed:", error);
+        throw new Error("Failed to decompress stored value");
       }
     }
     return value;
@@ -764,11 +825,11 @@ class OptimizedStorageManager {
   compressString(str) {
     // Dictionary compression for common patterns
     const commonPatterns = {
-      '"type":"': '\x01',
-      '"value":': '\x02', 
-      '"description":"': '\x03',
-      'true': '\x04',
-      'false': '\x05'
+      '"type":"': "\x01",
+      '"value":': "\x02",
+      '"description":"': "\x03",
+      true: "\x04",
+      false: "\x05",
     };
 
     let compressed = str;
@@ -781,11 +842,11 @@ class OptimizedStorageManager {
 
   decompressString(compressed) {
     const commonPatterns = {
-      '\x01': '"type":"',
-      '\x02': '"value":',
-      '\x03': '"description":"', 
-      '\x04': 'true',
-      '\x05': 'false'
+      "\x01": '"type":"',
+      "\x02": '"value":',
+      "\x03": '"description":"',
+      "\x04": "true",
+      "\x05": "false",
     };
 
     let decompressed = compressed;
@@ -799,25 +860,28 @@ class OptimizedStorageManager {
   // Storage quota management
   async optimizeStorageUsage() {
     const quota = await this.checkStorageQuota();
-    
+
     if (quota.percentUsed > 80) {
-      console.log('Storage optimization needed, usage:', quota.percentUsed + '%');
-      
+      console.log(
+        "Storage optimization needed, usage:",
+        quota.percentUsed + "%",
+      );
+
       // Strategy 1: Compress large settings
       await this.compressLargeSettings();
-      
+
       // Strategy 2: Remove temporary data
       await this.cleanupTemporaryData();
-      
+
       // Strategy 3: Archive old data
       await this.archiveOldData();
-      
+
       const newQuota = await this.checkStorageQuota();
-      console.log('Storage after optimization:', newQuota.percentUsed + '%');
-      
+      console.log("Storage after optimization:", newQuota.percentUsed + "%");
+
       return newQuota.percentUsed - quota.percentUsed; // Space saved
     }
-    
+
     return 0;
   }
 
@@ -827,10 +891,10 @@ class OptimizedStorageManager {
     let totalSaved = 0;
 
     for (const [key, value] of Object.entries(storage)) {
-      if (typeof value === 'object' && value.type) {
+      if (typeof value === "object" && value.type) {
         const originalSize = JSON.stringify(value).length;
         const compressed = this.compressValue(value.value, value.type);
-        
+
         if (compressed !== value.value) {
           updates[key] = { ...value, value: compressed };
           const newSize = JSON.stringify(updates[key]).length;
@@ -841,7 +905,9 @@ class OptimizedStorageManager {
 
     if (Object.keys(updates).length > 0) {
       await chrome.storage.local.set(updates);
-      console.log(`Compressed ${Object.keys(updates).length} settings, saved ${totalSaved} bytes`);
+      console.log(
+        `Compressed ${Object.keys(updates).length} settings, saved ${totalSaved} bytes`,
+      );
     }
   }
 }
@@ -850,6 +916,7 @@ class OptimizedStorageManager {
 ### 8. Memory Management
 
 **Intelligent Memory Usage:**
+
 ```javascript
 // Memory-efficient settings management
 class MemoryOptimizedClient {
@@ -870,7 +937,7 @@ class MemoryOptimizedClient {
     // Estimate memory usage
     const cacheSize = this.estimateCacheSize();
     this.memoryUsage.current = cacheSize;
-    
+
     if (cacheSize > this.memoryUsage.peak) {
       this.memoryUsage.peak = cacheSize;
     }
@@ -878,7 +945,8 @@ class MemoryOptimizedClient {
     // Trigger garbage collection if needed
     if (cacheSize / this.memoryUsage.limit > this.gcThreshold) {
       const now = Date.now();
-      if (now - this.lastGC > 30000) { // Max once per 30 seconds
+      if (now - this.lastGC > 30000) {
+        // Max once per 30 seconds
         this.performGarbageCollection();
         this.lastGC = now;
       }
@@ -888,52 +956,53 @@ class MemoryOptimizedClient {
   estimateCacheSize() {
     const cached = this.settings.getCachedSettings();
     let size = 0;
-    
+
     for (const [key, setting] of Object.entries(cached)) {
       // Rough estimation of memory usage
       size += key.length * 2; // String overhead
       size += JSON.stringify(setting).length * 2; // Object overhead
     }
-    
+
     return size;
   }
 
   performGarbageCollection() {
-    console.log('Performing memory garbage collection...');
-    
+    console.log("Performing memory garbage collection...");
+
     // Clear cache and force reload of frequently used settings
     const frequentKeys = this.getFrequentlyAccessedKeys();
     this.settings.clearCache();
-    
+
     // Preload only essential settings
     if (frequentKeys.length > 0) {
-      this.settings.getSettings(frequentKeys.slice(0, 5))
-        .catch(error => console.warn('GC preload failed:', error));
+      this.settings
+        .getSettings(frequentKeys.slice(0, 5))
+        .catch((error) => console.warn("GC preload failed:", error));
     }
-    
+
     // Force garbage collection if available
     if (window.gc) {
       window.gc();
     }
-    
-    console.log('Memory GC completed');
+
+    console.log("Memory GC completed");
   }
 
   getFrequentlyAccessedKeys() {
     // This would be tracked by the usage pattern analyzer
-    return ['feature_enabled', 'theme_preference', 'api_endpoint'];
+    return ["feature_enabled", "theme_preference", "api_endpoint"];
   }
 
   getMemoryReport() {
     const usage = this.memoryUsage.current;
     const limit = this.memoryUsage.limit;
-    
+
     return {
       current: `${(usage / 1024).toFixed(1)} KB`,
       peak: `${(this.memoryUsage.peak / 1024).toFixed(1)} KB`,
       limit: `${(limit / 1024).toFixed(1)} KB`,
-      utilization: `${(usage / limit * 100).toFixed(1)}%`,
-      cached: Object.keys(this.settings.getCachedSettings()).length
+      utilization: `${((usage / limit) * 100).toFixed(1)}%`,
+      cached: Object.keys(this.settings.getCachedSettings()).length,
     };
   }
 }
@@ -944,6 +1013,7 @@ class MemoryOptimizedClient {
 ### 9. Real-Time Performance Monitoring
 
 **Comprehensive Performance Tracking:**
+
 ```javascript
 // Production performance monitoring system
 class SettingsPerformanceMonitor {
@@ -955,19 +1025,19 @@ class SettingsPerformanceMonitor {
         avgResponseTime: 0,
         p95ResponseTime: 0,
         throughput: 0,
-        errorRate: 0
+        errorRate: 0,
       },
       resource: {
         memoryUsage: 0,
         storageUsage: 0,
-        cacheHitRate: 0
-      }
+        cacheHitRate: 0,
+      },
     };
-    
+
     this.responseTimeBuffer = [];
     this.bufferSize = 100;
     this.reportingInterval = 60000; // 1 minute
-    
+
     this.startReporting();
   }
 
@@ -979,9 +1049,9 @@ class SettingsPerformanceMonitor {
       type,
       key,
       startTime: performance.now(),
-      startMemory: this.getMemoryUsage()
+      startMemory: this.getMemoryUsage(),
     };
-    
+
     this.metrics.operations.set(operationId, operation);
     return operationId;
   }
@@ -993,26 +1063,26 @@ class SettingsPerformanceMonitor {
     const endTime = performance.now();
     const duration = endTime - operation.startTime;
     const endMemory = this.getMemoryUsage();
-    
+
     // Update operation
     operation.endTime = endTime;
     operation.duration = duration;
     operation.success = success;
     operation.memoryDelta = endMemory - operation.startMemory;
-    
+
     if (error) {
       operation.error = error;
       this.metrics.errors.push({
         timestamp: Date.now(),
         type: operation.type,
         key: operation.key,
-        error: error.message
+        error: error.message,
       });
     }
 
     // Update performance metrics
     this.updatePerformanceMetrics(operation);
-    
+
     // Clean up completed operation
     this.metrics.operations.delete(operationId);
   }
@@ -1026,17 +1096,19 @@ class SettingsPerformanceMonitor {
 
     // Calculate metrics
     const sortedTimes = [...this.responseTimeBuffer].sort((a, b) => a - b);
-    this.metrics.performance.avgResponseTime = 
-      this.responseTimeBuffer.reduce((a, b) => a + b) / this.responseTimeBuffer.length;
-    
+    this.metrics.performance.avgResponseTime =
+      this.responseTimeBuffer.reduce((a, b) => a + b) /
+      this.responseTimeBuffer.length;
+
     const p95Index = Math.floor(sortedTimes.length * 0.95);
     this.metrics.performance.p95ResponseTime = sortedTimes[p95Index] || 0;
 
     // Error rate (last 100 operations)
-    const recentErrors = this.metrics.errors.filter(e => 
-      Date.now() - e.timestamp < 300000 // Last 5 minutes
+    const recentErrors = this.metrics.errors.filter(
+      (e) => Date.now() - e.timestamp < 300000, // Last 5 minutes
     );
-    this.metrics.performance.errorRate = recentErrors.length / this.bufferSize * 100;
+    this.metrics.performance.errorRate =
+      (recentErrors.length / this.bufferSize) * 100;
   }
 
   getMemoryUsage() {
@@ -1049,16 +1121,19 @@ class SettingsPerformanceMonitor {
   // Wrap settings operations with monitoring
   wrapSettingsClient(settingsClient) {
     const originalMethods = [
-      'getSetting', 'getSettings', 'getAllSettings',
-      'updateSetting', 'updateSettings'
+      "getSetting",
+      "getSettings",
+      "getAllSettings",
+      "updateSetting",
+      "updateSettings",
     ];
 
-    originalMethods.forEach(methodName => {
+    originalMethods.forEach((methodName) => {
       const originalMethod = settingsClient[methodName].bind(settingsClient);
-      
+
       settingsClient[methodName] = async (...args) => {
         const operationId = this.startOperation(methodName, args[0]);
-        
+
         try {
           const result = await originalMethod(...args);
           this.endOperation(operationId, true);
@@ -1085,20 +1160,20 @@ class SettingsPerformanceMonitor {
       timestamp: new Date().toISOString(),
       performance: { ...this.metrics.performance },
       activeOperations: this.metrics.operations.size,
-      recentErrors: this.metrics.errors.filter(e => 
-        Date.now() - e.timestamp < this.reportingInterval
+      recentErrors: this.metrics.errors.filter(
+        (e) => Date.now() - e.timestamp < this.reportingInterval,
       ).length,
       memory: {
         current: this.getMemoryUsage(),
-        formatted: `${(this.getMemoryUsage() / 1024 / 1024).toFixed(1)} MB`
-      }
+        formatted: `${(this.getMemoryUsage() / 1024 / 1024).toFixed(1)} MB`,
+      },
     };
 
-    console.log('Settings Performance Report:', report);
-    
+    console.log("Settings Performance Report:", report);
+
     // Send to analytics if configured
     this.sendToAnalytics(report);
-    
+
     return report;
   }
 
@@ -1112,19 +1187,20 @@ class SettingsPerformanceMonitor {
     const alerts = [];
 
     if (this.metrics.performance.avgResponseTime > 200) {
-      alerts.push('Average response time exceeds 200ms');
+      alerts.push("Average response time exceeds 200ms");
     }
 
     if (this.metrics.performance.errorRate > 5) {
-      alerts.push('Error rate exceeds 5%');
+      alerts.push("Error rate exceeds 5%");
     }
 
-    if (this.getMemoryUsage() > 10 * 1024 * 1024) { // 10MB
-      alerts.push('Memory usage exceeds 10MB');
+    if (this.getMemoryUsage() > 10 * 1024 * 1024) {
+      // 10MB
+      alerts.push("Memory usage exceeds 10MB");
     }
 
     if (alerts.length > 0) {
-      console.warn('Performance Alerts:', alerts);
+      console.warn("Performance Alerts:", alerts);
     }
 
     return alerts;
@@ -1142,6 +1218,7 @@ const monitoredSettings = performanceMonitor.wrapSettingsClient(settings);
 ### 10. Performance Testing and Benchmarking
 
 **Automated Performance Testing:**
+
 ```javascript
 // Comprehensive performance test suite
 class SettingsPerformanceTester {
@@ -1151,14 +1228,14 @@ class SettingsPerformanceTester {
   }
 
   async runFullBenchmark() {
-    console.log('Starting comprehensive performance benchmark...');
-    
+    console.log("Starting comprehensive performance benchmark...");
+
     const results = {
       individual: await this.testIndividualOperations(),
       batch: await this.testBatchOperations(),
       cache: await this.testCachePerformance(),
       memory: await this.testMemoryUsage(),
-      stress: await this.testStressConditions()
+      stress: await this.testStressConditions(),
     };
 
     this.generateBenchmarkReport(results);
@@ -1166,36 +1243,36 @@ class SettingsPerformanceTester {
   }
 
   async testIndividualOperations(iterations = 50) {
-    const operations = ['getSetting', 'updateSetting'];
+    const operations = ["getSetting", "updateSetting"];
     const results = {};
 
     for (const operation of operations) {
       const times = [];
-      
+
       for (let i = 0; i < iterations; i++) {
         const start = performance.now();
-        
+
         try {
-          if (operation === 'getSetting') {
-            await this.settings.getSetting('feature_enabled');
-          } else if (operation === 'updateSetting') {
-            await this.settings.updateSetting('feature_enabled', i % 2 === 0);
+          if (operation === "getSetting") {
+            await this.settings.getSetting("feature_enabled");
+          } else if (operation === "updateSetting") {
+            await this.settings.updateSetting("feature_enabled", i % 2 === 0);
           }
-          
+
           times.push(performance.now() - start);
         } catch (error) {
           console.error(`${operation} failed in iteration ${i}:`, error);
         }
-        
+
         // Small delay to prevent overwhelming
-        await new Promise(resolve => setTimeout(resolve, 10));
+        await new Promise((resolve) => setTimeout(resolve, 10));
       }
 
       results[operation] = {
         avg: times.reduce((a, b) => a + b) / times.length,
         min: Math.min(...times),
         max: Math.max(...times),
-        p95: times.sort((a, b) => a - b)[Math.floor(times.length * 0.95)]
+        p95: times.sort((a, b) => a - b)[Math.floor(times.length * 0.95)],
       };
     }
 
@@ -1207,16 +1284,16 @@ class SettingsPerformanceTester {
     const results = {};
 
     for (const size of batchSizes) {
-      const keys = Array.from({length: size}, (_, i) => `test_setting_${i}`);
-      
+      const keys = Array.from({ length: size }, (_, i) => `test_setting_${i}`);
+
       const start = performance.now();
       await this.settings.getSettings(keys);
       const duration = performance.now() - start;
-      
+
       results[`batch_${size}`] = {
         totalTime: duration,
         avgPerItem: duration / size,
-        throughput: size / (duration / 1000) // items per second
+        throughput: size / (duration / 1000), // items per second
       };
     }
 
@@ -1225,21 +1302,21 @@ class SettingsPerformanceTester {
 
   async testCachePerformance(iterations = 100) {
     // First load to populate cache
-    await this.settings.getSetting('feature_enabled');
-    
+    await this.settings.getSetting("feature_enabled");
+
     const cachedTimes = [];
     const uncachedTimes = [];
 
     for (let i = 0; i < iterations; i++) {
       // Test cached access
       let start = performance.now();
-      this.settings.getCachedSetting('feature_enabled');
+      this.settings.getCachedSetting("feature_enabled");
       cachedTimes.push(performance.now() - start);
-      
+
       // Test uncached access (clear cache first)
       this.settings.clearCache();
       start = performance.now();
-      await this.settings.getSetting('feature_enabled');
+      await this.settings.getSetting("feature_enabled");
       uncachedTimes.push(performance.now() - start);
     }
 
@@ -1247,30 +1324,32 @@ class SettingsPerformanceTester {
       cached: {
         avg: cachedTimes.reduce((a, b) => a + b) / cachedTimes.length,
         min: Math.min(...cachedTimes),
-        max: Math.max(...cachedTimes)
+        max: Math.max(...cachedTimes),
       },
       uncached: {
         avg: uncachedTimes.reduce((a, b) => a + b) / uncachedTimes.length,
         min: Math.min(...uncachedTimes),
-        max: Math.max(...uncachedTimes)
+        max: Math.max(...uncachedTimes),
       },
-      speedup: (uncachedTimes.reduce((a, b) => a + b) / uncachedTimes.length) /
-               (cachedTimes.reduce((a, b) => a + b) / cachedTimes.length)
+      speedup:
+        uncachedTimes.reduce((a, b) => a + b) /
+        uncachedTimes.length /
+        (cachedTimes.reduce((a, b) => a + b) / cachedTimes.length),
     };
   }
 
   async testMemoryUsage() {
     const initialMemory = this.getMemoryUsage();
-    
+
     // Load many settings
-    const keys = Array.from({length: 50}, (_, i) => `memory_test_${i}`);
+    const keys = Array.from({ length: 50 }, (_, i) => `memory_test_${i}`);
     await this.settings.getSettings(keys);
-    
+
     const afterLoadMemory = this.getMemoryUsage();
-    
+
     // Clear cache
     this.settings.clearCache();
-    
+
     const afterClearMemory = this.getMemoryUsage();
 
     return {
@@ -1278,39 +1357,39 @@ class SettingsPerformanceTester {
       afterLoad: afterLoadMemory,
       afterClear: afterClearMemory,
       loadIncrease: afterLoadMemory - initialMemory,
-      clearDecrease: afterLoadMemory - afterClearMemory
+      clearDecrease: afterLoadMemory - afterClearMemory,
     };
   }
 
   async testStressConditions() {
     const results = {};
-    
+
     // Test concurrent operations
-    const concurrentPromises = Array.from({length: 20}, (_, i) => 
-      this.settings.getSetting(`concurrent_test_${i % 5}`)
+    const concurrentPromises = Array.from({ length: 20 }, (_, i) =>
+      this.settings.getSetting(`concurrent_test_${i % 5}`),
     );
-    
+
     const start = performance.now();
     await Promise.all(concurrentPromises);
     const concurrentTime = performance.now() - start;
-    
+
     results.concurrent = {
       operations: 20,
       totalTime: concurrentTime,
-      avgTime: concurrentTime / 20
+      avgTime: concurrentTime / 20,
     };
 
     // Test rapid sequential operations
     const sequentialStart = performance.now();
     for (let i = 0; i < 50; i++) {
-      await this.settings.getSetting('feature_enabled');
+      await this.settings.getSetting("feature_enabled");
     }
     const sequentialTime = performance.now() - sequentialStart;
-    
+
     results.sequential = {
       operations: 50,
       totalTime: sequentialTime,
-      avgTime: sequentialTime / 50
+      avgTime: sequentialTime / 50,
     };
 
     return results;
@@ -1321,77 +1400,89 @@ class SettingsPerformanceTester {
   }
 
   generateBenchmarkReport(results) {
-    console.log('\n🚀 Settings Performance Benchmark Report');
-    console.log('==========================================');
-    
-    console.log('\n📊 Individual Operations:');
+    console.log("\n🚀 Settings Performance Benchmark Report");
+    console.log("==========================================");
+
+    console.log("\n📊 Individual Operations:");
     for (const [op, metrics] of Object.entries(results.individual)) {
       console.log(`  ${op}:`);
       console.log(`    Average: ${metrics.avg.toFixed(2)}ms`);
-      console.log(`    Range: ${metrics.min.toFixed(2)}ms - ${metrics.max.toFixed(2)}ms`);
+      console.log(
+        `    Range: ${metrics.min.toFixed(2)}ms - ${metrics.max.toFixed(2)}ms`,
+      );
       console.log(`    95th percentile: ${metrics.p95.toFixed(2)}ms`);
     }
-    
-    console.log('\n📦 Batch Operations:');
+
+    console.log("\n📦 Batch Operations:");
     for (const [batch, metrics] of Object.entries(results.batch)) {
       console.log(`  ${batch}:`);
       console.log(`    Total: ${metrics.totalTime.toFixed(2)}ms`);
       console.log(`    Per item: ${metrics.avgPerItem.toFixed(2)}ms`);
       console.log(`    Throughput: ${metrics.throughput.toFixed(1)} ops/sec`);
     }
-    
-    console.log('\n💾 Cache Performance:');
+
+    console.log("\n💾 Cache Performance:");
     const cache = results.cache;
     console.log(`  Cached access: ${cache.cached.avg.toFixed(3)}ms`);
     console.log(`  Uncached access: ${cache.uncached.avg.toFixed(2)}ms`);
     console.log(`  Cache speedup: ${cache.speedup.toFixed(1)}x`);
-    
-    console.log('\n🧠 Memory Usage:');
+
+    console.log("\n🧠 Memory Usage:");
     const memory = results.memory;
-    console.log(`  Load increase: ${(memory.loadIncrease / 1024).toFixed(1)} KB`);
-    console.log(`  Clear decrease: ${(memory.clearDecrease / 1024).toFixed(1)} KB`);
-    
-    console.log('\n⚡ Stress Test Results:');
+    console.log(
+      `  Load increase: ${(memory.loadIncrease / 1024).toFixed(1)} KB`,
+    );
+    console.log(
+      `  Clear decrease: ${(memory.clearDecrease / 1024).toFixed(1)} KB`,
+    );
+
+    console.log("\n⚡ Stress Test Results:");
     const stress = results.stress;
-    console.log(`  Concurrent (20 ops): ${stress.concurrent.totalTime.toFixed(2)}ms total`);
-    console.log(`  Sequential (50 ops): ${stress.sequential.totalTime.toFixed(2)}ms total`);
-    
+    console.log(
+      `  Concurrent (20 ops): ${stress.concurrent.totalTime.toFixed(2)}ms total`,
+    );
+    console.log(
+      `  Sequential (50 ops): ${stress.sequential.totalTime.toFixed(2)}ms total`,
+    );
+
     // Performance assessment
-    console.log('\n✅ Performance Assessment:');
+    console.log("\n✅ Performance Assessment:");
     this.assessPerformance(results);
   }
 
   assessPerformance(results) {
     const assessments = [];
-    
+
     // Check individual operation performance
     if (results.individual.getSetting.avg < 50) {
-      assessments.push('✅ Excellent getSetting performance (<50ms)');
+      assessments.push("✅ Excellent getSetting performance (<50ms)");
     } else if (results.individual.getSetting.avg < 100) {
-      assessments.push('⚠️ Good getSetting performance (<100ms)');
+      assessments.push("⚠️ Good getSetting performance (<100ms)");
     } else {
-      assessments.push('❌ Poor getSetting performance (>100ms)');
-    }
-    
-    // Check cache effectiveness
-    if (results.cache.speedup > 10) {
-      assessments.push('✅ Excellent cache performance (>10x speedup)');
-    } else if (results.cache.speedup > 5) {
-      assessments.push('⚠️ Good cache performance (>5x speedup)');
-    } else {
-      assessments.push('❌ Poor cache performance (<5x speedup)');
-    }
-    
-    // Check memory efficiency
-    if (results.memory.loadIncrease < 1024 * 100) { // <100KB
-      assessments.push('✅ Excellent memory efficiency (<100KB)');
-    } else if (results.memory.loadIncrease < 1024 * 500) { // <500KB
-      assessments.push('⚠️ Good memory efficiency (<500KB)');
-    } else {
-      assessments.push('❌ Poor memory efficiency (>500KB)');
+      assessments.push("❌ Poor getSetting performance (>100ms)");
     }
 
-    assessments.forEach(assessment => console.log(`  ${assessment}`));
+    // Check cache effectiveness
+    if (results.cache.speedup > 10) {
+      assessments.push("✅ Excellent cache performance (>10x speedup)");
+    } else if (results.cache.speedup > 5) {
+      assessments.push("⚠️ Good cache performance (>5x speedup)");
+    } else {
+      assessments.push("❌ Poor cache performance (<5x speedup)");
+    }
+
+    // Check memory efficiency
+    if (results.memory.loadIncrease < 1024 * 100) {
+      // <100KB
+      assessments.push("✅ Excellent memory efficiency (<100KB)");
+    } else if (results.memory.loadIncrease < 1024 * 500) {
+      // <500KB
+      assessments.push("⚠️ Good memory efficiency (<500KB)");
+    } else {
+      assessments.push("❌ Poor memory efficiency (>500KB)");
+    }
+
+    assessments.forEach((assessment) => console.log(`  ${assessment}`));
   }
 }
 
@@ -1405,36 +1496,42 @@ const tester = new SettingsPerformanceTester();
 ### Performance Optimization Checklist
 
 **✅ Service Worker Management:**
+
 - [ ] Keep-alive mechanism implemented (25-second alarm)
 - [ ] Event listeners registered synchronously at top level
 - [ ] Proper async/sync message handling separation
 - [ ] Error handling and fallback mechanisms
 
 **✅ Caching Strategy:**
+
 - [ ] Multi-layer caching (client + server)
 - [ ] Smart cache invalidation
 - [ ] TTL-based expiration
 - [ ] Usage-based cache priority
 
 **✅ Batch Operations:**
+
 - [ ] Batch reads using `getSettings()`
 - [ ] Batch writes using `updateSettings()`
 - [ ] Intelligent batching windows (25-50ms)
 - [ ] Queue management for optimal throughput
 
 **✅ Storage Optimization:**
+
 - [ ] Compression for large settings (>1KB)
 - [ ] Quota monitoring and cleanup
 - [ ] Efficient serialization
 - [ ] Storage area optimization (local vs sync)
 
 **✅ Memory Management:**
+
 - [ ] Memory usage monitoring
 - [ ] Garbage collection strategies
 - [ ] Cache size limits
 - [ ] Memory leak prevention
 
 **✅ Performance Monitoring:**
+
 - [ ] Response time tracking
 - [ ] Error rate monitoring
 - [ ] Resource usage metrics
