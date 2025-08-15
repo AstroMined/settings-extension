@@ -14,6 +14,7 @@ module.exports = {
   // Test file patterns - ONLY pure function unit tests
   testMatch: [
     "<rootDir>/test/validation.test.js",
+    "<rootDir>/test/config-loader.test.js",
     // Other pure function tests would go here
     // settings-manager.test.js and storage.test.js moved to E2E (browser integration)
   ],
@@ -27,6 +28,7 @@ module.exports = {
   // Coverage configuration - ONLY pure function modules
   collectCoverageFrom: [
     "lib/validation.js",
+    "lib/config-loader.js",
     "lib/utils.js",
     "lib/formatters.js",
     // EXCLUDE browser integration files (tested via E2E):
@@ -60,6 +62,12 @@ module.exports = {
       functions: 90,
       lines: 80,
       statements: 80,
+    },
+    "./lib/config-loader.js": {
+      branches: 90,
+      functions: 90,
+      lines: 90,
+      statements: 90,
     },
     // Browser integration files excluded - tested via E2E
     // (settings-manager.js, content-settings.js covered by Playwright)

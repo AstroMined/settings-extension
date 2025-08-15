@@ -292,6 +292,24 @@ class SettingsPopup {
         input.addEventListener("blur", () => this.validateSetting(key, input));
         break;
 
+      case "enum":
+        input = document.createElement("select");
+        input.className = "setting-select";
+        // Add options from configuration
+        if (setting.options && typeof setting.options === "object") {
+          for (const [value, displayText] of Object.entries(setting.options)) {
+            const option = document.createElement("option");
+            option.value = value;
+            option.textContent = displayText;
+            option.selected = value === setting.value;
+            input.appendChild(option);
+          }
+        }
+        input.addEventListener("change", () =>
+          this.handleSettingChange(key, input),
+        );
+        break;
+
       default:
         input = document.createElement("input");
         input.type = "text";
@@ -398,6 +416,16 @@ class SettingsPopup {
       case "json":
         if (typeof value !== "object" || value === null) {
           throw new Error("Must be a valid object");
+        }
+        break;
+
+      case "enum":
+        if (!setting.options || typeof setting.options !== "object") {
+          throw new Error("Enum setting is missing options");
+        }
+        if (!setting.options[value]) {
+          const validOptions = Object.keys(setting.options).join(", ");
+          throw new Error(`Must be one of: ${validOptions}`);
         }
         break;
     }

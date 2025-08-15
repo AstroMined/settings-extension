@@ -6,12 +6,8 @@ class SettingsOptions {
     this.validationErrors = new Map();
     this.isInitialized = false;
     this.currentTab = "general";
-
-    this.settingCategories = {
-      general: ["feature_enabled", "refresh_interval", "api_key"],
-      appearance: ["custom_css"],
-      advanced: ["advanced_config"],
-    };
+    this.configLoader = null;
+    this.categories = [];
 
     this.setupEventListeners();
     this.initialize();
@@ -20,6 +16,12 @@ class SettingsOptions {
   async initialize() {
     try {
       console.log("Initializing options page...");
+
+      // Initialize configuration loader first
+      this.configLoader = new ConfigurationLoader();
+      await this.configLoader.loadConfiguration();
+      this.categories = this.configLoader.getCategories();
+      console.log("Loaded categories:", this.categories);
 
       // First test if background script is responding at all
       await this.testBackgroundConnection();
@@ -111,20 +113,29 @@ class SettingsOptions {
   }
 
   renderAllSettings() {
-    for (const [category, settingKeys] of Object.entries(
-      this.settingCategories,
-    )) {
-      this.renderCategorySettings(category, settingKeys);
+    if (!this.configLoader || this.categories.length === 0) {
+      console.error(
+        "ConfigurationLoader not initialized or no categories found",
+      );
+      return;
+    }
+
+    for (const category of this.categories) {
+      const categorySettings = this.configLoader.getCategorySettings(category);
+      this.renderCategorySettings(category, categorySettings);
     }
   }
 
-  renderCategorySettings(category, settingKeys) {
+  renderCategorySettings(category, categorySettings) {
     const container = document.getElementById(`${category}-settings`);
-    if (!container) return;
+    if (!container) {
+      console.warn(`Container not found for category: ${category}`);
+      return;
+    }
 
     container.innerHTML = "";
 
-    settingKeys.forEach((key) => {
+    categorySettings.forEach(([key, _configSetting]) => {
       if (this.currentSettings.has(key)) {
         const setting = this.currentSettings.get(key);
         const settingElement = this.createAdvancedSettingElement(key, setting);
@@ -222,6 +233,27 @@ class SettingsOptions {
         input.addEventListener("blur", () => this.validateSetting(key, input));
         break;
 
+      case "enum":
+        input = document.createElement("select");
+        input.className = "setting-select";
+
+        // Add options from configuration
+        if (setting.options && typeof setting.options === "object") {
+          for (const [value, displayText] of Object.entries(setting.options)) {
+            const option = document.createElement("option");
+            option.value = value;
+            option.textContent = displayText;
+            option.selected = value === setting.value;
+            input.appendChild(option);
+          }
+        }
+
+        input.addEventListener("change", () =>
+          this.handleSettingChange(key, input),
+        );
+        input.addEventListener("blur", () => this.validateSetting(key, input));
+        break;
+
       case "json":
         input = document.createElement("textarea");
         input.value = JSON.stringify(setting.value, null, 2);
@@ -249,18 +281,12 @@ class SettingsOptions {
   }
 
   getSettingDisplayName(key) {
-    const displayNames = {
-      feature_enabled: "Enable Main Feature",
-      refresh_interval: "Refresh Interval (seconds)",
-      api_key: "API Key",
-      custom_css: "Custom CSS",
-      advanced_config: "Advanced Configuration",
-    };
+    if (!this.configLoader) {
+      console.error("ConfigurationLoader not available for getDisplayName");
+      return key.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase());
+    }
 
-    return (
-      displayNames[key] ||
-      key.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase())
-    );
+    return this.configLoader.getDisplayName(key);
   }
 
   handleSettingChange(key, input) {
@@ -316,6 +342,11 @@ class SettingsOptions {
         } catch {
           throw new Error("Invalid JSON format");
         }
+      } else if (setting.type === "enum") {
+        // Enum validation - ensure value exists in options
+        if (setting.options && !setting.options[value]) {
+          throw new Error("Invalid enum value");
+        }
       }
 
       this.validateValue(setting, value);
@@ -358,6 +389,16 @@ class SettingsOptions {
       case "json":
         if (typeof value !== "object" || value === null) {
           throw new Error("Must be a valid object");
+        }
+        break;
+
+      case "enum":
+        if (!setting.options || typeof setting.options !== "object") {
+          throw new Error("Enum setting is missing options");
+        }
+        if (!setting.options[value]) {
+          const validOptions = Object.keys(setting.options).join(", ");
+          throw new Error(`Must be one of: ${validOptions}`);
         }
         break;
     }

@@ -63,7 +63,11 @@ chrome.alarms.onAlarm.addListener((alarm) => {
 });
 
 // Import dependencies AFTER event listeners are registered
-importScripts("lib/browser-compat.js", "lib/settings-manager.js");
+importScripts(
+  "lib/browser-compat.js",
+  "lib/config-loader.js",
+  "lib/settings-manager.js",
+);
 
 let settingsManager;
 
@@ -85,8 +89,9 @@ async function initializeSettingsOnStartup() {
     // Create a fallback settings manager but don't fail completely
     try {
       settingsManager = new SettingsManager();
-      await settingsManager.initializeWithEmbeddedDefaults();
-      console.log("Settings manager initialized with fallback defaults");
+      // Use the same initialize method but with ConfigurationLoader fallback
+      await settingsManager.initialize();
+      console.log("Settings manager initialized with fallback configuration");
     } catch (fallbackError) {
       console.error("Even fallback initialization failed:", fallbackError);
       settingsManager = null;
@@ -107,7 +112,8 @@ async function initializeSettings() {
     console.error("Failed to initialize settings manager:", error);
     // Create a fallback settings manager
     settingsManager = new SettingsManager();
-    await settingsManager.initializeWithEmbeddedDefaults();
+    // Use the same initialize method but ConfigurationLoader will handle fallback
+    await settingsManager.initialize();
   }
 }
 
