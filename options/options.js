@@ -249,18 +249,12 @@ class SettingsOptions {
   }
 
   getSettingDisplayName(key) {
-    const displayNames = {
-      feature_enabled: "Enable Main Feature",
-      refresh_interval: "Refresh Interval (seconds)",
-      api_key: "API Key",
-      custom_css: "Custom CSS",
-      advanced_config: "Advanced Configuration",
-    };
+    if (this.configLoader) {
+      return this.configLoader.getDisplayName(key);
+    }
 
-    return (
-      displayNames[key] ||
-      key.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase())
-    );
+    // Fallback if configLoader not available
+    return key.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase());
   }
 
   handleSettingChange(key, input) {
