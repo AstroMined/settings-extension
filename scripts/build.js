@@ -30,7 +30,6 @@ function setupDistDirectory() {
 function copyFile(src, dest) {
   const srcPath = path.join(projectRoot, src);
   const destPath = path.join(distDir, dest || src);
-  const displayDest = dest || src;
 
   if (fs.existsSync(srcPath)) {
     // Ensure destination directory exists
@@ -38,7 +37,7 @@ function copyFile(src, dest) {
     fs.mkdirSync(destDirPath, { recursive: true });
 
     fs.copyFileSync(srcPath, destPath);
-    console.log(`Copied: ${src} -> dist/${displayDest}`);
+    console.log(`Copied: ${src} -> dist/${dest || src}`);
   } else {
     console.log(`Skipped (not found): ${src}`);
   }
