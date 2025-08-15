@@ -212,6 +212,12 @@ input[type="text"] {
   width: 100%;
 }
 
+select.setting-input {
+  width: 100%;
+  cursor: pointer;
+  background-color: white;
+}
+
 textarea.setting-input {
   min-height: 60px;
   resize: vertical;
@@ -346,6 +352,11 @@ textarea.json-input {
   .setting-input {
     background-color: #3a3a3a;
     border-color: #555;
+    color: #e0e0e0;
+  }
+
+  select.setting-input {
+    background-color: #3a3a3a;
     color: #e0e0e0;
   }
 
