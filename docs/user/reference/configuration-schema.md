@@ -469,6 +469,7 @@ const configLoader = new ConfigurationLoader();
 Creates a new configuration loader instance with null configuration state and 5-minute cache duration.
 
 **Properties:**
+
 - `config`: Current loaded configuration object (null until loaded)
 - `configCache`: Cached configuration for performance
 - `cacheTimestamp`: Timestamp of last cache update
@@ -486,6 +487,7 @@ const config = await configLoader.loadConfiguration();
 ```
 
 **Behavior:**
+
 - Returns cached configuration if valid (within 5 minutes)
 - Fetches from `chrome.runtime.getURL("config/defaults.json")`
 - Validates schema using comprehensive validation rules
@@ -493,6 +495,7 @@ const config = await configLoader.loadConfiguration();
 - Caches result for subsequent calls
 
 **Error Handling:**
+
 - Network failures: Falls back to embedded configuration
 - Invalid JSON: Falls back to embedded configuration
 - Schema validation errors: Falls back to embedded configuration
@@ -508,6 +511,7 @@ configLoader.validateConfiguration(configObject);
 ```
 
 **Validation Rules:**
+
 - Configuration must be valid object
 - Each setting must have `type`, `value`, `description` fields
 - Setting types must be: boolean, text, longtext, number, json, enum
@@ -555,6 +559,7 @@ const displayName = configLoader.getDisplayName("api_key");
 ```
 
 **Fallback Logic:**
+
 - Uses `setting.displayName` if available
 - Falls back to formatted key (underscores → spaces, title case)
 - Works even when configuration is not loaded
@@ -589,6 +594,7 @@ const generalSettings = configLoader.getCategorySettings("general");
 ```
 
 **Sorting:**
+
 - Settings sorted by `order` property (ascending)
 - Settings without `order` default to 0
 - Consistent ordering for UI generation
@@ -632,6 +638,7 @@ const cacheInfo = configLoader.getCacheInfo();
 ```
 
 **Cache Info Properties:**
+
 - `cached`: Boolean indicating if cache exists
 - `timestamp`: Cache creation timestamp (null if no cache)
 - `age`: Age in milliseconds (null if no cache)
@@ -662,7 +669,7 @@ const categories = configLoader.getCategories();
 for (const category of categories) {
   const categoryName = configLoader.getCategoryDisplayName(category);
   const settings = configLoader.getCategorySettings(category);
-  
+
   // Create UI elements for category and settings
   renderCategoryTab(categoryName, settings);
 }
@@ -679,7 +686,7 @@ const settings = configLoader.getSettingKeys();
 for (const key of settings) {
   const displayName = configLoader.getDisplayName(key);
   const setting = configLoader.getSetting(key);
-  
+
   // Create form input with proper label
   createFormInput(key, displayName, setting);
 }
