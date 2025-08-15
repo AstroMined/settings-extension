@@ -2,26 +2,50 @@
   "feature_enabled": {
     "type": "boolean",
     "value": true,
-    "description": "Enable main feature functionality"
+    "description": "Enable main feature functionality",
+    "displayName": "Enable Main Feature",
+    "category": "general",
+    "helpText": "Toggle this to enable/disable the main functionality",
+    "order": 1
   },
   "api_key": {
     "type": "text",
     "value": "",
     "description": "API key for external service",
-    "maxLength": 100
+    "displayName": "API Key",
+    "category": "general",
+    "maxLength": 100,
+    "placeholder": "Enter your API key...",
+    "validation": "required",
+    "helpText": "Required API key for connecting to external services",
+    "order": 2
+  },
+  "refresh_interval": {
+    "type": "enum",
+    "value": "60",
+    "description": "Auto-refresh interval",
+    "displayName": "Refresh Interval",
+    "category": "general",
+    "options": {
+      "30": "30 seconds",
+      "60": "1 minute",
+      "300": "5 minutes",
+      "900": "15 minutes",
+      "1800": "30 minutes"
+    },
+    "helpText": "How often to automatically refresh data",
+    "order": 3
   },
   "custom_css": {
     "type": "longtext",
     "value": "/* Custom CSS styles */\n.example { color: blue; }",
     "description": "Custom CSS for content injection",
-    "maxLength": 50000
-  },
-  "refresh_interval": {
-    "type": "number",
-    "value": 60,
-    "description": "Auto-refresh interval in seconds",
-    "min": 1,
-    "max": 3600
+    "displayName": "Custom CSS",
+    "category": "appearance",
+    "maxLength": 50000,
+    "placeholder": "Enter custom CSS styles...",
+    "helpText": "Custom CSS styles to inject into web pages",
+    "order": 1
   },
   "advanced_config": {
     "type": "json",
@@ -30,6 +54,10 @@
       "timeout": 5000,
       "retries": 3
     },
-    "description": "Advanced configuration object"
+    "description": "Advanced configuration object",
+    "displayName": "Advanced Configuration",
+    "category": "advanced",
+    "helpText": "Advanced configuration options in JSON format",
+    "order": 1
   }
 }

@@ -63,7 +63,11 @@ chrome.alarms.onAlarm.addListener((alarm) => {
 });
 
 // Import dependencies AFTER event listeners are registered
-importScripts("lib/browser-compat.js", "lib/settings-manager.js");
+importScripts(
+  "lib/browser-compat.js",
+  "lib/config-loader.js",
+  "lib/settings-manager.js",
+);
 
 let settingsManager;
 

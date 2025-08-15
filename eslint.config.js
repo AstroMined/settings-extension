@@ -35,6 +35,7 @@ module.exports = [
       browserAPI: "readonly",
       SettingsManager: "readonly",
       ContentScriptSettings: "readonly",
+      ConfigurationLoader: "readonly",
       importScripts: "readonly",
       ServiceWorkerGlobalScope: "readonly",
     },

@@ -316,6 +316,11 @@ class SettingsOptions {
         } catch {
           throw new Error("Invalid JSON format");
         }
+      } else if (setting.type === "enum") {
+        // Enum validation - ensure value exists in options
+        if (setting.options && !setting.options[value]) {
+          throw new Error("Invalid enum value");
+        }
       }
 
       this.validateValue(setting, value);
