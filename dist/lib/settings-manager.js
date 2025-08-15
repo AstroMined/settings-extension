@@ -89,61 +89,6 @@ class SettingsManager {
   }
 
   /**
-   * Fallback initialization with embedded defaults
-   * @deprecated This method is kept for compatibility but should not be used
-   * @returns {Promise<void>}
-   */
-  async initializeWithEmbeddedDefaults() {
-    console.warn(
-      "Using deprecated initializeWithEmbeddedDefaults - configuration should load from ConfigurationLoader",
-    );
-
-    try {
-      // Try to use ConfigurationLoader fallback instead
-      const configLoader = new ConfigurationLoader();
-      const fallbackConfig = configLoader.loadFallbackConfiguration();
-
-      this.settings = new Map();
-      for (const [key, setting] of Object.entries(fallbackConfig)) {
-        this.settings.set(key, { ...setting });
-      }
-
-      this.initialized = true;
-      this.notifyListeners("initialized", {
-        settings: this.getAllSettingsSync(),
-      });
-    } catch (error) {
-      console.error("Even fallback configuration loading failed:", error);
-      throw error;
-    }
-  }
-
-  /**
-   * Load default settings from centralized configuration
-   * @deprecated Use ConfigurationLoader directly instead
-   * @returns {Promise<Object>}
-   */
-  async loadDefaults() {
-    console.warn(
-      "loadDefaults is deprecated - use ConfigurationLoader directly",
-    );
-
-    if (this.defaultsCache) {
-      return this.defaultsCache;
-    }
-
-    try {
-      const configLoader = new ConfigurationLoader();
-      const defaults = await configLoader.loadConfiguration();
-      this.defaultsCache = defaults;
-      return defaults;
-    } catch (error) {
-      console.error("Failed to load defaults via ConfigurationLoader:", error);
-      throw error;
-    }
-  }
-
-  /**
    * Get settings from storage
    * @returns {Promise<Object>}
    */
