@@ -66,11 +66,16 @@ Earlier iterations coupled the popup to an active tab/content script (e.g., `tab
      ```js
      async function pingContentScript(browserAPI) {
        try {
-         const [tab] = await browserAPI.tabs.query({ active: true, currentWindow: true });
+         const [tab] = await browserAPI.tabs.query({
+           active: true,
+           currentWindow: true,
+         });
          if (!tab?.id) return false;
-         await browserAPI.tabs.sendMessage(tab.id, { type: 'ping' });
+         await browserAPI.tabs.sendMessage(tab.id, { type: "ping" });
          return true;
-       } catch { return false; }
+       } catch {
+         return false;
+       }
      }
      ```
 

@@ -10,7 +10,7 @@
 
 ### Summary
 
-Eliminate all direct `chrome.*` / `browser.*` usage outside `lib/browser-compat.js`. Enforce this with ESLint/CI. Add a popup‑specific guardrail: **forbid ****\`\`**** messaging for settings** in `src/ui/popup/**`. This locks in cross‑browser support and the 002a decoupling.
+Eliminate all direct `chrome.*` / `browser.*` usage outside `lib/browser-compat.js`. Enforce this with ESLint/CI. Add a popup‑specific guardrail: **forbid \*\***\`\`\***\* messaging for settings** in `src/ui/popup/**`. This locks in cross‑browser support and the 002a decoupling.
 
 ### Problem
 
@@ -41,27 +41,34 @@ Direct vendor API calls scattered in code hinder portability (Chrome vs Firefox)
 export default [
   {
     rules: {
-      'no-restricted-globals': [
-        'error',
-        { name: 'chrome', message: 'Use browserAPI from lib/browser-compat.js' },
-        { name: 'browser', message: 'Use browserAPI from lib/browser-compat.js' }
-      ]
+      "no-restricted-globals": [
+        "error",
+        {
+          name: "chrome",
+          message: "Use browserAPI from lib/browser-compat.js",
+        },
+        {
+          name: "browser",
+          message: "Use browserAPI from lib/browser-compat.js",
+        },
+      ],
     },
-    files: ['src/**/*.js'],
-    ignores: ['src/lib/browser-compat.js']
+    files: ["src/**/*.js"],
+    ignores: ["src/lib/browser-compat.js"],
   },
   {
-    files: ['src/ui/popup/**/*.js'],
+    files: ["src/ui/popup/**/*.js"],
     rules: {
-      'no-restricted-syntax': [
-        'error',
+      "no-restricted-syntax": [
+        "error",
         {
-          selector: "CallExpression[callee.object.name='browserAPI'][callee.property.name=/^(tabs)$/]",
-          message: 'Popup must not use tabs.* for settings I/O'
-        }
-      ]
-    }
-  }
+          selector:
+            "CallExpression[callee.object.name='browserAPI'][callee.property.name=/^(tabs)$/]",
+          message: "Popup must not use tabs.* for settings I/O",
+        },
+      ],
+    },
+  },
 ];
 ```
 
