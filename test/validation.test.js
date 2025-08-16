@@ -202,6 +202,18 @@ describe("Settings Validation", () => {
     });
   });
 
+  describe("Enum Validation", () => {
+    test("should validate valid enum values", () => {
+      const options = { option1: "", option2: "Second" };
+      expect(validateSetting("enum", "option1", { options })).toBe(true);
+    });
+
+    test("should reject invalid enum values", () => {
+      const options = { option1: "First", option2: "Second" };
+      expect(validateSetting("enum", "missing", { options })).toBe(false);
+    });
+  });
+
   describe("Setting Schema Validation", () => {
     test("should validate complete setting object", () => {
       const validSetting = {

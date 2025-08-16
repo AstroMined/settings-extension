@@ -265,6 +265,21 @@ function validateSettingDetailed(setting) {
         }
         break;
 
+      case "enum":
+        if (!setting.options || typeof setting.options !== "object") {
+          isValid = false;
+          errorMessage = "Enum setting is missing options";
+        } else if (
+          !Object.prototype.hasOwnProperty.call(setting.options, setting.value)
+        ) {
+          isValid = false;
+          const validOptions = Object.keys(setting.options).join(", ");
+          errorMessage = `Value must be one of: ${validOptions}`;
+        } else {
+          isValid = true;
+        }
+        break;
+
       default:
         isValid = false;
         errorMessage = `Unknown setting type: ${setting.type}`;
