@@ -15,8 +15,9 @@ module.exports = {
   testMatch: [
     "<rootDir>/test/validation.test.js",
     "<rootDir>/test/config-loader.test.js",
+    "<rootDir>/test/settings-manager.test.js",
     // Other pure function tests would go here
-    // settings-manager.test.js and storage.test.js moved to E2E (browser integration)
+    // storage.test.js moved to E2E (browser integration)
   ],
 
   // Module paths
