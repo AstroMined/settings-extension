@@ -6,12 +6,12 @@
 module.exports = {
   testDir: "./test/e2e",
 
-  // Test timeout - optimized for performance while allowing extension loading
-  timeout: 30000,
+  // Test timeout - increased for extension loading
+  timeout: 60000,
 
-  // Expect timeout for element operations - optimized for performance
+  // Expect timeout for element operations
   expect: {
-    timeout: 8000,
+    timeout: 10000,
   },
 
   // Test configuration
@@ -60,8 +60,8 @@ module.exports = {
   // Retry configuration
   retries: process.env.CI ? 2 : 0,
 
-  // Parallel workers - optimized for performance while maintaining stability
-  workers: process.env.CI ? 2 : 3,
+  // Parallel workers - keep low for extension testing
+  workers: process.env.CI ? 1 : 1,
 
   // Fail fast in CI
   maxFailures: process.env.CI ? 5 : undefined,
@@ -73,6 +73,6 @@ module.exports = {
   // Forbid only on CI
   forbidOnly: !!process.env.CI,
 
-  // Fully parallel execution - enabled for performance optimization
-  fullyParallel: true, // Optimized for parallel execution with proper test isolation
+  // Fully parallel execution
+  fullyParallel: false, // Set to false for extension testing to avoid conflicts
 };

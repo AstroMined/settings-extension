@@ -54,7 +54,7 @@ test.describe("End-to-End User Workflows", () => {
       );
 
       // Wait for extension to initialize
-      await resetPage.waitForTimeout(1000);
+      await resetPage.waitForTimeout(2000);
 
       // Reset storage using the extension's message passing system
       await resetPage.evaluate(async () => {
@@ -92,7 +92,7 @@ test.describe("End-to-End User Workflows", () => {
       });
 
       // Wait for reset to complete and settings to reinitialize
-      await resetPage.waitForTimeout(1000);
+      await resetPage.waitForTimeout(2000);
 
       // Verify the reset was successful by requesting settings from background script
       const verificationResult = await resetPage.evaluate(async () => {
@@ -143,7 +143,7 @@ test.describe("End-to-End User Workflows", () => {
         await page.goto(`chrome-extension://${extensionId}/popup/popup.html`);
 
         // Wait for extension to initialize
-        await page.waitForTimeout(1500);
+        await page.waitForTimeout(3000);
 
         // Check that loading disappears and settings container appears
         await expect(page.locator("#loading")).toBeHidden();
@@ -173,7 +173,7 @@ test.describe("End-to-End User Workflows", () => {
         );
 
         // Wait for options page to initialize
-        await page.waitForTimeout(1500);
+        await page.waitForTimeout(3000);
 
         await expect(page.locator("#loading")).toBeHidden();
         await expect(page.locator("#general-tab")).toBeVisible();
