@@ -49,12 +49,9 @@ class BrowserFactory {
       projectName.toLowerCase().includes("firefox") ||
       projectName.toLowerCase().includes("ff");
     const extensionPath = path.resolve(__dirname, "../../../dist");
-    // Create unique user data directory for each worker to avoid conflicts
-    const workerId = process.env.PLAYWRIGHT_WORKER_INDEX || "0";
-    const timestamp = Date.now();
     const userDataDir = path.resolve(
       __dirname,
-      `../../../test-user-data-${projectName}-worker-${workerId}-${timestamp}`,
+      `../../../test-user-data-${projectName}`,
     );
 
     // Log browser selection for transparency
@@ -97,9 +94,8 @@ class BrowserFactory {
         );
 
         const baseConfig = {
-          // Extensions work better with virtual display than true headless
-          // Use headed mode but with minimal display for CI environments
-          headless: process.env.HEADED === "true" ? false : false,
+          // Use headed mode in CI with Xvfb virtual display for extension support
+          headless: false,
           ignoreHTTPSErrors: true,
           args: ["--no-sandbox", "--disable-dev-shm-usage"],
           ...options,
@@ -129,9 +125,8 @@ class BrowserFactory {
 
       const browserType = this.getBrowserType(testInfo);
       const baseConfig = {
-        // Extensions work better with virtual display than true headless
-        // Use headed mode but with minimal display for CI environments
-        headless: process.env.HEADED === "true" ? false : false,
+        // Use headed mode in CI with Xvfb virtual display for extension support
+        headless: false,
         ignoreHTTPSErrors: true,
         args: [
           `--disable-extensions-except=${extensionPath}`,
@@ -149,20 +144,6 @@ class BrowserFactory {
           "--disable-component-extensions-with-background-pages=false",
           "--enable-automation",
           "--disable-blink-features=AutomationControlled",
-          // Additional flags for CI environments (virtual display)
-          ...(process.env.CI
-            ? [
-                "--disable-gpu",
-                "--disable-software-rasterizer",
-                "--disable-background-mode",
-                "--disable-default-apps",
-                "--disable-translate",
-                "--disable-sync",
-                "--metrics-recording-only",
-                "--no-first-run",
-                "--safebrowsing-disable-auto-update",
-              ]
-            : []),
         ],
         ...options,
       };
@@ -173,8 +154,8 @@ class BrowserFactory {
           baseConfig,
         );
 
-        // Wait for extension to load - further optimized timing
-        await new Promise((resolve) => setTimeout(resolve, 1500));
+        // Wait for extension to load
+        await new Promise((resolve) => setTimeout(resolve, 3000));
 
         return context;
       } catch (error) {
@@ -350,7 +331,7 @@ class BrowserFactory {
     const context = await this.createExtensionContext(testInfo, options);
     const serviceWorker = await this.getExtensionServiceWorker(
       context,
-      10000,
+      15000,
       isFirefox,
     );
     const extensionId = this.getExtensionId(serviceWorker);

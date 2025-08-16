@@ -8,7 +8,7 @@ const BrowserFactory = require("./utils/browser-factory");
 
 // Enhanced helper functions for robust extension testing
 class ExtensionTestHelpers {
-  static async waitForExtensionReady(page, timeout = 10000) {
+  static async waitForExtensionReady(page, timeout = 15000) {
     // Wait for either settings container to appear or loading to disappear
     return Promise.race([
       page.waitForSelector("#settings-container", {
@@ -19,7 +19,7 @@ class ExtensionTestHelpers {
     ]);
   }
 
-  static async waitForPageFullyLoaded(page, timeout = 10000) {
+  static async waitForPageFullyLoaded(page, timeout = 15000) {
     // More comprehensive page load detection
     await page.waitForFunction(
       () => {
@@ -63,9 +63,6 @@ test.describe("Browser Extension Functionality", () => {
   let context;
   let extensionId;
   let serviceWorker;
-
-  // Use serial execution within this describe block for better context sharing
-  test.describe.configure({ mode: "serial" });
 
   // eslint-disable-next-line no-empty-pattern
   test.beforeAll(async ({}, testInfo) => {
@@ -169,9 +166,9 @@ test.describe("Browser Extension Functionality", () => {
       await Promise.race([
         page.waitForSelector("#settings-container", {
           state: "visible",
-          timeout: 10000,
+          timeout: 15000,
         }),
-        page.waitForSelector("#loading", { state: "hidden", timeout: 10000 }),
+        page.waitForSelector("#loading", { state: "hidden", timeout: 15000 }),
       ]);
 
       // Ensure settings are fully loaded
@@ -186,7 +183,7 @@ test.describe("Browser Extension Functionality", () => {
             loading.style.display === "none"
           );
         },
-        { timeout: 10000 },
+        { timeout: 15000 },
       );
 
       // Check that the loading spinner disappears and settings container appears
@@ -229,9 +226,9 @@ test.describe("Browser Extension Functionality", () => {
       await Promise.race([
         page.waitForSelector("#general-tab", {
           state: "visible",
-          timeout: 10000,
+          timeout: 15000,
         }),
-        page.waitForSelector("#loading", { state: "hidden", timeout: 10000 }),
+        page.waitForSelector("#loading", { state: "hidden", timeout: 15000 }),
       ]);
 
       // Ensure page is fully loaded
@@ -245,7 +242,7 @@ test.describe("Browser Extension Functionality", () => {
             (!loading || loading.style.display === "none")
           );
         },
-        { timeout: 10000 },
+        { timeout: 15000 },
       );
 
       // Check that the loading spinner disappears and tab content appears
@@ -277,17 +274,16 @@ test.describe("Browser Extension Functionality", () => {
     }
   });
 
-  test("can change boolean and text settings", async () => {
+  test("can change a boolean setting", async () => {
     const page = await context.newPage();
 
     try {
-      // Test boolean setting change in popup
       await page.goto(`chrome-extension://${extensionId}/popup/popup.html`);
 
       // Wait for settings to load
       await page.waitForSelector("#settings-container", {
         state: "visible",
-        timeout: 10000,
+        timeout: 15000,
       });
 
       // Find a boolean setting and toggle it
@@ -310,22 +306,24 @@ test.describe("Browser Extension Functionality", () => {
       // Verify the state changed
       const newState = await booleanToggle.isChecked();
       expect(newState).toBe(!initialState);
-
-      // Test text setting change in options page
-      await page.goto(`chrome-extension://${extensionId}/options/options.html`);
-
-      // Find a text input and change its value
-      const textInput = page.locator('input[type="text"]').first();
-      if (await textInput.isVisible()) {
-        await textInput.clear();
-        await textInput.fill("Test Value");
-
-        // Verify the value was set
-        const value = await textInput.inputValue();
-        expect(value).toBe("Test Value");
-      }
     } finally {
       await page.close();
+    }
+  });
+
+  test("can change a text setting", async () => {
+    const page = await context.newPage();
+    await page.goto(`chrome-extension://${extensionId}/options/options.html`);
+
+    // Find a text input and change its value
+    const textInput = page.locator('input[type="text"]').first();
+    if (await textInput.isVisible()) {
+      await textInput.clear();
+      await textInput.fill("Test Value");
+
+      // Verify the value was set
+      const value = await textInput.inputValue();
+      expect(value).toBe("Test Value");
     }
   });
 
@@ -344,8 +342,8 @@ test.describe("Browser Extension Functionality", () => {
       await textInput.clear();
       await textInput.fill(testValue);
 
-      // Wait for save to complete using better condition
-      await page.waitForTimeout(500);
+      // Wait for save to complete
+      await page.waitForTimeout(1000);
 
       // Close and reopen popup
       await page.close();
@@ -389,8 +387,8 @@ test.describe("Browser Extension Functionality", () => {
       await page.goto("https://example.com");
       await page.waitForLoadState("networkidle");
 
-      // Wait for content script injection
-      await page.waitForTimeout(1000);
+      // Wait a moment for content script injection
+      await page.waitForTimeout(2000);
 
       // Test content script injection and API availability
       const contentScriptResults = await page.evaluate(() => {

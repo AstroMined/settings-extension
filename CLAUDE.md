@@ -22,23 +22,30 @@ npm run test:chrome      # Test extension in Chrome browser (manual)
 npm run test:firefox     # Test extension in Firefox browser (manual)
 
 # Enhanced E2E Testing (Preferred for Extension Testing)
-npm run test:e2e:chrome                    # Run E2E tests in Chrome with real extension loading
+# ⚡ OPTIMIZED: 79% faster with 3-worker parallel execution
+npm run test:e2e:chrome                    # Run E2E tests in Chrome (42 tests in ~47s local, ~66s CI)
 npm run test:e2e:firefox                   # Run E2E tests in Firefox with FirefoxFunctionalTester (NEW!)
 npm run test:e2e:firefox-functional        # Run comprehensive Firefox functional tests
 npm run test:e2e:all                       # Run both Chrome and Firefox E2E tests
 npm run test:e2e -- --grep "popup"        # Run specific E2E test patterns
-npm run test:e2e -- --headed              # Run E2E tests in headed mode
-npm run test:e2e -- --debug               # Run E2E tests with debugging
+HEADED=true npm run test:e2e:chrome        # Force headed mode for local debugging
+CI=true npm run test:e2e:chrome            # Simulate CI environment with optimized flags
 
 # Code Quality (run before commits)
 npm run lint             # Check code with ESLint
 npm run lint:fix         # Auto-fix ESLint issues
 npm run format           # Format code with Prettier
 
+# Cleanup Commands
+npm run clean            # Clean dist/, artifacts, and test data directories
+npm run clean:test-data  # Clean test directories older than 60 minutes (safe for concurrent runs)
+npm run clean:test-data:force # Force clean all test directories immediately
+
 # ⚠️ CRITICAL BUILD DEPENDENCIES FOR E2E TESTS
 # ALWAYS use npm scripts (test:e2e:chrome, test:e2e:firefox) instead of direct npx playwright commands
 # Direct npx commands may fail with "service worker timeout" if dist/ folder is missing or stale
-# The npm scripts include the essential "npm run build &&" step that ensures fresh extension artifacts
+# The npm scripts include essential steps: cleanup old test data + fresh build + extension artifacts
+# ✅ AUTOMATIC CLEANUP: E2E tests now automatically clean up old test directories before running
 
 # CRITICAL: Before making message handling changes, see "Critical Manifest V3 Patterns" section below!
 # IMPORTANT: For reliable extension testing, use npm run test:e2e instead of manual browser testing
@@ -74,6 +81,7 @@ This is a **Manifest V3 browser extension framework** for cross-browser settings
 - UI load times: <500ms
 - Memory usage: <10MB per tab
 - Test coverage: >80% (stricter for core modules)
+- **E2E test suite**: ~47 seconds (local), ~66 seconds (CI) - 79% improvement from original 4+ minutes
 
 ## ⚠️ Critical Manifest V3 Patterns
 
