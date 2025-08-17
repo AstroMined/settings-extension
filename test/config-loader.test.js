@@ -1,7 +1,7 @@
 // test/config-loader.test.js
 // Comprehensive test suite for ConfigurationLoader class
 
-const ConfigurationLoader = require("../lib/config-loader");
+const ConfigurationLoader = require("../src/lib/config-loader");
 
 // Mock browser APIs for testing
 const mockBrowserAPI = {

@@ -18,7 +18,7 @@ const {
   validateTextSecure,
   validateSetting,
   validateAllSettings,
-} = require("../lib/validation.js");
+} = require("../src/lib/validation.js");
 
 describe("Settings Validation", () => {
   beforeEach(() => {
