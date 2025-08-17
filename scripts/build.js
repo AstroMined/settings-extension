@@ -7,16 +7,23 @@ const isWatch = process.argv.includes("--watch");
 const projectRoot = path.resolve(__dirname, "..");
 const distDir = path.join(projectRoot, "dist");
 
-// Files and directories to copy - now includes both manifests for universal build
+// Files to copy with source -> destination mapping
 const filesToCopy = [
-  "manifest.json", // Chrome/Chromium manifest (default)
-  "manifest.firefox.json", // Firefox manifest (alternate)
-  "background.js",
-  "content-script.js",
-  "background.html", // Needed for Firefox background pages
+  { src: "manifest.json", dest: "manifest.json" }, // Chrome/Chromium manifest (default)
+  { src: "manifest.firefox.json", dest: "manifest.firefox.json" }, // Firefox manifest (alternate)
+  { src: "src/background/background.js", dest: "background.js" },
+  { src: "src/content/content-script.js", dest: "content-script.js" },
+  { src: "src/background/background.html", dest: "background.html" }, // Needed for Firefox background pages
 ];
 
-const dirsToRecursiveCopy = ["lib", "popup", "options", "config", "icons"];
+// Directories to copy with source -> destination mapping
+const dirsToRecursiveCopy = [
+  { src: "src/lib", dest: "lib" },
+  { src: "src/ui/popup", dest: "popup" },
+  { src: "src/ui/options", dest: "options" },
+  { src: "src/config", dest: "config" },
+  { src: "src/assets/icons", dest: "icons" },
+];
 
 // Clean and create dist directory
 function setupDistDirectory() {
@@ -71,6 +78,79 @@ function copyDirectory(srcRelative, destRelative = srcRelative) {
   }
 }
 
+// Validate manifest file references
+function validateManifestReferences() {
+  console.log("🔍 Validating manifest file references...");
+
+  const manifestFiles = ["manifest.json", "manifest.firefox.json"];
+  let validationPassed = true;
+
+  for (const manifestFile of manifestFiles) {
+    const manifestPath = path.join(distDir, manifestFile);
+
+    if (!fs.existsSync(manifestPath)) {
+      console.log(`⚠️  Manifest not found: ${manifestFile}`);
+      continue;
+    }
+
+    try {
+      const manifestContent = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
+      const filesToCheck = [];
+
+      // Extract file references from manifest
+      if (manifestContent.background?.service_worker) {
+        filesToCheck.push(manifestContent.background.service_worker);
+      }
+      if (manifestContent.background?.page) {
+        filesToCheck.push(manifestContent.background.page);
+      }
+      if (manifestContent.content_scripts) {
+        manifestContent.content_scripts.forEach((cs) => {
+          if (cs.js) filesToCheck.push(...cs.js);
+          if (cs.css) filesToCheck.push(...cs.css);
+        });
+      }
+      if (manifestContent.action?.default_popup) {
+        filesToCheck.push(manifestContent.action.default_popup);
+      }
+      if (manifestContent.options_ui?.page) {
+        filesToCheck.push(manifestContent.options_ui.page);
+      }
+      if (manifestContent.web_accessible_resources) {
+        manifestContent.web_accessible_resources.forEach((war) => {
+          if (war.resources) filesToCheck.push(...war.resources);
+        });
+      }
+      if (manifestContent.icons) {
+        filesToCheck.push(...Object.values(manifestContent.icons));
+      }
+      if (manifestContent.action?.default_icon) {
+        filesToCheck.push(
+          ...Object.values(manifestContent.action.default_icon),
+        );
+      }
+
+      // Check if all referenced files exist in dist
+      for (const file of filesToCheck) {
+        const filePath = path.join(distDir, file);
+        if (!fs.existsSync(filePath)) {
+          console.log(`❌ Missing file referenced in ${manifestFile}: ${file}`);
+          validationPassed = false;
+        }
+      }
+
+      if (validationPassed) {
+        console.log(`✅ ${manifestFile}: All referenced files exist`);
+      }
+    } catch (error) {
+      console.log(`❌ Error parsing ${manifestFile}: ${error.message}`);
+      validationPassed = false;
+    }
+  }
+
+  return validationPassed;
+}
+
 // Main build function
 function build() {
   console.log(`🏗️  Building universal extension (Chrome + Firefox)...`);
@@ -81,15 +161,24 @@ function build() {
 
   // Copy individual files
   for (const file of filesToCopy) {
-    copyFile(file);
+    copyFile(file.src, file.dest);
   }
 
   // Copy directories recursively
   for (const dir of dirsToRecursiveCopy) {
-    copyDirectory(dir);
+    copyDirectory(dir.src, dir.dest);
   }
 
-  console.log("✅ Build completed successfully!");
+  // Validate manifest references
+  const validationPassed = validateManifestReferences();
+
+  if (validationPassed) {
+    console.log("✅ Build completed successfully!");
+  } else {
+    console.log("⚠️  Build completed with validation warnings!");
+  }
+
+  return validationPassed;
 }
 
 // Watch mode functionality
@@ -97,8 +186,8 @@ function watchFiles() {
   console.log("👀 Watching for changes...");
 
   const watchPaths = [
-    ...filesToCopy.map((file) => path.join(projectRoot, file)),
-    ...dirsToRecursiveCopy.map((dir) => path.join(projectRoot, dir)),
+    ...filesToCopy.map((file) => path.join(projectRoot, file.src)),
+    ...dirsToRecursiveCopy.map((dir) => path.join(projectRoot, dir.src)),
   ];
 
   // Filter to only watch existing paths

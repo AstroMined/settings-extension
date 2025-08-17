@@ -1,4 +1,4 @@
-const SettingsManager = require("../lib/settings-manager");
+const SettingsManager = require("../src/lib/settings-manager");
 
 // Minimal tests for SettingsManager validateSetting enum handling
 
