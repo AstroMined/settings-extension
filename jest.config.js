@@ -29,18 +29,17 @@ module.exports = {
 
   // Coverage configuration - ONLY pure function modules
   collectCoverageFrom: [
-    "lib/validation.js",
-    "lib/config-loader.js",
-    "lib/utils.js",
-    "lib/formatters.js",
+    "src/lib/validation.js",
+    "src/lib/config-loader.js",
+    // "src/lib/error-handler.js" - TODO: add tests and enable coverage
     // EXCLUDE browser integration files (tested via E2E):
-    // "lib/settings-manager.js" - uses chrome.storage
-    // "lib/content-settings.js" - uses DOM/browser APIs
-    // "lib/browser-compat.js" - browser API abstraction
-    // "background.js" - service worker
-    // "content-script.js" - DOM manipulation
-    // "popup/*.js" - DOM/UI interaction
-    // "options/*.js" - DOM/UI interaction
+    // "src/lib/settings-manager.js" - uses chrome.storage
+    // "src/lib/content-settings.js" - uses DOM/browser APIs
+    // "src/lib/browser-compat.js" - browser API abstraction
+    // "src/background.js" - service worker
+    // "src/content-script.js" - DOM manipulation
+    // "src/ui/popup/*.js" - DOM/UI interaction
+    // "src/ui/options/*.js" - DOM/UI interaction
     "!**/*.d.ts",
     "!test/**",
     "!**/*.config.js",
@@ -59,18 +58,19 @@ module.exports = {
       statements: 80,
     },
     // High standards for pure function modules
-    "./lib/validation.js": {
+    "./src/lib/validation.js": {
       branches: 76, // Current actual coverage - will improve with refactoring
       functions: 90,
       lines: 80,
       statements: 80,
     },
-    "./lib/config-loader.js": {
+    "./src/lib/config-loader.js": {
       branches: 90,
       functions: 90,
       lines: 90,
       statements: 90,
     },
+    // "./src/lib/error-handler.js" - TODO: add tests and enable thresholds
     // Browser integration files excluded - tested via E2E
     // (settings-manager.js, content-settings.js covered by Playwright)
   },
