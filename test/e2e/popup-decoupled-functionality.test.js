@@ -14,7 +14,7 @@ test.describe("Popup Decoupled Functionality", () => {
 
   // Run tests in serial mode to avoid race conditions on shared manifest file
   test.describe.configure({ mode: "serial" });
-  
+
   // eslint-disable-next-line no-empty-pattern
   test.beforeAll(async ({}, testInfo) => {
     console.log("Setting up decoupled popup tests...");
