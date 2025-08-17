@@ -140,6 +140,57 @@ async function processAsyncMessage(message, sender, sendResponse) {
 - This mismatch is the key diagnostic sign
 - Always check if `handleMessage` is declared `async`
 
+## 🏗️ Decoupled Architecture Pattern
+
+### **Popup ↔ Background ↔ Storage (Content Scripts Optional)**
+
+**Core Principle**: The popup must work independently of content scripts for all settings operations.
+
+**✅ CORRECT Architecture**:
+
+```
+Popup ↔ Background ↔ Storage
+   ↓ (optional)
+Content Script (page DOM manipulation only)
+```
+
+**Implementation Details**:
+
+1. **Popup Settings Loading**:
+   - Primary: `browserAPI.runtime.sendMessage({ type: "GET_ALL_SETTINGS" })`
+   - Fallback: `browserAPI.storage.local.get('settings')`
+   - Last resort: `fetch(browserAPI.runtime.getURL('config/defaults.json'))`
+
+2. **Background as Authority**:
+   - Seeds settings from `config/defaults.json` if storage is empty
+   - Handles all popup requests even if SettingsManager fails
+   - Never depends on content script presence
+
+3. **Content Scripts (Optional)**:
+   - Only apply settings to page DOM
+   - Listen to `storage.onChanged` for updates
+   - Can be disabled without breaking popup
+
+**❌ NEVER do this in popup**:
+
+```javascript
+// DON'T: Popup depending on content script
+const response = await browserAPI.tabs.sendMessage(tabId, {
+  type: "getSettings",
+});
+```
+
+**✅ DO this instead**:
+
+```javascript
+// DO: Popup using background + storage
+const response = await browserAPI.runtime.sendMessage({
+  type: "GET_ALL_SETTINGS",
+});
+```
+
+**ESLint Protection**: Automatic rules prevent `tabs.sendMessage` usage in popup for settings operations.
+
 ## Documentation Structure
 
 This project has **comprehensive documentation** organized in three complementary systems:

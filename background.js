@@ -65,6 +65,7 @@ chrome.alarms.onAlarm.addListener((alarm) => {
 // Import dependencies AFTER event listeners are registered
 importScripts(
   "lib/browser-compat.js",
+  "lib/error-handler.js",
   "lib/config-loader.js",
   "lib/settings-manager.js",
 );
@@ -83,6 +84,10 @@ async function initializeSettingsOnStartup() {
     console.log("Initializing settings manager on startup...");
     settingsManager = new SettingsManager();
     await settingsManager.initialize();
+
+    // Ensure settings are seeded from defaults if needed
+    await ensureSettingsSeeded();
+
     console.log("Settings manager initialized successfully on startup");
   } catch (error) {
     console.error("Failed to initialize settings manager on startup:", error);
@@ -91,11 +96,52 @@ async function initializeSettingsOnStartup() {
       settingsManager = new SettingsManager();
       // Use the same initialize method but with ConfigurationLoader fallback
       await settingsManager.initialize();
+      await ensureSettingsSeeded();
       console.log("Settings manager initialized with fallback configuration");
     } catch (fallbackError) {
       console.error("Even fallback initialization failed:", fallbackError);
       settingsManager = null;
     }
+  }
+}
+
+/**
+ * Ensure settings are seeded from defaults.json if storage is empty
+ * @returns {Promise<void>}
+ */
+async function ensureSettingsSeeded() {
+  try {
+    // Check if settings exist in storage
+    const storageResult = await self.browserAPI.storage.local.get("settings");
+
+    if (
+      !storageResult.settings ||
+      Object.keys(storageResult.settings).length === 0
+    ) {
+      console.log("No settings found in storage, seeding from defaults...");
+
+      // Load defaults from config/defaults.json
+      const defaultsUrl = self.browserAPI.runtime.getURL(
+        "config/defaults.json",
+      );
+      const response = await fetch(defaultsUrl);
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch defaults: ${response.status}`);
+      }
+
+      const defaults = await response.json();
+      console.log("Loaded defaults from config/defaults.json");
+
+      // Store defaults in storage
+      await self.browserAPI.storage.local.set({ settings: defaults });
+      console.log("Settings seeded successfully from defaults");
+    } else {
+      console.log("Settings already exist in storage");
+    }
+  } catch (error) {
+    console.error("Failed to seed settings from defaults:", error);
+    // Don't throw - let the app continue with whatever settings exist
   }
 }
 
@@ -144,10 +190,18 @@ function handleMessage(message, sender, sendResponse) {
       "Settings manager not available, attempting re-initialization...",
     );
 
-    // Handle re-initialization asynchronously
-    initializeSettingsOnStartup()
+    // Handle re-initialization asynchronously with timeout protection
+    const initPromise = initializeSettingsOnStartup();
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => reject(new Error("Initialization timeout")), 10000);
+    });
+
+    Promise.race([initPromise, timeoutPromise])
       .then(() => {
         if (!settingsManager) {
+          console.error(
+            "Settings manager still not available after re-initialization",
+          );
           sendResponse({
             error:
               "Settings manager not available. Service worker may need to be restarted.",
@@ -155,14 +209,14 @@ function handleMessage(message, sender, sendResponse) {
           });
           return;
         }
-        // Process the message after initialization
+        // Process the message after successful initialization
+        console.log("✅ Settings manager re-initialized, processing message");
         processAsyncMessage(message, sender, sendResponse);
       })
       .catch((error) => {
         console.error("Failed to re-initialize settings manager:", error);
         sendResponse({
-          error:
-            "Settings manager not available. Service worker may need to be restarted.",
+          error: `Settings manager initialization failed: ${error.message}`,
           fallback: true,
         });
       });
@@ -180,6 +234,16 @@ function handleMessage(message, sender, sendResponse) {
 async function processAsyncMessage(message, sender, sendResponse) {
   try {
     console.log("🔄 Processing async message:", message.type);
+
+    // Double-check settings manager availability
+    if (!settingsManager) {
+      console.error("Settings manager not available in processAsyncMessage");
+      sendResponse({
+        error: "Settings manager not available",
+        fallback: true,
+      });
+      return;
+    }
 
     switch (message.type) {
       case "GET_SETTING":
@@ -222,13 +286,35 @@ async function processAsyncMessage(message, sender, sendResponse) {
         await handleCheckStorageQuota(message, sendResponse);
         break;
 
+      case "GET_CURRENT_TAB_ID":
+        await handleGetCurrentTabId(message, sendResponse, sender);
+        break;
+
       default:
         sendResponse({ error: `Unknown message type: ${message.type}` });
     }
 
     console.log("✅ Async message processed successfully");
   } catch (error) {
-    console.error("❌ Error processing async message:", error);
+    // Standardized error handling for background operations
+    if (typeof ErrorHandler !== "undefined") {
+      ErrorHandler.handle(
+        error,
+        {
+          messageType: message.type,
+          senderId: sender?.tab?.id || "popup",
+        },
+        {
+          component: "Background",
+          operation: `Message Handler (${message.type})`,
+          severity: "error",
+          showUser: false,
+          rethrow: false,
+        },
+      );
+    } else {
+      console.error("❌ Error processing async message:", error);
+    }
     sendResponse({ error: error.message });
   }
 }
@@ -255,7 +341,29 @@ async function handleGetSettings(message, sendResponse) {
 async function handleGetAllSettings(message, sendResponse) {
   console.log("🔍 Getting all settings...");
   try {
-    const allSettings = await settingsManager.getAllSettings();
+    let allSettings;
+
+    // Try to get settings from settings manager first
+    if (settingsManager) {
+      allSettings = await settingsManager.getAllSettings();
+    } else {
+      // Fallback: try to get directly from storage
+      console.log(
+        "Settings manager not available, trying direct storage access...",
+      );
+      const storageResult = await self.browserAPI.storage.local.get("settings");
+      allSettings = storageResult.settings;
+
+      // If no settings in storage, seed from defaults
+      if (!allSettings || Object.keys(allSettings).length === 0) {
+        console.log("No settings in storage, loading defaults...");
+        await ensureSettingsSeeded();
+        const updatedResult =
+          await self.browserAPI.storage.local.get("settings");
+        allSettings = updatedResult.settings || {};
+      }
+    }
+
     console.log(
       "📤 Sending settings response:",
       Object.keys(allSettings || {}),
@@ -334,6 +442,31 @@ async function handleGetStorageStats(message, sendResponse) {
 async function handleCheckStorageQuota(message, sendResponse) {
   const quota = await settingsManager.checkStorageQuota();
   sendResponse({ quota });
+}
+
+async function handleGetCurrentTabId(message, sendResponse, sender) {
+  try {
+    // If the sender is from a tab, return the tab ID
+    if (sender && sender.tab && sender.tab.id) {
+      sendResponse({ tabId: sender.tab.id });
+      return;
+    }
+
+    // Otherwise try to get the current active tab
+    const tabs = await self.browserAPI.tabs.query({
+      active: true,
+      currentWindow: true,
+    });
+
+    if (tabs && tabs.length > 0 && tabs[0].id) {
+      sendResponse({ tabId: tabs[0].id });
+    } else {
+      sendResponse({ error: "Could not determine current tab ID" });
+    }
+  } catch (error) {
+    console.error("Error getting current tab ID:", error);
+    sendResponse({ error: error.message });
+  }
 }
 
 /**

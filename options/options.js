@@ -33,9 +33,33 @@ class SettingsOptions {
       this.isInitialized = true;
       console.log("Options page initialized successfully");
     } catch (error) {
-      console.error("Failed to initialize options:", error);
-      this.showError("Failed to load settings. Please refresh the page.");
-      this.hideLoading();
+      // Standardized error handling for options page initialization
+      if (typeof ErrorHandler !== "undefined") {
+        ErrorHandler.handle(
+          error,
+          {
+            isInitialized: this.isInitialized,
+            categoriesLoaded: this.categories?.length || 0,
+          },
+          {
+            component: "Options",
+            operation: "Initialize",
+            severity: "critical",
+            showUser: true,
+            rethrow: false,
+            fallbackAction: () => {
+              this.showError(
+                "Failed to load settings. Please refresh the page.",
+              );
+              this.hideLoading();
+            },
+          },
+        );
+      } else {
+        console.error("Failed to initialize options:", error);
+        this.showError("Failed to load settings. Please refresh the page.");
+        this.hideLoading();
+      }
     }
   }
 
@@ -62,10 +86,27 @@ class SettingsOptions {
 
       console.log("Background script ping response:", response);
     } catch (error) {
-      console.error("Background script connection test failed:", error);
-      throw new Error(
-        "Background script is not responding. Please reload the extension.",
-      );
+      // Standardized error handling for background connection test
+      if (typeof ErrorHandler !== "undefined") {
+        ErrorHandler.handle(
+          error,
+          {
+            connectionTest: true,
+          },
+          {
+            component: "Options",
+            operation: "Background Connection Test",
+            severity: "critical",
+            showUser: false,
+            rethrow: true,
+          },
+        );
+      } else {
+        console.error("Background script connection test failed:", error);
+        throw new Error(
+          "Background script is not responding. Please reload the extension.",
+        );
+      }
     }
   }
 
@@ -107,8 +148,23 @@ class SettingsOptions {
       this.currentSettings = new Map(Object.entries(response.settings));
       console.log("Loaded settings:", this.currentSettings);
     } catch (error) {
-      console.error("Error in loadSettings:", error);
-      throw error;
+      // Standardized error handling for settings loading
+      if (typeof ErrorHandler !== "undefined") {
+        ErrorHandler.handle(
+          error,
+          {}, // No specific context needed
+          {
+            component: "Options",
+            operation: "Load Settings",
+            severity: "error",
+            showUser: false,
+            rethrow: true,
+          },
+        );
+      } else {
+        console.error("Error in loadSettings:", error);
+        throw error;
+      }
     }
   }
 
@@ -435,8 +491,28 @@ class SettingsOptions {
         `Successfully saved ${Object.keys(updates).length} setting(s)`,
       );
     } catch (error) {
-      console.error("Save failed:", error);
-      this.showError(`Save failed: ${error.message}`);
+      // Standardized error handling for settings save
+      if (typeof ErrorHandler !== "undefined") {
+        ErrorHandler.handle(
+          error,
+          {
+            pendingChanges: this.pendingChanges.size,
+          },
+          {
+            component: "Options",
+            operation: "Save Settings",
+            severity: "error",
+            showUser: true,
+            rethrow: false,
+            fallbackAction: () => {
+              this.showError(`Save failed: ${error.message}`);
+            },
+          },
+        );
+      } else {
+        console.error("Save failed:", error);
+        this.showError(`Save failed: ${error.message}`);
+      }
     }
   }
 
@@ -536,8 +612,28 @@ class SettingsOptions {
       URL.revokeObjectURL(url);
       this.showSuccess("Settings exported successfully");
     } catch (error) {
-      console.error("Export failed:", error);
-      this.showError(`Export failed: ${error.message}`);
+      // Standardized error handling for settings export
+      if (typeof ErrorHandler !== "undefined") {
+        ErrorHandler.handle(
+          error,
+          {
+            operation: "export",
+          },
+          {
+            component: "Options",
+            operation: "Export Settings",
+            severity: "error",
+            showUser: true,
+            rethrow: false,
+            fallbackAction: () => {
+              this.showError(`Export failed: ${error.message}`);
+            },
+          },
+        );
+      } else {
+        console.error("Export failed:", error);
+        this.showError(`Export failed: ${error.message}`);
+      }
     }
   }
 
@@ -568,8 +664,29 @@ class SettingsOptions {
         this.updateSaveButton();
         this.showSuccess("Settings imported successfully");
       } catch (error) {
-        console.error("Import failed:", error);
-        this.showError(`Import failed: ${error.message}`);
+        // Standardized error handling for settings import
+        if (typeof ErrorHandler !== "undefined") {
+          ErrorHandler.handle(
+            error,
+            {
+              fileName: file?.name,
+              fileSize: file?.size,
+            },
+            {
+              component: "Options",
+              operation: "Import Settings",
+              severity: "error",
+              showUser: true,
+              rethrow: false,
+              fallbackAction: () => {
+                this.showError(`Import failed: ${error.message}`);
+              },
+            },
+          );
+        } else {
+          console.error("Import failed:", error);
+          this.showError(`Import failed: ${error.message}`);
+        }
       }
     });
 
@@ -600,8 +717,29 @@ class SettingsOptions {
       this.updateSaveButton();
       this.showSuccess("Settings reset to defaults");
     } catch (error) {
-      console.error("Reset failed:", error);
-      this.showError(`Reset failed: ${error.message}`);
+      // Standardized error handling for settings reset
+      if (typeof ErrorHandler !== "undefined") {
+        ErrorHandler.handle(
+          error,
+          {
+            operation: "reset",
+            pendingChanges: this.pendingChanges.size,
+          },
+          {
+            component: "Options",
+            operation: "Reset Settings",
+            severity: "error",
+            showUser: true,
+            rethrow: false,
+            fallbackAction: () => {
+              this.showError(`Reset failed: ${error.message}`);
+            },
+          },
+        );
+      } else {
+        console.error("Reset failed:", error);
+        this.showError(`Reset failed: ${error.message}`);
+      }
     }
   }
 

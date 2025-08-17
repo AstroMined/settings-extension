@@ -1,4 +1,5 @@
 // Popup JavaScript for Settings Extension
+
 class SettingsPopup {
   constructor() {
     this.currentSettings = new Map();
@@ -14,7 +15,7 @@ class SettingsPopup {
 
   async initialize() {
     try {
-      console.log("Initializing popup...");
+      console.debug("Initializing popup...");
 
       // First test if background script is responding at all
       await this.testBackgroundConnection();
@@ -23,105 +24,54 @@ class SettingsPopup {
       this.renderSettings();
       this.hideLoading();
       this.isInitialized = true;
-      console.log("Popup initialized successfully");
+      console.debug("Popup initialized successfully");
     } catch (error) {
       console.error("Failed to initialize popup:", error);
-      this.showError("Failed to load settings. Please try again.");
+      this.showError(`Failed to initialize: ${error.message}`);
       this.hideLoading();
     }
   }
 
   async testBackgroundConnection() {
-    const maxRetries = 3;
-    let lastError = null;
+    const maxRetries = 2;
+    const timeout = 5000; // 5 seconds
 
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
-        console.log(
-          `Testing background script connection (attempt ${attempt}/${maxRetries})...`,
-        );
+        const response = await Promise.race([
+          browserAPI.runtime.sendMessage({ type: "PING" }),
+          new Promise((_, reject) => {
+            setTimeout(() => reject(new Error("Timeout")), timeout);
+          }),
+        ]);
 
-        const response = await new Promise((resolve, reject) => {
-          const timeout = setTimeout(
-            () => {
-              reject(
-                new Error(
-                  `Background script ping timeout (attempt ${attempt})`,
-                ),
-              );
-            },
-            Math.min(2000 * attempt, 8000),
-          ); // Progressive timeout: 2s, 4s, 8s
-
-          browserAPI.runtime
-            .sendMessage({ type: "PING" })
-            .then((response) => {
-              clearTimeout(timeout);
-              if (response && response.pong) {
-                resolve(response);
-              } else {
-                reject(new Error("Invalid ping response"));
-              }
-            })
-            .catch((error) => {
-              clearTimeout(timeout);
-              reject(error);
-            });
-        });
-
-        console.log("Background script ping response:", response);
-        return; // Success - exit retry loop
-      } catch (error) {
-        console.error(
-          `Background script connection test failed (attempt ${attempt}):`,
-          error,
-        );
-        lastError = error;
-
-        if (attempt < maxRetries) {
-          // Wait before retry (exponential backoff)
-          const delay = Math.min(500 * Math.pow(2, attempt - 1), 2000);
-          console.log(`Retrying in ${delay}ms...`);
-          await new Promise((resolve) => setTimeout(resolve, delay));
+        if (response && response.pong) {
+          return; // Success
         }
+        throw new Error("Invalid ping response");
+      } catch {
+        if (attempt === maxRetries) {
+          throw new Error(
+            `Service worker not responding after ${maxRetries} attempts. Please reload the extension.`,
+          );
+        }
+        await new Promise((resolve) => setTimeout(resolve, 300));
       }
     }
-
-    // All retries failed
-    throw new Error(
-      `Service worker not responding after ${maxRetries} attempts. ${lastError?.message || "Unknown error"}. Please reload the extension.`,
-    );
   }
 
   async loadSettings() {
     const maxRetries = 2;
-    let lastError = null;
+    const timeout = 5000; // 5 seconds
 
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
-        const response = await new Promise((resolve, reject) => {
-          const timeout = setTimeout(
-            () => {
-              reject(
-                new Error(
-                  `Settings load timeout after ${5 + attempt * 2} seconds (attempt ${attempt})`,
-                ),
-              );
-            },
-            (5 + attempt * 2) * 1000,
-          ); // Progressive timeout: 7s, 9s
-
-          browserAPI.runtime
-            .sendMessage({ type: "GET_ALL_SETTINGS" })
-            .then((response) => {
-              clearTimeout(timeout);
-              resolve(response);
-            })
-            .catch((error) => {
-              clearTimeout(timeout);
-              reject(error);
-            });
-        });
+        const response = await Promise.race([
+          browserAPI.runtime.sendMessage({ type: "GET_ALL_SETTINGS" }),
+          new Promise((_, reject) => {
+            setTimeout(() => reject(new Error("Timeout")), timeout);
+          }),
+        ]);
 
         if (!response) {
           throw new Error("No response from background script");
@@ -136,23 +86,107 @@ class SettingsPopup {
         }
 
         this.currentSettings = new Map(Object.entries(response.settings));
-        return; // Success - exit retry loop
+        return; // Success
       } catch (error) {
         console.error(`Error loading settings (attempt ${attempt}):`, error);
-        lastError = error;
 
-        if (attempt < maxRetries) {
-          // Wait before retry
-          const delay = 1000 * attempt; // 1s, 2s
-          await new Promise((resolve) => setTimeout(resolve, delay));
+        // On final attempt, try storage fallback
+        if (attempt === maxRetries) {
+          try {
+            const settings = await this.loadSettingsFromStorage();
+            if (settings) {
+              console.debug(
+                "Successfully loaded settings from storage fallback",
+              );
+              this.currentSettings = settings;
+              return;
+            }
+          } catch (storageError) {
+            console.error("Storage fallback failed:", storageError);
+          }
+          throw error;
+        } else {
+          await new Promise((resolve) => setTimeout(resolve, 500));
         }
       }
     }
+  }
 
-    // All retries failed
-    throw new Error(
-      `Failed to load settings after ${maxRetries} attempts: ${lastError?.message || "Unknown error"}`,
-    );
+  async loadDefaultSettings() {
+    try {
+      const response = await fetch(
+        browserAPI.runtime.getURL("config/defaults.json"),
+      );
+      if (!response.ok) {
+        throw new Error(`Failed to fetch defaults: ${response.status}`);
+      }
+      const defaults = await response.json();
+      console.debug("Loaded default settings from config/defaults.json");
+      return defaults;
+    } catch (error) {
+      console.error("Failed to load default settings:", error);
+      // Return minimal fallback settings
+      return {
+        feature_enabled: {
+          type: "boolean",
+          value: true,
+          description: "Enable main feature functionality",
+        },
+      };
+    }
+  }
+
+  /**
+   * Simple storage fallback - load settings directly from storage
+   */
+  async loadSettingsFromStorage() {
+    try {
+      const storageResult = await browserAPI.storage.local.get("settings");
+
+      if (
+        storageResult.settings &&
+        this.validateStorageSettings(storageResult.settings)
+      ) {
+        return new Map(Object.entries(storageResult.settings));
+      }
+
+      // No valid settings found, initialize with defaults
+      const defaultSettings = await this.loadDefaultSettings();
+      await browserAPI.storage.local.set({ settings: defaultSettings });
+      return new Map(Object.entries(defaultSettings));
+    } catch (error) {
+      console.error("Storage fallback failed:", error);
+      return null;
+    }
+  }
+
+  /**
+   * Validate that settings object has the expected structure
+   */
+  validateStorageSettings(settings) {
+    if (!settings || typeof settings !== "object") {
+      return false;
+    }
+
+    const keys = Object.keys(settings);
+    if (keys.length === 0) {
+      return false;
+    }
+
+    // Validate at least one setting has proper structure
+    for (const key of keys) {
+      const setting = settings[key];
+      if (
+        setting &&
+        typeof setting === "object" &&
+        "type" in setting &&
+        "value" in setting
+      ) {
+        return true; // At least one valid setting found
+      }
+    }
+
+    return false;
   }
 
   renderSettings() {
@@ -339,7 +373,7 @@ class SettingsPopup {
         }
       } else if (setting.type === "json") {
         try {
-          value = JSON.parse(value);
+          value = this.safeJsonParse(value);
         } catch {
           throw new Error("Invalid JSON format");
         }
@@ -370,7 +404,7 @@ class SettingsPopup {
         }
       } else if (setting.type === "json") {
         try {
-          value = JSON.parse(value);
+          value = this.safeJsonParse(value);
         } catch {
           throw new Error("Invalid JSON format");
         }
@@ -595,30 +629,62 @@ class SettingsPopup {
     }
   }
 
+  async checkContentScriptPresence() {
+    try {
+      const result = await browserAPI.storage.local.get(
+        "contentScriptRegistry",
+      );
+      const registry = result.contentScriptRegistry || {};
+
+      // Get current tab ID to check if content script is registered for this tab
+      const [tab] = await browserAPI.tabs.query({
+        active: true,
+        currentWindow: true,
+      });
+
+      if (!tab?.id) return false;
+
+      // Check if content script is registered for current tab and is recent (within last 30 seconds)
+      const tabEntry = registry[tab.id];
+      if (!tabEntry || !tabEntry.timestamp) return false;
+
+      const now = Date.now();
+      const isRecent = now - tabEntry.timestamp < 30000; // 30 second timeout
+
+      return isRecent;
+    } catch (error) {
+      console.error("Error checking content script presence:", error);
+      return false;
+    }
+  }
+
+  /**
+   * Parse JSON with basic error handling
+   */
+  safeJsonParse(jsonString) {
+    if (typeof jsonString !== "string") {
+      throw new Error("Input must be a string");
+    }
+    return JSON.parse(jsonString);
+  }
+
   openAdvancedSettings() {
     try {
-      // Use the proper Manifest V3 options API
-      if (chrome.runtime.openOptionsPage) {
-        chrome.runtime.openOptionsPage();
-        console.log(
-          "✅ Options page opened using chrome.runtime.openOptionsPage()",
-        );
+      if (browserAPI.runtime.openOptionsPage) {
+        browserAPI.runtime.openOptionsPage();
       } else {
-        // Fallback for older browsers or if openOptionsPage isn't available
-        console.log("⚠️ Falling back to manual tab creation");
         browserAPI.tabs.create({
           url: browserAPI.runtime.getURL("options/options.html"),
         });
       }
     } catch (error) {
-      console.error("❌ Failed to open options page:", error);
-      // Final fallback - try manual tab creation
+      console.error("Failed to open options page:", error);
       try {
         browserAPI.tabs.create({
           url: browserAPI.runtime.getURL("options/options.html"),
         });
       } catch (fallbackError) {
-        console.error("❌ Fallback also failed:", fallbackError);
+        console.error("Fallback also failed:", fallbackError);
         this.showError(
           "Unable to open advanced settings. Please try right-clicking the extension icon and selecting 'Options'.",
         );
@@ -678,13 +744,45 @@ class SettingsPopup {
       advancedBtn.addEventListener("click", () => this.openAdvancedSettings());
     }
   }
+
+  /**
+   * Cleanup method for proper resource management
+   */
+  cleanup() {
+    if (this.currentSettings) {
+      this.currentSettings.clear();
+    }
+  }
 }
 
 // Initialize the popup when the DOM is ready
-document.addEventListener("DOMContentLoaded", () => {
-  try {
-    window.settingsPopupInstance = new SettingsPopup();
-  } catch (error) {
-    console.error("Error creating SettingsPopup instance:", error);
+(function () {
+  "use strict";
+
+  let settingsPopupInstance = null;
+
+  function cleanup() {
+    if (
+      settingsPopupInstance &&
+      typeof settingsPopupInstance.cleanup === "function"
+    ) {
+      settingsPopupInstance.cleanup();
+    }
+    settingsPopupInstance = null;
   }
-});
+
+  // Cleanup on page unload
+  window.addEventListener("beforeunload", cleanup);
+
+  document.addEventListener("DOMContentLoaded", () => {
+    try {
+      if (!settingsPopupInstance) {
+        settingsPopupInstance = new SettingsPopup();
+        // Expose for testing
+        window.settingsPopupInstance = settingsPopupInstance;
+      }
+    } catch (error) {
+      console.error("Error creating SettingsPopup instance:", error);
+    }
+  });
+})();
