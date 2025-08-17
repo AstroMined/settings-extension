@@ -17,9 +17,48 @@ function initializeContentScript() {
       console.debug("Settings event in content script:", event, data);
     });
 
+    // Register content script presence in storage
+    registerContentScriptPresence();
+
     console.debug("Content script settings initialized");
   } catch (error) {
     console.error("Failed to initialize content script settings:", error);
+  }
+}
+
+/**
+ * Register content script presence in storage for popup detection
+ */
+async function registerContentScriptPresence() {
+  try {
+    // Get current tab ID through background script to avoid tabs permission in content script
+    const response = await browserAPI.runtime.sendMessage({
+      type: "GET_CURRENT_TAB_ID",
+    });
+
+    if (!response || !response.tabId) {
+      console.debug("Could not get tab ID for content script registration");
+      return;
+    }
+
+    const tabId = response.tabId;
+
+    // Get existing registry
+    const result = await browserAPI.storage.local.get("contentScriptRegistry");
+    const registry = result.contentScriptRegistry || {};
+
+    // Register this tab with current timestamp
+    registry[tabId] = {
+      timestamp: Date.now(),
+      url: window.location.href,
+    };
+
+    // Store updated registry
+    await browserAPI.storage.local.set({ contentScriptRegistry: registry });
+
+    console.debug("Content script presence registered for tab:", tabId);
+  } catch (error) {
+    console.error("Failed to register content script presence:", error);
   }
 }
 
@@ -99,10 +138,45 @@ function handlePageNavigation() {
 /**
  * Cleanup on page unload
  */
-function cleanup() {
+async function cleanup() {
   if (contentSettings) {
     contentSettings.destroy();
     contentSettings = null;
+  }
+
+  // Clean up content script presence registration
+  await unregisterContentScriptPresence();
+}
+
+/**
+ * Remove content script presence registration from storage
+ */
+async function unregisterContentScriptPresence() {
+  try {
+    // Get current tab ID through background script
+    const response = await browserAPI.runtime.sendMessage({
+      type: "GET_CURRENT_TAB_ID",
+    });
+
+    if (!response || !response.tabId) {
+      return;
+    }
+
+    const tabId = response.tabId;
+
+    // Get existing registry
+    const result = await browserAPI.storage.local.get("contentScriptRegistry");
+    const registry = result.contentScriptRegistry || {};
+
+    // Remove this tab from registry
+    delete registry[tabId];
+
+    // Store updated registry
+    await browserAPI.storage.local.set({ contentScriptRegistry: registry });
+
+    console.debug("Content script presence unregistered for tab:", tabId);
+  } catch (error) {
+    console.error("Failed to unregister content script presence:", error);
   }
 }
 

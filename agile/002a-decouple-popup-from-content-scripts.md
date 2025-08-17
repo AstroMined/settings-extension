@@ -3,10 +3,10 @@
 ## Decouple Popup Settings from Content Scripts
 
 **Epic:** Framework Maturity\
-**Status:** Ready for Implementation\
+**Status:** ✅ Implemented\
 **Priority:** High\
-**Story Points:** 3–5\
-**Sprint:** Next
+**Story Points:** 5\
+**Sprint:** Completed
 
 ### Summary
 
@@ -98,8 +98,49 @@ Earlier iterations coupled the popup to an active tab/content script (e.g., `tab
 
 ### Definition of Done
 
-- Popup settings flow works with CS absent.
-- Background seeds/normalizes settings from defaults and services popup requests.
-- CS only applies settings; removing it doesn’t break the popup.
-- E2E and unit tests added and passing.
-- No direct `tabs.*` usage in popup for settings.
+- ✅ Popup settings flow works with CS absent.
+- ✅ Background seeds/normalizes settings from defaults and services popup requests.
+- ✅ CS only applies settings; removing it doesn't break the popup.
+- ✅ E2E and unit tests added and passing.
+- ✅ No direct `tabs.*` usage in popup for settings.
+
+### Implementation Summary
+
+**Completed Features:**
+
+1. **Storage-First Popup Loading**
+   - Enhanced `loadSettings()` with storage.local fallback when background is slow/unavailable
+   - Added `loadDefaultSettings()` method to fetch from config/defaults.json
+   - Graceful degradation when background script is unresponsive
+
+2. **Background Authority Strengthened**
+   - Added `ensureSettingsSeeded()` function to load defaults from config/defaults.json
+   - Enhanced `handleGetAllSettings()` with storage fallback when SettingsManager unavailable
+   - All settings always available through background + storage, never dependent on content scripts
+
+3. **Content Script Presence Detection**
+   - Added `pingContentScript()` helper in popup for optional tab-specific actions
+   - Content scripts remain completely optional for popup functionality
+
+4. **Browser API Compliance**
+   - Fixed all direct `chrome.*` API usage to use `browserAPI` wrapper
+   - Consistent cross-browser compatibility maintained
+
+5. **Comprehensive Testing**
+   - `test/e2e/popup-decoupled-functionality.test.js` - Tests popup without content scripts
+   - `test/e2e/popup-with-content-scripts.test.js` - Tests popup with content scripts
+   - `test/background-message-handlers.test.js` - Unit tests for background message handlers
+
+6. **Code Quality Guardrails**
+   - ESLint rules prevent `tabs.sendMessage` usage in popup for settings operations
+   - Automated prevention of architecture regression
+
+**Architecture Pattern:**
+
+```flow
+Popup ↔ Background ↔ Storage
+   ↓ (optional)
+Content Script (page DOM manipulation only)
+```
+
+The popup is now completely decoupled from content scripts for all settings operations.
