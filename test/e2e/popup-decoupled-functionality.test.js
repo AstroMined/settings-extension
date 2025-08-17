@@ -11,7 +11,12 @@ const fs = require("fs");
 test.describe("Popup Decoupled Functionality", () => {
   let context;
   let extensionId;
-  test.beforeAll(async (testInfo) => {
+
+  // Run tests in serial mode to avoid race conditions on shared manifest file
+  test.describe.configure({ mode: "serial" });
+  
+  // eslint-disable-next-line no-empty-pattern
+  test.beforeAll(async ({}, testInfo) => {
     console.log("Setting up decoupled popup tests...");
 
     // Temporarily modify the dist manifest to remove content scripts
@@ -21,29 +26,20 @@ test.describe("Popup Decoupled Functionality", () => {
       "../../dist/manifest.backup.json",
     );
 
-    let manifestModified = false;
-
     try {
-      // Build the extension first to ensure dist exists
-      const { execSync } = require("child_process");
-      execSync("npm run build", {
-        cwd: path.join(__dirname, "../.."),
-        stdio: "inherit",
-      });
+      // Read the manifest file directly (build should have already happened before tests)
+      const manifestContent = fs.readFileSync(distManifestPath, "utf8");
 
       // Backup original manifest
-      if (fs.existsSync(distManifestPath)) {
-        fs.copyFileSync(distManifestPath, backupManifestPath);
+      fs.writeFileSync(backupManifestPath, manifestContent);
 
-        // Read and modify manifest to remove content scripts
-        const manifest = JSON.parse(fs.readFileSync(distManifestPath, "utf8"));
-        delete manifest.content_scripts;
+      // Parse and modify manifest to remove content scripts
+      const manifest = JSON.parse(manifestContent);
+      delete manifest.content_scripts;
 
-        // Write modified manifest
-        fs.writeFileSync(distManifestPath, JSON.stringify(manifest, null, 2));
-        manifestModified = true;
-        console.log("Removed content_scripts from dist manifest for testing");
-      }
+      // Write modified manifest
+      fs.writeFileSync(distManifestPath, JSON.stringify(manifest, null, 2));
+      console.log("Removed content_scripts from dist manifest for testing");
 
       // Set up extension with modified manifest
       const extensionSetup = await BrowserFactory.setupExtension(testInfo);
@@ -53,7 +49,8 @@ test.describe("Popup Decoupled Functionality", () => {
       console.log(`Extension loaded without content scripts: ${extensionId}`);
     } catch (error) {
       // Restore manifest if something went wrong
-      if (manifestModified && fs.existsSync(backupManifestPath)) {
+      const backupExists = fs.existsSync(backupManifestPath);
+      if (backupExists) {
         fs.copyFileSync(backupManifestPath, distManifestPath);
         fs.unlinkSync(backupManifestPath);
       }
@@ -69,14 +66,22 @@ test.describe("Popup Decoupled Functionality", () => {
       "../../dist/manifest.backup.json",
     );
 
-    if (fs.existsSync(backupManifestPath)) {
-      fs.copyFileSync(backupManifestPath, distManifestPath);
-      fs.unlinkSync(backupManifestPath);
-      console.log("Restored original manifest");
+    try {
+      if (fs.existsSync(backupManifestPath)) {
+        fs.copyFileSync(backupManifestPath, distManifestPath);
+        fs.unlinkSync(backupManifestPath);
+        console.log("Restored original manifest");
+      }
+    } catch (error) {
+      console.warn("Failed to restore manifest:", error.message);
     }
 
     if (context) {
-      await context.close();
+      try {
+        await context.close();
+      } catch (error) {
+        console.warn("Failed to close browser context:", error.message);
+      }
     }
   });
 

@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Settings Extension",
-  "version": "1.1.1",
+  "version": "1.0.0",
   "description": "Comprehensive settings management for browser extensions",
 
   "browser_specific_settings": {
@@ -11,10 +11,10 @@
     }
   },
 
-  "permissions": ["storage", "activeTab", "alarms", "tabs"],
+  "permissions": ["storage", "activeTab"],
 
   "background": {
-    "service_worker": "background.js"
+    "page": "background.html"
   },
 
   "content_scripts": [
@@ -22,7 +22,6 @@
       "matches": ["<all_urls>"],
       "js": [
         "lib/browser-compat.js",
-        "lib/error-handler.js",
         "lib/content-settings.js",
         "content-script.js"
       ]
