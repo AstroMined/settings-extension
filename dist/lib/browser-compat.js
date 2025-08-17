@@ -54,6 +54,8 @@ if (!browserAPI_exists) {
   const hasTabs = (isChrome && chrome.tabs) || (isFirefox && browser.tabs);
   const hasAction =
     (isChrome && chrome.action) || (isFirefox && browser.action);
+  const hasAlarms =
+    (isChrome && chrome.alarms) || (isFirefox && browser.alarms);
 
   // Unified browser API object
   const browserAPI = {
@@ -275,6 +277,44 @@ if (!browserAPI_exists) {
         }
       : null,
 
+    // Alarms API
+    alarms: hasAlarms
+      ? {
+          create: isChrome
+            ? promisify(chrome.alarms.create, chrome.alarms)
+            : browser.alarms.create?.bind(browser.alarms) ||
+              (() => Promise.resolve()),
+          clear: isChrome
+            ? promisify(chrome.alarms.clear, chrome.alarms)
+            : browser.alarms.clear?.bind(browser.alarms) ||
+              (() => Promise.resolve()),
+          get: isChrome
+            ? promisify(chrome.alarms.get, chrome.alarms)
+            : browser.alarms.get?.bind(browser.alarms) ||
+              (() => Promise.resolve()),
+          getAll: isChrome
+            ? promisify(chrome.alarms.getAll, chrome.alarms)
+            : browser.alarms.getAll?.bind(browser.alarms) ||
+              (() => Promise.resolve([])),
+          onAlarm: {
+            addListener: isChrome
+              ? chrome.alarms.onAlarm?.addListener?.bind(
+                  chrome.alarms.onAlarm,
+                ) || (() => {})
+              : browser.alarms.onAlarm?.addListener?.bind(
+                  browser.alarms.onAlarm,
+                ) || (() => {}),
+            removeListener: isChrome
+              ? chrome.alarms.onAlarm?.removeListener?.bind(
+                  chrome.alarms.onAlarm,
+                ) || (() => {})
+              : browser.alarms.onAlarm?.removeListener?.bind(
+                  browser.alarms.onAlarm,
+                ) || (() => {}),
+          },
+        }
+      : null,
+
     // Browser environment detection
     environment: {
       isChrome,
@@ -285,6 +325,7 @@ if (!browserAPI_exists) {
       hasRuntime,
       hasTabs,
       hasAction,
+      hasAlarms,
     },
 
     // Browser information

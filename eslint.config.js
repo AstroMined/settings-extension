@@ -8,7 +8,13 @@ const compat = new FlatCompat({
 
 module.exports = [
   {
-    ignores: ["test-user-data-*/**", "coverage/**", "web-ext-artifacts/**"],
+    ignores: [
+      "test-user-data-*/**",
+      "coverage/**",
+      "web-ext-artifacts/**",
+      "dist/**",
+      "examples/**",
+    ],
   },
   ...compat.config({
     env: {
@@ -28,6 +34,19 @@ module.exports = [
       "prettier/prettier": "error",
       "no-console": "off",
       "no-unused-vars": ["error", { argsIgnorePattern: "^_" }],
+      "no-restricted-globals": [
+        "error",
+        {
+          name: "chrome",
+          message:
+            "Use browserAPI from lib/browser-compat.js instead of direct chrome API calls",
+        },
+        {
+          name: "browser",
+          message:
+            "Use browserAPI from lib/browser-compat.js instead of direct browser API calls",
+        },
+      ],
     },
     globals: {
       chrome: "readonly",
@@ -41,29 +60,24 @@ module.exports = [
       ServiceWorkerGlobalScope: "readonly",
     },
   }),
+  // Exception for browser-compat.js - allow direct API usage
+  {
+    files: ["**/browser-compat.js"],
+    rules: {
+      "no-restricted-globals": "off",
+    },
+  },
   // Popup-specific rules to prevent coupling with content scripts
   {
-    files: ["popup/**/*.js"],
+    files: ["src/ui/popup/**/*.js"],
     rules: {
       "no-restricted-syntax": [
         "error",
         {
           selector:
-            "CallExpression[callee.object.name='browserAPI'][callee.property.name='tabs'][arguments.0.property.name='sendMessage']",
-          message:
-            "Popup should not use tabs.sendMessage for settings operations. Use runtime.sendMessage to communicate with background script instead.",
-        },
-        {
-          selector:
             "CallExpression[callee.object.object.name='browserAPI'][callee.object.property.name='tabs'][callee.property.name='sendMessage']",
           message:
-            "Popup should not use tabs.sendMessage for settings operations. Use runtime.sendMessage to communicate with background script instead.",
-        },
-        {
-          selector:
-            "CallExpression[callee.object.name='chrome'][callee.property.name='tabs'][arguments.0.property.name='sendMessage']",
-          message:
-            "Popup should not use chrome.tabs.sendMessage. Use browserAPI.runtime.sendMessage instead for settings operations.",
+            "Popup should not use browserAPI.tabs.sendMessage for settings operations. Use browserAPI.runtime.sendMessage to communicate with background script instead.",
         },
       ],
     },

@@ -329,13 +329,14 @@ class FirefoxFunctionalTester {
     try {
       const extensionPath = path.resolve(__dirname, "../../../dist");
 
-      // Check for storage API usage in background script
+      // Check for storage API usage in background script (including abstracted usage)
       const backgroundPath = path.join(extensionPath, "background.js");
       if (fs.existsSync(backgroundPath)) {
         const backgroundContent = fs.readFileSync(backgroundPath, "utf8");
         results.storageApiUsed =
           backgroundContent.includes("chrome.storage") ||
-          backgroundContent.includes("browser.storage");
+          backgroundContent.includes("browser.storage") ||
+          backgroundContent.includes("browserAPI.storage");
       }
 
       // Check for settings manager

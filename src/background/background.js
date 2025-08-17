@@ -16,55 +16,61 @@ self.addEventListener("unhandledrejection", (event) => {
   );
 });
 
-// Core Chrome Extension API listeners (registered before imports)
+// Import browser compatibility layer first
+importScripts("lib/browser-compat.js");
+
+// Core Extension API listeners (registered after browserAPI is available)
 console.log("🔧 Registering event listeners...");
 
 try {
-  chrome.runtime.onMessage.addListener(handleMessage);
+  browserAPI.runtime.onMessage.addListener(handleMessage);
   console.log("✅ Message listener registered successfully");
 } catch (error) {
   console.error("❌ Failed to register message listener:", error);
 }
 
 try {
-  chrome.runtime.onInstalled.addListener(handleInstalled);
+  browserAPI.runtime.onInstalled.addListener(handleInstalled);
   console.log("✅ Installed listener registered successfully");
 } catch (error) {
   console.error("❌ Failed to register installed listener:", error);
 }
 
 try {
-  chrome.runtime.onStartup.addListener(handleStartup);
+  browserAPI.runtime.onStartup.addListener(handleStartup);
   console.log("✅ Startup listener registered successfully");
 } catch (error) {
   console.error("❌ Failed to register startup listener:", error);
 }
 
 try {
-  chrome.storage.onChanged.addListener(handleStorageChange);
+  browserAPI.storage.onChanged.addListener(handleStorageChange);
   console.log("✅ Storage change listener registered successfully");
 } catch (error) {
   console.error("❌ Failed to register storage change listener:", error);
 }
 
-if (chrome.action && chrome.action.onClicked) {
-  chrome.action.onClicked.addListener(handleActionClick);
+if (browserAPI.action && browserAPI.action.onClicked) {
+  browserAPI.action.onClicked.addListener(handleActionClick);
 }
 
 // Keep-alive alarm to prevent service worker termination
-chrome.alarms.create("keep-alive", { periodInMinutes: 0.42 }); // 25 seconds
-chrome.alarms.onAlarm.addListener((alarm) => {
+browserAPI.alarms.create("keep-alive", { periodInMinutes: 0.42 }); // 25 seconds
+browserAPI.alarms.onAlarm.addListener((alarm) => {
   if (alarm.name === "keep-alive") {
     // Simple operation to keep service worker alive
-    chrome.runtime.getPlatformInfo(() => {
+    try {
+      // Use a simple storage check to keep service worker alive
+      browserAPI.storage.local.get(["__keep_alive__"]);
       console.debug("Service worker keep-alive ping");
-    });
+    } catch (error) {
+      console.debug("Keep-alive ping failed:", error);
+    }
   }
 });
 
-// Import dependencies AFTER event listeners are registered
+// Import remaining dependencies
 importScripts(
-  "lib/browser-compat.js",
   "lib/error-handler.js",
   "lib/config-loader.js",
   "lib/settings-manager.js",

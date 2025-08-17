@@ -17,6 +17,7 @@ module.exports = {
     "<rootDir>/test/config-loader.test.js",
     "<rootDir>/test/settings-manager.test.js",
     "<rootDir>/test/race-condition.test.js",
+    "<rootDir>/test/browser-api-compliance.test.js",
     // Other pure function tests would go here
     // storage.test.js moved to E2E (browser integration)
   ],
