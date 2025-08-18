@@ -46,11 +46,7 @@ class TestRunner {
   async runUnitTests() {
     console.log("📋 Running unit tests...");
 
-    const result = await this.runCommand("npm", [
-      "test",
-      "--",
-      "--selectProjects=unit",
-    ]);
+    const result = await this.runCommand("npm", ["test"]);
     this.results.unit = result;
 
     if (result.code === 0) {
@@ -62,31 +58,23 @@ class TestRunner {
   }
 
   async runIntegrationTests() {
-    console.log("🔗 Running integration tests...");
+    console.log("🔗 Running E2E tests...");
 
-    const result = await this.runCommand("npm", [
-      "test",
-      "--",
-      "--selectProjects=integration",
-    ]);
+    const result = await this.runCommand("npm", ["run", "test:e2e"]);
     this.results.integration = result;
 
     if (result.code === 0) {
-      console.log("✅ Integration tests passed\n");
+      console.log("✅ E2E tests passed\n");
     } else {
-      console.log("❌ Integration tests failed\n");
-      throw new Error("Integration tests failed");
+      console.log("❌ E2E tests failed\n");
+      throw new Error("E2E tests failed");
     }
   }
 
   async runPerformanceTests() {
     console.log("⚡ Running performance tests...");
 
-    const result = await this.runCommand("npm", [
-      "test",
-      "--",
-      "--selectProjects=performance",
-    ]);
+    const result = await this.runCommand("npm", ["run", "test:performance"]);
     this.results.performance = result;
 
     if (result.code === 0) {

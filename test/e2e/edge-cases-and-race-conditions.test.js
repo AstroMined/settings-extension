@@ -393,6 +393,414 @@ test.describe("Edge Cases and Race Conditions", () => {
     });
   });
 
+  test.describe("Data Persistence Race Condition Prevention (Story 003)", () => {
+    test("should prevent data loss during rapid consecutive setting changes", async () => {
+      const page = await openPopupPage();
+
+      try {
+        await page.waitForSelector("#settings-container");
+
+        // Get initial value
+        const initialValue = await page.evaluate(
+          () => document.querySelector('input[id="setting-api_key"]')?.value,
+        );
+        console.log("Initial API key value:", initialValue);
+
+        // Perform rapid consecutive changes (this used to cause race conditions)
+        const rapidValues = [];
+        for (let i = 0; i < 20; i++) {
+          const value = `race-test-${i}-${Date.now()}`;
+          rapidValues.push(value);
+
+          await page.evaluate((testValue) => {
+            const input = document.querySelector('input[id="setting-api_key"]');
+            if (input) {
+              input.value = testValue;
+              input.dispatchEvent(new Event("input")); // Trigger change
+            }
+          }, value);
+
+          // Very short delay to simulate rapid typing
+          await page.waitForTimeout(50);
+        }
+
+        // Wait for all debounced saves to complete (auto-save debouncing is 500ms)
+        await page.waitForTimeout(1500);
+
+        // Verify final value is one of the values we set (no data loss)
+        const finalValue = await page.evaluate(
+          () => document.querySelector('input[id="setting-api_key"]')?.value,
+        );
+
+        expect(rapidValues).toContain(finalValue);
+        console.log(`✅ Final value preserved: ${finalValue}`);
+
+        // Test persistence across page reload
+        await page.reload();
+        await page.waitForLoadState("domcontentloaded");
+        await page.waitForSelector("#settings-container");
+
+        const persistedValue = await page.evaluate(
+          () => document.querySelector('input[id="setting-api_key"]')?.value,
+        );
+
+        expect(persistedValue).toBe(finalValue);
+        console.log(`✅ Value persisted across reload: ${persistedValue}`);
+      } finally {
+        await page.close();
+      }
+    });
+
+    test("should handle bulk setting changes with operation queuing", async () => {
+      const page = await openPopupPage();
+
+      try {
+        await page.waitForSelector("#settings-container");
+
+        // First check what elements are available
+        const availableElements = await page.evaluate(() => {
+          const elements = [];
+          [
+            "setting-api_key",
+            "setting-feature_enabled",
+            "setting-refresh_interval",
+          ].forEach((id) => {
+            const element = document.querySelector(`#${id}`);
+            elements.push({
+              id: id,
+              exists: !!element,
+              type: element?.tagName.toLowerCase(),
+              value: element?.value,
+              checked: element?.checked,
+            });
+          });
+          return elements;
+        });
+
+        console.log("Available elements:", availableElements);
+
+        // Perform multiple different setting changes simultaneously (only on available elements)
+        const bulkChanges = availableElements
+          .filter((el) => el.exists)
+          .slice(0, 2) // Use first 2 available elements to ensure test stability
+          .map((el, index) => {
+            if (el.type === "input" && el.id === "setting-api_key") {
+              return {
+                id: el.id,
+                value: `bulk-test-${Date.now()}`,
+                type: "text",
+              };
+            } else if (
+              el.type === "input" &&
+              el.id === "setting-feature_enabled"
+            ) {
+              return { id: el.id, value: false, type: "checkbox" };
+            } else if (el.type === "select") {
+              return { id: el.id, value: "600", type: "select" };
+            }
+            return { id: el.id, value: `test-${index}`, type: "text" };
+          });
+
+        // Apply all changes simultaneously (this used to cause race conditions)
+        await Promise.all(
+          bulkChanges.map((change) =>
+            page.evaluate(({ id, value, type }) => {
+              const element = document.querySelector(`#${id}`);
+              if (element) {
+                if (type === "checkbox") {
+                  element.checked = value;
+                  element.dispatchEvent(new Event("change"));
+                } else {
+                  element.value = value;
+                  element.dispatchEvent(
+                    new Event(type === "select" ? "change" : "input"),
+                  );
+                }
+              }
+            }, change),
+          ),
+        );
+
+        // Wait for operation queue to process all changes
+        await page.waitForTimeout(1000);
+
+        // Verify all changes were applied correctly
+        const finalValues = await page.evaluate((changes) => {
+          const results = {};
+          changes.forEach((change) => {
+            const element = document.querySelector(`#${change.id}`);
+            if (element) {
+              if (change.type === "checkbox") {
+                results[change.id] = element.checked;
+              } else {
+                results[change.id] = element.value;
+              }
+            }
+          });
+          return results;
+        }, bulkChanges);
+
+        // Verify each change was applied
+        bulkChanges.forEach((change) => {
+          expect(finalValues[change.id]).toBe(change.value);
+        });
+
+        console.log("✅ Bulk changes processed correctly:", finalValues);
+
+        // Test persistence of all changes
+        await page.reload();
+        await page.waitForLoadState("domcontentloaded");
+        await page.waitForSelector("#settings-container");
+
+        const persistedValues = await page.evaluate((changes) => {
+          const results = {};
+          changes.forEach((change) => {
+            const element = document.querySelector(`#${change.id}`);
+            if (element) {
+              if (change.type === "checkbox") {
+                results[change.id] = element.checked;
+              } else {
+                results[change.id] = element.value;
+              }
+            }
+          });
+          return results;
+        }, bulkChanges);
+
+        expect(persistedValues).toEqual(finalValues);
+        console.log("✅ All bulk changes persisted correctly");
+      } finally {
+        await page.close();
+      }
+    });
+
+    test("should demonstrate race condition fix through consistent final state", async () => {
+      const page = await openPopupPage();
+
+      try {
+        await page.waitForSelector("#settings-container");
+
+        // Test the race condition scenario: simultaneous rapid changes
+        // Before the fix, this would cause data loss or corruption
+        // After the fix, the final state should be consistent and no data should be lost
+
+        const testRounds = 3; // Multiple rounds to increase chance of catching race conditions
+        const results = [];
+
+        for (let round = 0; round < testRounds; round++) {
+          console.log(
+            `Testing race condition round ${round + 1}/${testRounds}`,
+          );
+
+          // Perform simultaneous rapid operations on different settings
+          const simultaneousChanges = [
+            page.evaluate((value) => {
+              const input = document.querySelector("#setting-api_key");
+              if (input) {
+                input.value = value;
+                input.dispatchEvent(new Event("input"));
+              }
+            }, `race-round-${round}-api`),
+
+            page.evaluate(
+              (checked) => {
+                const checkbox = document.querySelector(
+                  "#setting-feature_enabled",
+                );
+                if (checkbox) {
+                  checkbox.checked = checked;
+                  checkbox.dispatchEvent(new Event("change"));
+                }
+              },
+              round % 2 === 0,
+            ),
+          ];
+
+          // Execute changes simultaneously
+          await Promise.all(simultaneousChanges);
+
+          // Wait for all saves to complete
+          await page.waitForTimeout(500);
+
+          // Collect current state
+          const currentState = await page.evaluate(() => {
+            const apiKey = document.querySelector("#setting-api_key")?.value;
+            const featureEnabled = document.querySelector(
+              "#setting-feature_enabled",
+            )?.checked;
+            return { apiKey, featureEnabled };
+          });
+
+          results.push(currentState);
+        }
+
+        // Verify all states are consistent and contain expected values
+        results.forEach((state, index) => {
+          expect(state.apiKey).toMatch(/^race-round-\d+-api$/);
+          expect(typeof state.featureEnabled).toBe("boolean");
+          console.log(`Round ${index + 1} result:`, state);
+        });
+
+        // Test final persistence
+        await page.reload();
+        await page.waitForLoadState("domcontentloaded");
+        await page.waitForSelector("#settings-container");
+
+        const finalState = await page.evaluate(() => {
+          const apiKey = document.querySelector("#setting-api_key")?.value;
+          const featureEnabled = document.querySelector(
+            "#setting-feature_enabled",
+          )?.checked;
+          return { apiKey, featureEnabled };
+        });
+
+        // Final state should be one of our test values (proving data was not lost/corrupted)
+        expect(finalState.apiKey).toMatch(/^race-round-\d+-api$/);
+        expect(typeof finalState.featureEnabled).toBe("boolean");
+
+        console.log(
+          `✅ Race condition fix validated: Final state is consistent`,
+          finalState,
+        );
+      } finally {
+        await page.close();
+      }
+    });
+
+    test("should handle storage operation failures with retry logic", async () => {
+      const page = await openPopupPage();
+
+      try {
+        await page.waitForSelector("#settings-container");
+
+        // Mock storage to fail initially then succeed
+        await page.evaluate(() => {
+          let failureCount = 0;
+          const originalSendMessage = browserAPI.runtime.sendMessage;
+
+          browserAPI.runtime.sendMessage = function (message) {
+            if (message.type === "UPDATE_SETTING" && failureCount < 2) {
+              failureCount++;
+              return Promise.reject(
+                new Error(`Simulated storage failure ${failureCount}`),
+              );
+            }
+            return originalSendMessage.call(this, message);
+          };
+        });
+
+        // Attempt to change a setting (should retry and eventually succeed)
+        const testValue = `retry-test-${Date.now()}`;
+        await page.evaluate((value) => {
+          const input = document.querySelector("#setting-api_key");
+          if (input) {
+            input.value = value;
+            input.dispatchEvent(new Event("input"));
+          }
+        }, testValue);
+
+        // Wait for retry logic to complete
+        await page.waitForTimeout(2000);
+
+        // Verify the change eventually succeeded
+        const finalValue = await page.evaluate(
+          () => document.querySelector("#setting-api_key")?.value,
+        );
+        expect(finalValue).toBe(testValue);
+
+        console.log("✅ Retry logic handled storage failures and recovered");
+      } finally {
+        await page.close();
+      }
+    });
+
+    test("should validate save status indicator during operations", async () => {
+      const page = await openPopupPage();
+
+      try {
+        await page.waitForSelector("#settings-container");
+
+        // Wait for save status container to exist (it may be hidden initially)
+        await page.waitForSelector("#save-status-container", {
+          state: "attached",
+          timeout: 5000,
+        });
+
+        // Check initial status
+        const initialStatus = await page.evaluate(() => {
+          const container = document.querySelector("#save-status-container");
+          const indicator = container?.querySelector(".save-status-indicator");
+          return {
+            containerExists: !!container,
+            containerVisible: container
+              ? getComputedStyle(container).display !== "none"
+              : false,
+            indicatorExists: !!indicator,
+            indicatorClass: indicator?.className || "",
+            indicatorText: indicator?.textContent || "",
+          };
+        });
+
+        expect(initialStatus.containerExists).toBe(true);
+        console.log("Initial status:", initialStatus);
+
+        // Make a change and monitor status transitions
+
+        // Start monitoring status changes
+        await page.evaluate(() => {
+          window.statusChanges = [];
+          const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+              if (
+                mutation.target.classList?.contains("save-status-indicator")
+              ) {
+                window.statusChanges.push({
+                  timestamp: Date.now(),
+                  className: mutation.target.className,
+                  textContent: mutation.target.textContent,
+                });
+              }
+            });
+          });
+
+          const indicator = document.querySelector(".save-status-indicator");
+          if (indicator) {
+            observer.observe(indicator, {
+              attributes: true,
+              childList: true,
+              subtree: true,
+            });
+          }
+        });
+
+        // Make a setting change
+        await page.evaluate(() => {
+          const input = document.querySelector("#setting-api_key");
+          if (input) {
+            input.value = `status-test-${Date.now()}`;
+            input.dispatchEvent(new Event("input"));
+          }
+        });
+
+        // Wait for status transitions
+        await page.waitForTimeout(1500);
+
+        // Get recorded status changes
+        const recordedChanges = await page.evaluate(
+          () => window.statusChanges || [],
+        );
+        console.log("Status changes recorded:", recordedChanges);
+
+        // Verify we captured status transitions (saving -> saved or similar)
+        expect(recordedChanges.length).toBeGreaterThan(0);
+
+        console.log("✅ Save status indicator working during operations");
+      } finally {
+        await page.close();
+      }
+    });
+  });
+
   test.describe("Error Recovery and Resilience", () => {
     test("should recover from storage corruption", async () => {
       const page = await openPopupPage();

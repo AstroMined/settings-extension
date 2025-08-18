@@ -198,12 +198,16 @@ describe("Browser API Abstraction Compliance", () => {
       // - UI files: get browserAPI from HTML script tags
       // - Content scripts: get browserAPI from manifest content_scripts injection
       // - config-loader: has getBrowserAPI() method that accesses global scope
+      // - storage-operation-manager: uses dependency injection (browserAPI passed to constructor)
       const isUIFile =
         relativeFile.includes("ui/") ||
         relativeFile.includes("popup/") ||
         relativeFile.includes("options/");
       const isContentScript = relativeFile.includes("content/");
       const hasGlobalBrowserAPIAccessor = /getBrowserAPI\s*\(/g.test(content);
+      // Check for dependency injection pattern (not used but good to track)
+      relativeFile.includes("storage-operation-manager.js") &&
+        /constructor\s*\(\s*browserAPI/.test(content);
 
       if (
         usesBrowserAPI &&

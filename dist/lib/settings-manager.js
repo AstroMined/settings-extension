@@ -4,6 +4,7 @@
 // Browser compatibility layer should already be loaded globally
 // This assumes browser-compat.js is loaded before this script in all contexts
 // This also assumes config-loader.js is loaded before this script
+// This also assumes storage-operation-manager.js, storage-errors.js, and storage-logger.js are loaded
 
 class SettingsManager {
   constructor() {
@@ -12,6 +13,22 @@ class SettingsManager {
     this.initialized = false;
     this.defaultsCache = null;
     this.storageArea = "local"; // Default to local storage
+
+    // Storage operation manager for race condition prevention
+    this.storageManager = null;
+
+    // Auto-save configuration
+    this.autoSaveDebounceTime = 500; // 500ms debounce
+    this.autoSaveTimer = null;
+    this.pendingChanges = new Map();
+    this.lastSaveTime = 0;
+
+    // Save status tracking
+    this.saveStatus = {
+      state: "saved", // "saving", "saved", "pending", "error"
+      lastError: null,
+      pendingCount: 0,
+    };
   }
 
   /**
@@ -48,11 +65,19 @@ class SettingsManager {
    */
   async initialize() {
     try {
+      // Initialize storage operation manager
+      const browserAPI = this.getBrowserAPI();
+      this.storageManager = new StorageOperationManager(browserAPI, {
+        debugMode: false,
+        enableLogging: true,
+        enableMetrics: true,
+      });
+
       // Load defaults from centralized configuration
       const configLoader = new ConfigurationLoader();
       const defaults = await configLoader.loadConfiguration();
 
-      // Get stored settings
+      // Get stored settings using queued operation
       const stored = await this.getStoredSettings();
 
       // Merge defaults with stored settings
@@ -79,6 +104,7 @@ class SettingsManager {
       }
 
       this.initialized = true;
+      this.saveStatus.state = "saved";
       this.notifyListeners("initialized", {
         settings: this.getAllSettingsSync(),
       });
@@ -89,20 +115,27 @@ class SettingsManager {
   }
 
   /**
-   * Get settings from storage
+   * Get settings from storage using storage operation manager
    * @returns {Promise<Object>}
    */
   async getStoredSettings() {
     try {
-      const storage = this.getBrowserAPI().storage[this.storageArea];
-
-      if (!storage) {
-        console.warn(`Storage area '${this.storageArea}' not available`);
-        return {};
+      if (this.storageManager) {
+        const result = await this.storageManager.queueOperation({
+          type: "get",
+          storageArea: this.storageArea,
+        });
+        return result.data || {};
+      } else {
+        // Fallback to direct storage access if storageManager not available
+        const storage = this.getBrowserAPI().storage[this.storageArea];
+        if (!storage) {
+          console.warn(`Storage area '${this.storageArea}' not available`);
+          return {};
+        }
+        const result = await storage.get();
+        return result || {};
       }
-
-      const result = await storage.get();
-      return result || {};
     } catch (error) {
       console.error("Failed to get stored settings:", error);
       return {};
@@ -173,7 +206,7 @@ class SettingsManager {
   }
 
   /**
-   * Update single setting
+   * Update single setting with auto-save debouncing
    * @param {string} key - Setting key
    * @param {*} value - New value
    * @returns {Promise<void>}
@@ -195,15 +228,19 @@ class SettingsManager {
     const updatedSetting = { ...setting, value };
     this.settings.set(key, updatedSetting);
 
-    // Persist to storage
-    await this.persistSetting(key, updatedSetting);
+    // Add to pending changes for auto-save
+    this.pendingChanges.set(key, updatedSetting);
+    this.scheduleAutoSave();
 
-    // Notify listeners
+    // Update save status
+    this.updateSaveStatus("pending", null, this.pendingChanges.size);
+
+    // Notify listeners immediately for UI responsiveness
     this.notifyListeners("updated", { key, value, setting: updatedSetting });
   }
 
   /**
-   * Update multiple settings
+   * Update multiple settings with auto-save debouncing
    * @param {Object} updates - Object with key-value pairs
    * @returns {Promise<void>}
    */
@@ -234,10 +271,16 @@ class SettingsManager {
       this.settings.set(key, setting);
     }
 
-    // Persist to storage
-    await this.persistSettings(validatedUpdates);
+    // Add all to pending changes for auto-save
+    for (const [key, setting] of Object.entries(validatedUpdates)) {
+      this.pendingChanges.set(key, setting);
+    }
+    this.scheduleAutoSave();
 
-    // Notify listeners
+    // Update save status
+    this.updateSaveStatus("pending", null, this.pendingChanges.size);
+
+    // Notify listeners immediately for UI responsiveness
     this.notifyListeners("updated", {
       updates: updatedSettings,
       settings: validatedUpdates,
@@ -263,7 +306,7 @@ class SettingsManager {
   }
 
   /**
-   * Import settings from JSON
+   * Import settings from JSON with auto-save
    * @param {string} jsonData - JSON string with settings
    * @returns {Promise<void>}
    */
@@ -318,8 +361,8 @@ class SettingsManager {
       this.settings.set(key, setting);
     }
 
-    // Persist to storage
-    await this.persistSettings(validSettings);
+    // Force immediate save for imports (high priority)
+    await this.forceSave(validSettings);
 
     // Notify listeners
     this.notifyListeners("imported", {
@@ -330,15 +373,30 @@ class SettingsManager {
   }
 
   /**
-   * Reset all settings to defaults
+   * Reset all settings to defaults using storage operation manager
    * @returns {Promise<void>}
    */
   async resetToDefaults() {
     try {
-      // Clear storage
-      const storage = this.getBrowserAPI().storage[this.storageArea];
-      if (storage) {
-        await storage.clear();
+      // Clear storage using storage operation manager
+      if (this.storageManager) {
+        await this.storageManager.queueOperation({
+          type: "clear",
+          storageArea: this.storageArea,
+        });
+      } else {
+        // Fallback to direct storage access
+        const storage = this.getBrowserAPI().storage[this.storageArea];
+        if (storage) {
+          await storage.clear();
+        }
+      }
+
+      // Clear pending changes
+      this.pendingChanges.clear();
+      if (this.autoSaveTimer) {
+        clearTimeout(this.autoSaveTimer);
+        this.autoSaveTimer = null;
       }
 
       // Reinitialize
@@ -439,41 +497,145 @@ class SettingsManager {
   }
 
   /**
-   * Persist single setting to storage
-   * @param {string} key - Setting key
-   * @param {Object} setting - Setting object
+   * Schedule auto-save with debouncing
+   * @private
+   */
+  scheduleAutoSave() {
+    // Clear existing timer
+    if (this.autoSaveTimer) {
+      clearTimeout(this.autoSaveTimer);
+    }
+
+    // Schedule new save
+    this.autoSaveTimer = setTimeout(async () => {
+      await this.flushPendingChanges();
+    }, this.autoSaveDebounceTime);
+  }
+
+  /**
+   * Flush all pending changes to storage
    * @returns {Promise<void>}
    */
-  async persistSetting(key, setting) {
+  async flushPendingChanges() {
+    if (this.pendingChanges.size === 0) {
+      return;
+    }
+
+    const changes = {};
+    const changedKeys = [];
+
+    // Convert Map to object for storage
+    for (const [key, setting] of this.pendingChanges) {
+      changes[key] = setting;
+      changedKeys.push(key);
+    }
+
+    this.pendingChanges.clear();
+    this.updateSaveStatus("saving", null, 0);
+
     try {
-      const storage = this.getBrowserAPI().storage[this.storageArea];
-      if (!storage) {
-        throw new Error(`Storage area '${this.storageArea}' not available`);
+      // Use storage operation manager for queued persistence
+      if (this.storageManager) {
+        await this.storageManager.queueOperation({
+          type: "set",
+          data: changes,
+          storageArea: this.storageArea,
+        });
+      } else {
+        // Fallback to direct storage access
+        const storage = this.getBrowserAPI().storage[this.storageArea];
+        if (!storage) {
+          throw new Error(`Storage area '${this.storageArea}' not available`);
+        }
+        await storage.set(changes);
       }
 
-      await storage.set({ [key]: setting });
+      this.lastSaveTime = Date.now();
+      this.updateSaveStatus("saved", null, 0);
+
+      console.debug("Auto-save completed for keys:", changedKeys);
+      this.notifyListeners("saved", {
+        keys: changedKeys,
+        timestamp: this.lastSaveTime,
+      });
     } catch (error) {
-      console.error("Failed to persist setting:", error);
+      console.error("Auto-save failed:", error);
+
+      // Re-queue failed changes
+      for (const [key, setting] of Object.entries(changes)) {
+        this.pendingChanges.set(key, setting);
+      }
+
+      this.updateSaveStatus("error", error, this.pendingChanges.size);
+
+      // Notify listeners of save failure
+      this.notifyListeners("save-failed", {
+        error: error.message,
+        keys: changedKeys,
+        timestamp: Date.now(),
+      });
+
+      // Retry after delay
+      setTimeout(() => {
+        this.scheduleAutoSave();
+      }, 2000);
+
       throw error;
     }
   }
 
   /**
-   * Persist multiple settings to storage
-   * @param {Object} settings - Settings object
+   * Force immediate save of pending changes or specific settings
+   * @param {Object} specificSettings - Optional specific settings to save
    * @returns {Promise<void>}
    */
-  async persistSettings(settings) {
-    try {
-      const storage = this.getBrowserAPI().storage[this.storageArea];
-      if (!storage) {
-        throw new Error(`Storage area '${this.storageArea}' not available`);
-      }
+  async forceSave(specificSettings = null) {
+    // Clear debounce timer
+    if (this.autoSaveTimer) {
+      clearTimeout(this.autoSaveTimer);
+      this.autoSaveTimer = null;
+    }
 
-      await storage.set(settings);
-    } catch (error) {
-      console.error("Failed to persist settings:", error);
-      throw error;
+    if (specificSettings) {
+      // Save specific settings immediately
+      try {
+        if (this.storageManager) {
+          await this.storageManager.queueOperation(
+            {
+              type: "set",
+              data: specificSettings,
+              storageArea: this.storageArea,
+            },
+            this.storageManager.PRIORITY?.HIGH || 1,
+          ); // High priority for force save
+        } else {
+          // Fallback to direct storage access
+          const storage = this.getBrowserAPI().storage[this.storageArea];
+          if (!storage) {
+            throw new Error(`Storage area '${this.storageArea}' not available`);
+          }
+          await storage.set(specificSettings);
+        }
+
+        this.lastSaveTime = Date.now();
+        this.updateSaveStatus("saved", null, this.pendingChanges.size);
+
+        console.debug(
+          "Force save completed for keys:",
+          Object.keys(specificSettings),
+        );
+        this.notifyListeners("saved", {
+          keys: Object.keys(specificSettings),
+          timestamp: this.lastSaveTime,
+          forced: true,
+        });
+      } catch (error) {
+        this.updateSaveStatus("error", error, this.pendingChanges.size);
+        throw error;
+      }
+    } else {
+      // Save all pending changes
+      await this.flushPendingChanges();
     }
   }
 
@@ -530,11 +692,86 @@ class SettingsManager {
   }
 
   /**
-   * Check storage quota usage
+   * Update save status and notify listeners
+   * @param {string} state - Save state ("saving", "saved", "pending", "error")
+   * @param {Error} error - Error object if state is "error"
+   * @param {number} pendingCount - Number of pending changes
+   */
+  updateSaveStatus(state, error = null, pendingCount = 0) {
+    const previousState = this.saveStatus.state;
+
+    this.saveStatus = {
+      state,
+      lastError: error,
+      pendingCount,
+      timestamp: Date.now(),
+    };
+
+    // Notify listeners of save status change
+    if (previousState !== state) {
+      this.notifyListeners("save-status-changed", { ...this.saveStatus });
+    }
+  }
+
+  /**
+   * Check if there are pending changes
+   * @returns {boolean}
+   */
+  hasPendingChanges() {
+    return this.pendingChanges.size > 0;
+  }
+
+  /**
+   * Get list of keys with pending changes
+   * @returns {Array<string>}
+   */
+  getPendingChanges() {
+    return Array.from(this.pendingChanges.keys());
+  }
+
+  /**
+   * Get current save status
+   * @returns {Object}
+   */
+  getSaveStatus() {
+    return { ...this.saveStatus };
+  }
+
+  /**
+   * Check storage quota usage using storage operation manager
    * @returns {Promise<Object>}
    */
   async checkStorageQuota() {
-    return await this.getBrowserAPI().utils.checkStorageQuota(this.storageArea);
+    try {
+      if (this.storageManager) {
+        const result = await this.storageManager.queueOperation({
+          type: "getBytesInUse",
+          storageArea: this.storageArea,
+        });
+
+        const quota = this.storageArea === "local" ? 5242880 : 102400; // 5MB local, 100KB sync
+        const used = result.bytesInUse || 0;
+
+        return {
+          available: used < quota * 0.9,
+          used,
+          quota,
+          percentUsed: (used / quota) * 100,
+        };
+      } else {
+        return await this.getBrowserAPI().utils.checkStorageQuota(
+          this.storageArea,
+        );
+      }
+    } catch (error) {
+      console.warn("Storage quota check failed:", error);
+      return {
+        available: true,
+        used: 0,
+        quota: "unknown",
+        error: error.message,
+      };
+    }
   }
 
   /**
@@ -543,20 +780,19 @@ class SettingsManager {
    */
   async getStorageStats() {
     try {
-      const storage = this.getBrowserAPI().storage[this.storageArea];
-      if (!storage || !storage.getBytesInUse) {
-        return { error: "Storage statistics not available" };
-      }
-
-      const totalBytes = await storage.getBytesInUse();
-      const settingsCount = this.settings.size;
       const quota = await this.checkStorageQuota();
+      const settingsCount = this.settings.size;
+      const storageMetrics = this.storageManager?.getMetrics?.() || null;
 
       return {
-        totalBytes,
+        totalBytes: quota.used || 0,
         settingsCount,
         quota,
-        averageSettingSize: settingsCount > 0 ? totalBytes / settingsCount : 0,
+        averageSettingSize:
+          settingsCount > 0 && quota.used ? quota.used / settingsCount : 0,
+        pendingChanges: this.pendingChanges.size,
+        saveStatus: this.getSaveStatus(),
+        storageMetrics,
       };
     } catch (error) {
       console.error("Failed to get storage stats:", error);
@@ -565,13 +801,47 @@ class SettingsManager {
   }
 
   /**
-   * Cleanup and destroy
+   * Cleanup and destroy with proper resource management
    */
   destroy() {
+    // Clear auto-save timer
+    if (this.autoSaveTimer) {
+      clearTimeout(this.autoSaveTimer);
+      this.autoSaveTimer = null;
+    }
+
+    // Force save any pending changes before cleanup
+    if (this.pendingChanges.size > 0) {
+      console.warn(
+        "Destroying SettingsManager with pending changes. Attempting force save...",
+      );
+      this.flushPendingChanges().catch((error) => {
+        console.error("Failed to save pending changes during destroy:", error);
+      });
+    }
+
+    // Cleanup storage operation manager
+    if (
+      this.storageManager &&
+      typeof this.storageManager.destroy === "function"
+    ) {
+      this.storageManager.destroy();
+    }
+
+    // Clear all data structures
     this.listeners.clear();
     this.settings.clear();
+    this.pendingChanges.clear();
+
+    // Reset state
     this.initialized = false;
     this.defaultsCache = null;
+    this.storageManager = null;
+    this.saveStatus = {
+      state: "saved",
+      lastError: null,
+      pendingCount: 0,
+    };
   }
 }
 

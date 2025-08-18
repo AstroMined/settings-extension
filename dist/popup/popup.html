@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=380, initial-scale=1.0, user-scalable=no">
     <title>Settings Extension</title>
     <link rel="stylesheet" href="popup.css">
+    <link rel="stylesheet" href="../components/save-status-indicator.css">
 </head>
 <body>
     <div class="popup-container">
@@ -56,9 +57,16 @@
                 </button>
             </div>
         </footer>
+        
+        <!-- Save status indicator container -->
+        <div id="save-status-container"></div>
     </div>
 
     <script src="../lib/browser-compat.js"></script>
+    <script src="../lib/storage-errors.js"></script>
+    <script src="../lib/storage-logger.js"></script>
+    <script src="../lib/storage-operation-manager.js"></script>
+    <script src="../components/save-status-indicator.js"></script>
     <script src="../lib/error-handler.js"></script>
     <script src="popup.js"></script>
 </body>
