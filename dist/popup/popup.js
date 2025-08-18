@@ -5,12 +5,40 @@ class SettingsPopup {
     this.currentSettings = new Map();
     this.validationErrors = new Map();
     this.isInitialized = false;
+    this.saveStatusIndicator = null;
 
     // Small delay to ensure DOM is fully ready (fixes race condition)
     setTimeout(() => {
       this.setupEventListeners();
+      this.initializeSaveStatusIndicator();
       this.initialize();
     }, 0);
+  }
+
+  /**
+   * Initialize save status indicator
+   */
+  initializeSaveStatusIndicator() {
+    try {
+      const container = document.getElementById("save-status-container");
+      if (container && typeof SaveStatusIndicator !== "undefined") {
+        this.saveStatusIndicator = new SaveStatusIndicator(container, {
+          position: "top-right",
+          autoHide: true,
+          autoHideDelay: 3000,
+          showRetry: true,
+          enableToasts: false, // Disabled in popup due to space constraints
+          onRetry: () => this.retrySave(),
+          onDismiss: () => this.dismissSaveStatus(),
+        });
+
+        console.debug("Save status indicator initialized");
+      } else {
+        console.warn("Save status indicator not available");
+      }
+    } catch (error) {
+      console.error("Failed to initialize save status indicator:", error);
+    }
   }
 
   async initialize() {
@@ -24,11 +52,25 @@ class SettingsPopup {
       this.renderSettings();
       this.hideLoading();
       this.isInitialized = true;
+
+      // Initialize save status as saved
+      if (this.saveStatusIndicator) {
+        this.saveStatusIndicator.showSaved();
+      }
+
       console.debug("Popup initialized successfully");
     } catch (error) {
       console.error("Failed to initialize popup:", error);
       this.showError(`Failed to initialize: ${error.message}`);
       this.hideLoading();
+
+      // Show error in save status indicator
+      if (this.saveStatusIndicator) {
+        this.saveStatusIndicator.showError(
+          error,
+          "Failed to initialize settings",
+        );
+      }
     }
   }
 
@@ -382,13 +424,28 @@ class SettingsPopup {
       // Validate the value
       this.validateValue(setting, value);
 
+      // Show saving status
+      if (this.saveStatusIndicator) {
+        this.saveStatusIndicator.showSaving();
+      }
+
       // Update the setting
       await this.updateSetting(key, value);
+
+      // Show saved status
+      if (this.saveStatusIndicator) {
+        this.saveStatusIndicator.showSaved();
+      }
 
       // Clear any validation errors
       this.clearValidationError(key);
     } catch (error) {
       this.setValidationError(key, error.message);
+
+      // Show error in save status indicator
+      if (this.saveStatusIndicator) {
+        this.saveStatusIndicator.showError(error, `Failed to save ${key}`);
+      }
     }
   }
 
@@ -523,6 +580,13 @@ class SettingsPopup {
 
   async exportSettings() {
     try {
+      // Show saving status during export
+      if (this.saveStatusIndicator) {
+        this.saveStatusIndicator.updateStatus("saving", {
+          message: "Exporting settings...",
+        });
+      }
+
       const response = await browserAPI.runtime.sendMessage({
         type: "EXPORT_SETTINGS",
       });
@@ -540,10 +604,22 @@ class SettingsPopup {
       a.click();
 
       URL.revokeObjectURL(url);
+
+      // Show success
+      if (this.saveStatusIndicator) {
+        this.saveStatusIndicator.updateStatus("saved", {
+          message: "Settings exported successfully",
+        });
+      }
       this.showSuccess("Settings exported successfully");
     } catch (error) {
       console.error("Export failed:", error);
       this.showError(`Export failed: ${error.message}`);
+
+      // Show error in save status indicator
+      if (this.saveStatusIndicator) {
+        this.saveStatusIndicator.showError(error, "Export failed");
+      }
     }
   }
 
@@ -558,6 +634,13 @@ class SettingsPopup {
         if (!file) return;
 
         try {
+          // Show saving status during import
+          if (this.saveStatusIndicator) {
+            this.saveStatusIndicator.updateStatus("saving", {
+              message: "Importing settings...",
+            });
+          }
+
           const content = await file.text();
           const response = await browserAPI.runtime.sendMessage({
             type: "IMPORT_SETTINGS",
@@ -570,10 +653,22 @@ class SettingsPopup {
 
           await this.loadSettings();
           this.renderSettings();
+
+          // Show success
+          if (this.saveStatusIndicator) {
+            this.saveStatusIndicator.updateStatus("saved", {
+              message: "Settings imported successfully",
+            });
+          }
           this.showSuccess("Settings imported successfully");
         } catch (error) {
           console.error("Import failed:", error);
           this.showError(`Import failed: ${error.message}`);
+
+          // Show error in save status indicator
+          if (this.saveStatusIndicator) {
+            this.saveStatusIndicator.showError(error, "Import failed");
+          }
         }
       });
 
@@ -581,6 +676,11 @@ class SettingsPopup {
     } catch (error) {
       console.error("Error in importSettings method:", error);
       this.showError(`Import setup failed: ${error.message}`);
+
+      // Show error in save status indicator
+      if (this.saveStatusIndicator) {
+        this.saveStatusIndicator.showError(error, "Import setup failed");
+      }
     }
   }
 
@@ -607,6 +707,13 @@ class SettingsPopup {
     }
 
     try {
+      // Show saving status during reset
+      if (this.saveStatusIndicator) {
+        this.saveStatusIndicator.updateStatus("saving", {
+          message: "Resetting settings...",
+        });
+      }
+
       const response = await new Promise((resolve, reject) => {
         browserAPI.runtime
           .sendMessage({
@@ -622,10 +729,22 @@ class SettingsPopup {
 
       await this.loadSettings();
       this.renderSettings();
+
+      // Show success
+      if (this.saveStatusIndicator) {
+        this.saveStatusIndicator.updateStatus("saved", {
+          message: "Settings reset to defaults",
+        });
+      }
       this.showSuccess("Settings reset to defaults");
     } catch (error) {
       console.error("Reset failed:", error);
       this.showError(`Reset failed: ${error.message}`);
+
+      // Show error in save status indicator
+      if (this.saveStatusIndicator) {
+        this.saveStatusIndicator.showError(error, "Reset failed");
+      }
     }
   }
 
@@ -746,9 +865,72 @@ class SettingsPopup {
   }
 
   /**
+   * Retry failed save operation
+   */
+  async retrySave() {
+    try {
+      console.debug("Retrying save operation");
+
+      if (this.saveStatusIndicator) {
+        this.saveStatusIndicator.showSaving();
+      }
+
+      // Force a settings reload and re-render to trigger save
+      await this.loadSettings();
+      this.renderSettings();
+
+      if (this.saveStatusIndicator) {
+        this.saveStatusIndicator.showSaved();
+      }
+
+      this.showSuccess("Settings synchronized successfully");
+    } catch (error) {
+      console.error("Retry save failed:", error);
+
+      if (this.saveStatusIndicator) {
+        this.saveStatusIndicator.showError(error, "Retry failed");
+      }
+
+      this.showError(`Retry failed: ${error.message}`);
+    }
+  }
+
+  /**
+   * Dismiss save status indicator
+   */
+  dismissSaveStatus() {
+    console.debug("Save status dismissed by user");
+  }
+
+  /**
+   * Get save status indicator instance for external access
+   * @returns {SaveStatusIndicator|null}
+   */
+  getSaveStatusIndicator() {
+    return this.saveStatusIndicator;
+  }
+
+  /**
+   * Update save status based on external events
+   * @param {string} status - Status to set
+   * @param {Object} options - Additional options
+   */
+  updateSaveStatus(status, options = {}) {
+    if (this.saveStatusIndicator) {
+      this.saveStatusIndicator.updateStatus(status, options);
+    }
+  }
+
+  /**
    * Cleanup method for proper resource management
    */
   cleanup() {
+    // Cleanup save status indicator
+    if (this.saveStatusIndicator) {
+      this.saveStatusIndicator.destroy();
+      this.saveStatusIndicator = null;
+    }
+
     if (this.currentSettings) {
       this.currentSettings.clear();
     }

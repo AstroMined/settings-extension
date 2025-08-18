@@ -8,9 +8,37 @@ class SettingsOptions {
     this.currentTab = "general";
     this.configLoader = null;
     this.categories = [];
+    this.saveStatusIndicator = null;
 
     this.setupEventListeners();
+    this.initializeSaveStatusIndicator();
     this.initialize();
+  }
+
+  /**
+   * Initialize save status indicator
+   */
+  initializeSaveStatusIndicator() {
+    try {
+      const container = document.getElementById("save-status-container");
+      if (container && typeof SaveStatusIndicator !== "undefined") {
+        this.saveStatusIndicator = new SaveStatusIndicator(container, {
+          position: "bottom-right",
+          autoHide: true,
+          autoHideDelay: 4000,
+          showRetry: true,
+          enableToasts: true,
+          onRetry: () => this.retrySave(),
+          onDismiss: () => this.dismissSaveStatus(),
+        });
+
+        console.debug("Save status indicator initialized for options page");
+      } else {
+        console.warn("Save status indicator not available in options page");
+      }
+    } catch (error) {
+      console.error("Failed to initialize save status indicator:", error);
+    }
   }
 
   async initialize() {
@@ -31,6 +59,12 @@ class SettingsOptions {
       this.showTab(this.currentTab);
       this.hideLoading();
       this.isInitialized = true;
+
+      // Initialize save status as saved
+      if (this.saveStatusIndicator) {
+        this.saveStatusIndicator.showSaved();
+      }
+
       console.log("Options page initialized successfully");
     } catch (error) {
       // Standardized error handling for options page initialization
@@ -52,6 +86,14 @@ class SettingsOptions {
                 "Failed to load settings. Please refresh the page.",
               );
               this.hideLoading();
+
+              // Show error in save status indicator
+              if (this.saveStatusIndicator) {
+                this.saveStatusIndicator.showError(
+                  error,
+                  "Failed to initialize settings",
+                );
+              }
             },
           },
         );
@@ -373,12 +415,27 @@ class SettingsOptions {
       this.pendingChanges.set(key, value);
       this.updateSaveButton();
 
+      // Show pending status
+      if (this.saveStatusIndicator) {
+        this.saveStatusIndicator.updateStatus("pending", {
+          message: `${this.pendingChanges.size} unsaved changes`,
+        });
+      }
+
       // Clear any validation errors
       this.clearValidationError(key);
     } catch (error) {
       this.setValidationError(key, error.message);
       this.pendingChanges.delete(key);
       this.updateSaveButton();
+
+      // Show validation error in save status indicator
+      if (this.saveStatusIndicator) {
+        this.saveStatusIndicator.showError(
+          error,
+          `Validation failed for ${key}`,
+        );
+      }
     }
   }
 
@@ -468,6 +525,12 @@ class SettingsOptions {
 
     try {
       const updates = Object.fromEntries(this.pendingChanges);
+      const changeCount = Object.keys(updates).length;
+
+      // Show saving status
+      if (this.saveStatusIndicator) {
+        this.saveStatusIndicator.showSaving();
+      }
 
       const response = await browserAPI.runtime.sendMessage({
         type: "UPDATE_SETTINGS",
@@ -487,9 +550,15 @@ class SettingsOptions {
 
       this.pendingChanges.clear();
       this.updateSaveButton();
-      this.showSuccess(
-        `Successfully saved ${Object.keys(updates).length} setting(s)`,
-      );
+
+      // Show saved status
+      if (this.saveStatusIndicator) {
+        this.saveStatusIndicator.updateStatus("saved", {
+          message: `${changeCount} settings saved successfully`,
+        });
+      }
+
+      this.showSuccess(`Successfully saved ${changeCount} setting(s)`);
     } catch (error) {
       // Standardized error handling for settings save
       if (typeof ErrorHandler !== "undefined") {
@@ -506,6 +575,11 @@ class SettingsOptions {
             rethrow: false,
             fallbackAction: () => {
               this.showError(`Save failed: ${error.message}`);
+
+              // Show error in save status indicator
+              if (this.saveStatusIndicator) {
+                this.saveStatusIndicator.showError(error, "Save failed");
+              }
             },
           },
         );
@@ -593,6 +667,13 @@ class SettingsOptions {
 
   async exportSettings() {
     try {
+      // Show saving status during export
+      if (this.saveStatusIndicator) {
+        this.saveStatusIndicator.updateStatus("saving", {
+          message: "Exporting settings...",
+        });
+      }
+
       const response = await browserAPI.runtime.sendMessage({
         type: "EXPORT_SETTINGS",
       });
@@ -610,6 +691,14 @@ class SettingsOptions {
       a.click();
 
       URL.revokeObjectURL(url);
+
+      // Show success
+      if (this.saveStatusIndicator) {
+        this.saveStatusIndicator.updateStatus("saved", {
+          message: "Settings exported successfully",
+        });
+      }
+
       this.showSuccess("Settings exported successfully");
     } catch (error) {
       // Standardized error handling for settings export
@@ -627,6 +716,11 @@ class SettingsOptions {
             rethrow: false,
             fallbackAction: () => {
               this.showError(`Export failed: ${error.message}`);
+
+              // Show error in save status indicator
+              if (this.saveStatusIndicator) {
+                this.saveStatusIndicator.showError(error, "Export failed");
+              }
             },
           },
         );
@@ -647,6 +741,13 @@ class SettingsOptions {
       if (!file) return;
 
       try {
+        // Show saving status during import
+        if (this.saveStatusIndicator) {
+          this.saveStatusIndicator.updateStatus("saving", {
+            message: "Importing settings...",
+          });
+        }
+
         const content = await file.text();
 
         const response = await browserAPI.runtime.sendMessage({
@@ -662,6 +763,14 @@ class SettingsOptions {
         this.renderAllSettings();
         this.pendingChanges.clear();
         this.updateSaveButton();
+
+        // Show success
+        if (this.saveStatusIndicator) {
+          this.saveStatusIndicator.updateStatus("saved", {
+            message: "Settings imported successfully",
+          });
+        }
+
         this.showSuccess("Settings imported successfully");
       } catch (error) {
         // Standardized error handling for settings import
@@ -680,6 +789,11 @@ class SettingsOptions {
               rethrow: false,
               fallbackAction: () => {
                 this.showError(`Import failed: ${error.message}`);
+
+                // Show error in save status indicator
+                if (this.saveStatusIndicator) {
+                  this.saveStatusIndicator.showError(error, "Import failed");
+                }
               },
             },
           );
@@ -703,6 +817,13 @@ class SettingsOptions {
     }
 
     try {
+      // Show saving status during reset
+      if (this.saveStatusIndicator) {
+        this.saveStatusIndicator.updateStatus("saving", {
+          message: "Resetting settings...",
+        });
+      }
+
       const response = await browserAPI.runtime.sendMessage({
         type: "RESET_SETTINGS",
       });
@@ -715,6 +836,14 @@ class SettingsOptions {
       this.renderAllSettings();
       this.pendingChanges.clear();
       this.updateSaveButton();
+
+      // Show success
+      if (this.saveStatusIndicator) {
+        this.saveStatusIndicator.updateStatus("saved", {
+          message: "Settings reset to defaults",
+        });
+      }
+
       this.showSuccess("Settings reset to defaults");
     } catch (error) {
       // Standardized error handling for settings reset
@@ -733,6 +862,11 @@ class SettingsOptions {
             rethrow: false,
             fallbackAction: () => {
               this.showError(`Reset failed: ${error.message}`);
+
+              // Show error in save status indicator
+              if (this.saveStatusIndicator) {
+                this.saveStatusIndicator.showError(error, "Reset failed");
+              }
             },
           },
         );
@@ -819,9 +953,116 @@ class SettingsOptions {
       }
     });
   }
+
+  /**
+   * Retry failed save operation
+   */
+  async retrySave() {
+    try {
+      console.debug("Retrying save operation in options page");
+
+      if (this.saveStatusIndicator) {
+        this.saveStatusIndicator.showSaving();
+      }
+
+      // If there are pending changes, save them; otherwise reload settings
+      if (this.pendingChanges.size > 0) {
+        await this.saveAllChanges();
+      } else {
+        await this.loadSettings();
+        this.renderAllSettings();
+
+        if (this.saveStatusIndicator) {
+          this.saveStatusIndicator.showSaved();
+        }
+      }
+
+      this.showSuccess("Settings synchronized successfully");
+    } catch (error) {
+      console.error("Retry save failed:", error);
+
+      if (this.saveStatusIndicator) {
+        this.saveStatusIndicator.showError(error, "Retry failed");
+      }
+
+      this.showError(`Retry failed: ${error.message}`);
+    }
+  }
+
+  /**
+   * Dismiss save status indicator
+   */
+  dismissSaveStatus() {
+    console.debug("Save status dismissed by user in options page");
+  }
+
+  /**
+   * Get save status indicator instance for external access
+   * @returns {SaveStatusIndicator|null}
+   */
+  getSaveStatusIndicator() {
+    return this.saveStatusIndicator;
+  }
+
+  /**
+   * Update save status based on external events
+   * @param {string} status - Status to set
+   * @param {Object} options - Additional options
+   */
+  updateSaveStatus(status, options = {}) {
+    if (this.saveStatusIndicator) {
+      this.saveStatusIndicator.updateStatus(status, options);
+    }
+  }
+
+  /**
+   * Cleanup method for proper resource management
+   */
+  cleanup() {
+    // Cleanup save status indicator
+    if (this.saveStatusIndicator) {
+      this.saveStatusIndicator.destroy();
+      this.saveStatusIndicator = null;
+    }
+
+    if (this.currentSettings) {
+      this.currentSettings.clear();
+    }
+
+    if (this.pendingChanges) {
+      this.pendingChanges.clear();
+    }
+  }
 }
 
 // Initialize the options page when the DOM is ready
-document.addEventListener("DOMContentLoaded", () => {
-  new SettingsOptions();
-});
+(function () {
+  "use strict";
+
+  let settingsOptionsInstance = null;
+
+  function cleanup() {
+    if (
+      settingsOptionsInstance &&
+      typeof settingsOptionsInstance.cleanup === "function"
+    ) {
+      settingsOptionsInstance.cleanup();
+    }
+    settingsOptionsInstance = null;
+  }
+
+  // Cleanup on page unload
+  window.addEventListener("beforeunload", cleanup);
+
+  document.addEventListener("DOMContentLoaded", () => {
+    try {
+      if (!settingsOptionsInstance) {
+        settingsOptionsInstance = new SettingsOptions();
+        // Expose for testing
+        window.settingsOptionsInstance = settingsOptionsInstance;
+      }
+    } catch (error) {
+      console.error("Error creating SettingsOptions instance:", error);
+    }
+  });
+})();

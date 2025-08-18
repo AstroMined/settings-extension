@@ -1,0 +1,491 @@
+/* ui/components/save-status-indicator.css */
+/* Save status indicator component styling */
+
+/* Base styles */
+.save-status-indicator {
+  position: fixed;
+  z-index: 10000;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 14px;
+  line-height: 1.4;
+  max-width: 320px;
+  min-width: 200px;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(8px);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  opacity: 0;
+  transform: translateY(-10px);
+  pointer-events: none;
+  user-select: none;
+}
+
+/* Position variants */
+.save-status-indicator.top-right {
+  top: 20px;
+  right: 20px;
+}
+
+.save-status-indicator.top-left {
+  top: 20px;
+  left: 20px;
+}
+
+.save-status-indicator.bottom-right {
+  bottom: 20px;
+  right: 20px;
+}
+
+.save-status-indicator.bottom-left {
+  bottom: 20px;
+  left: 20px;
+}
+
+/* Visible state */
+.save-status-indicator.visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+/* Status-specific styles */
+.save-status-indicator.saved {
+  background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+  border: 1px solid #b8dacc;
+  color: #155724;
+}
+
+.save-status-indicator.saving {
+  background: linear-gradient(135deg, #cce7ff 0%, #99d6ff 100%);
+  border: 1px solid #7cc7ff;
+  color: #004085;
+}
+
+.save-status-indicator.pending {
+  background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+  border: 1px solid #ffdf7e;
+  color: #856404;
+}
+
+.save-status-indicator.error {
+  background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+  border: 1px solid #f1aeb5;
+  color: #721c24;
+}
+
+/* Content layout */
+.save-status-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  position: relative;
+}
+
+/* Icon container */
+.save-status-icon-container {
+  position: relative;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+/* Status icons */
+.save-status-icon {
+  display: block;
+  font-size: 16px;
+  font-weight: bold;
+  text-align: center;
+  line-height: 20px;
+}
+
+.save-status-indicator.saved .save-status-icon::before {
+  content: "✓";
+  color: #28a745;
+}
+
+.save-status-indicator.pending .save-status-icon::before {
+  content: "⏳";
+  animation: save-status-pulse 2s ease-in-out infinite;
+}
+
+.save-status-indicator.error .save-status-icon::before {
+  content: "⚠";
+  color: #dc3545;
+  animation: save-status-shake 0.5s ease-in-out;
+}
+
+/* Spinner for saving state */
+.save-status-spinner {
+  display: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 20px;
+  height: 20px;
+}
+
+.save-status-spinner-dot {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: currentColor;
+  animation: save-status-spinner 1.2s ease-in-out infinite;
+}
+
+.save-status-spinner-dot:nth-child(1) {
+  top: 8px;
+  left: 2px;
+  animation-delay: -0.4s;
+}
+
+.save-status-spinner-dot:nth-child(2) {
+  top: 8px;
+  left: 8px;
+  animation-delay: -0.2s;
+}
+
+.save-status-spinner-dot:nth-child(3) {
+  top: 8px;
+  left: 14px;
+  animation-delay: 0s;
+}
+
+/* Status text */
+.save-status-text {
+  flex: 1;
+  font-weight: 500;
+  min-width: 0; /* Allow text to shrink */
+  word-wrap: break-word;
+}
+
+/* Action buttons */
+.save-status-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.save-status-retry-btn,
+.save-status-dismiss-btn {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.save-status-retry-btn:hover,
+.save-status-dismiss-btn:hover {
+  background: rgba(0, 0, 0, 0.2);
+  transform: scale(1.1);
+}
+
+.save-status-retry-btn:active,
+.save-status-dismiss-btn:active {
+  transform: scale(0.95);
+}
+
+/* Progress bar */
+.save-status-progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 0 0 8px 8px;
+  overflow: hidden;
+}
+
+.save-status-progress-bar {
+  height: 100%;
+  background: currentColor;
+  opacity: 0.7;
+  transform: translateX(-100%);
+}
+
+/* Toast notifications */
+.save-status-toast {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10001;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 12px 20px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  backdrop-filter: blur(8px);
+  transition: all 0.3s ease;
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.9);
+  pointer-events: none;
+}
+
+.save-status-toast.visible {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+/* Screen reader only content */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Animations */
+@keyframes save-status-spinner {
+  0%,
+  80%,
+  100% {
+    opacity: 0.3;
+    transform: scale(0.8);
+  }
+  40% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes save-status-progress {
+  0% {
+    transform: translateX(-100%);
+  }
+  50% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes save-status-pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.1);
+  }
+}
+
+@keyframes save-status-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  10%,
+  30%,
+  50%,
+  70%,
+  90% {
+    transform: translateX(-2px);
+  }
+  20%,
+  40%,
+  60%,
+  80% {
+    transform: translateX(2px);
+  }
+}
+
+@keyframes save-status-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes save-status-fade-out {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .save-status-indicator.saved {
+    background: linear-gradient(135deg, #1e4a2a 0%, #2d5f3a 100%);
+    border-color: #3a7c4a;
+    color: #95d3a8;
+  }
+
+  .save-status-indicator.saving {
+    background: linear-gradient(135deg, #1e3a5f 0%, #2d4a7c 100%);
+    border-color: #3a5f9a;
+    color: #95c3f0;
+  }
+
+  .save-status-indicator.pending {
+    background: linear-gradient(135deg, #5f4a1e 0%, #7c6a2d 100%);
+    border-color: #9a7f3a;
+    color: #f0d395;
+  }
+
+  .save-status-indicator.error {
+    background: linear-gradient(135deg, #5f1e2a 0%, #7c2d3a 100%);
+    border-color: #9a3a4a;
+    color: #f095a8;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .save-status-indicator {
+    border-width: 2px;
+    box-shadow: 0 0 0 1px #000;
+  }
+
+  .save-status-retry-btn,
+  .save-status-dismiss-btn {
+    border: 1px solid currentColor;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .save-status-indicator,
+  .save-status-icon,
+  .save-status-spinner-dot,
+  .save-status-progress-bar,
+  .save-status-toast {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .save-status-indicator.visible {
+    transform: none;
+  }
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .save-status-indicator {
+    max-width: calc(100vw - 40px);
+    font-size: 13px;
+  }
+
+  .save-status-indicator.top-right,
+  .save-status-indicator.top-left {
+    top: 10px;
+  }
+
+  .save-status-indicator.top-right,
+  .save-status-indicator.bottom-right {
+    right: 10px;
+  }
+
+  .save-status-indicator.top-left,
+  .save-status-indicator.bottom-left {
+    left: 10px;
+  }
+
+  .save-status-indicator.bottom-right,
+  .save-status-indicator.bottom-left {
+    bottom: 10px;
+  }
+
+  .save-status-content {
+    padding: 10px 12px;
+    gap: 10px;
+  }
+}
+
+/* Print styles - hide indicators */
+@media print {
+  .save-status-indicator,
+  .save-status-toast {
+    display: none !important;
+  }
+}
+
+/* Focus management for accessibility */
+.save-status-indicator:focus-within {
+  outline: 2px solid #0066cc;
+  outline-offset: 2px;
+}
+
+.save-status-retry-btn:focus,
+.save-status-dismiss-btn:focus {
+  outline: 2px solid #0066cc;
+  outline-offset: 1px;
+}
+
+/* RTL language support */
+[dir="rtl"] .save-status-indicator.top-right {
+  right: auto;
+  left: 20px;
+}
+
+[dir="rtl"] .save-status-indicator.top-left {
+  left: auto;
+  right: 20px;
+}
+
+[dir="rtl"] .save-status-indicator.bottom-right {
+  right: auto;
+  left: 20px;
+}
+
+[dir="rtl"] .save-status-indicator.bottom-left {
+  left: auto;
+  right: 20px;
+}
+
+/* Compact variant for smaller spaces */
+.save-status-indicator.compact {
+  min-width: 150px;
+  font-size: 12px;
+}
+
+.save-status-indicator.compact .save-status-content {
+  padding: 8px 12px;
+  gap: 8px;
+}
+
+.save-status-indicator.compact .save-status-icon-container {
+  width: 16px;
+  height: 16px;
+}
+
+.save-status-indicator.compact .save-status-icon {
+  font-size: 14px;
+  line-height: 16px;
+}
+
+.save-status-indicator.compact .save-status-retry-btn,
+.save-status-indicator.compact .save-status-dismiss-btn {
+  width: 20px;
+  height: 20px;
+  font-size: 12px;
+}

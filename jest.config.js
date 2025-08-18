@@ -18,6 +18,11 @@ module.exports = {
     "<rootDir>/test/settings-manager.test.js",
     "<rootDir>/test/race-condition.test.js",
     "<rootDir>/test/browser-api-compliance.test.js",
+    "<rootDir>/test/storage-operation-manager.test.js",
+    "<rootDir>/test/storage-errors.test.js",
+    "<rootDir>/test/storage-logger.test.js",
+    "<rootDir>/test/save-status-indicator.test.js",
+    "<rootDir>/test/performance/**/*.test.js",
     // Other pure function tests would go here
     // storage.test.js moved to E2E (browser integration)
   ],
@@ -82,8 +87,8 @@ module.exports = {
   // Coverage directory
   coverageDirectory: "coverage",
 
-  // Test timeout
-  testTimeout: 10000,
+  // Test timeout - longer for performance tests
+  testTimeout: 30000,
 
   // Transform configuration
   transform: {

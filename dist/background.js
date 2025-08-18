@@ -71,6 +71,9 @@ browserAPI.alarms.onAlarm.addListener((alarm) => {
 
 // Import remaining dependencies
 importScripts(
+  "lib/storage-errors.js",
+  "lib/storage-logger.js",
+  "lib/storage-operation-manager.js",
   "lib/error-handler.js",
   "lib/config-loader.js",
   "lib/settings-manager.js",

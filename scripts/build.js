@@ -21,6 +21,7 @@ const dirsToRecursiveCopy = [
   { src: "src/lib", dest: "lib" },
   { src: "src/ui/popup", dest: "popup" },
   { src: "src/ui/options", dest: "options" },
+  { src: "src/ui/components", dest: "components" },
   { src: "src/config", dest: "config" },
   { src: "src/assets/icons", dest: "icons" },
 ];
