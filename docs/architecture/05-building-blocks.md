@@ -7,7 +7,7 @@ This document describes the static structure of the Settings Extension, includin
 ## Scope
 
 - **Applies to**: Static architecture and component structure
-- **Last Updated**: 2025-08-11
+- **Last Updated**: 2025-08-18
 - **Status**: Approved
 
 ## Level 1: System Overview
@@ -320,6 +320,28 @@ The Core Library Subsystem implements the core business logic and data managemen
   }
   ```
 
+**Storage Reliability Layer (Story 003)**
+
+- **StorageOperationManager**: `lib/storage-operation-manager.js`
+  - Operation queuing with race condition prevention
+  - Retry logic with exponential backoff
+  - Service worker context validation
+  - Performance metrics and logging
+- **StorageErrors**: `lib/storage-errors.js`
+  - Comprehensive error classification
+  - Storage-specific error types and handling
+  - Recovery strategy mapping
+
+- **StorageLogger**: `lib/storage-logger.js`
+  - Detailed operation metrics and debugging
+  - Performance monitoring and health reporting
+  - Configurable logging levels
+
+- **SaveStatusIndicator**: `ui/components/save-status-indicator.js`
+  - Real-time user feedback for save operations
+  - Visual status indication (saving/saved/error)
+  - Error retry functionality
+
 **Browser Compatibility Layer (Storage Integration)**
 
 - **File**: `lib/browser-compat.js`
@@ -335,7 +357,7 @@ The Core Library Subsystem implements the core business logic and data managemen
     onChanged: EventListener
   }
   ```
-- **Note**: Storage operations are directly integrated into the browser compatibility layer rather than using a separate storage adapter class
+- **Note**: Storage operations use StorageOperationManager for reliable queuing and error handling
 
 ## Level 3: Detailed Component View
 
