@@ -74,7 +74,7 @@
     "lint-staged": "^16.1.5",
     "playwright-webextext": "^0.0.4",
     "prettier": "^3.6.2",
-    "puppeteer": "^24.16.2",
+    "puppeteer": "^24.17.0",
     "rimraf": "^6.0.1",
     "sharp": "^0.34.3",
     "web-ext": "^8.9.0"
